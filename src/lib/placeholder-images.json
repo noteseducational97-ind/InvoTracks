@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "Abstract financial chart with glowing lines and numbers",
+      "imageUrl": "https://picsum.photos/seed/finance/1200/800",
+      "imageHint": "finance abstract"
+    },
+    {
+      "id": "user-avatar",
+      "description": "A placeholder user avatar",
+      "imageUrl": "https://picsum.photos/seed/avatar/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "investment-1",
+      "description": "Image representing a tech stock investment",
+      "imageUrl": "https://picsum.photos/seed/tech/400/225",
+      "imageHint": "technology circuit"
+    },
+    {
+      "id": "investment-2",
+      "description": "Image representing a real estate investment",
+      "imageUrl": "https://picsum.photos/seed/estate/400/225",
+      "imageHint": "modern architecture"
+    },
+    {
+      "id": "investment-3",
+      "description": "Image representing a renewable energy investment",
+      "imageUrl": "https://picsum.photos/seed/renewable/400/225",
+      "imageHint": "wind turbines"
+    }
+  ]
 }
