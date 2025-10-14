@@ -75,15 +75,13 @@ export default function MutualFundCalculatorPage() {
                             <Label htmlFor="monthly-investment">Monthly Investment (₹)</Label>
                             <Input id="monthly-investment" type="number" value={monthlyInvestment} onChange={(e) => setMonthlyInvestment(Number(e.target.value))} />
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="annual-rate">Expected Annual Return (%)</Label>
-                                <Input id="annual-rate" type="number" value={annualRate} onChange={(e) => setAnnualRate(Number(e.target.value))} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="expense-ratio">Expense Ratio (%)</Label>
-                                <Input id="expense-ratio" type="number" value={expenseRatio} onChange={(e) => setExpenseRatio(Number(e.target.value))} />
-                            </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="annual-rate">Expected Annual Return (%)</Label>
+                            <Input id="annual-rate" type="number" value={annualRate} onChange={(e) => setAnnualRate(Number(e.target.value))} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="expense-ratio">Expense Ratio (%)</Label>
+                            <Input id="expense-ratio" type="number" value={expenseRatio} onChange={(e) => setExpenseRatio(Number(e.target.value))} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="years">Investment Period (Years)</Label>
