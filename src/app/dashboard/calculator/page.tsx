@@ -67,13 +67,13 @@ export default function CalculatorPage() {
                         </CardContent>
                     </Card>
                 </Link>
-                 <Link href="/dashboard/calculator/emi" className="group">
+                 <Link href="/dashboard/calculator/loan" className="group">
                     <Card className="h-full transition-all group-hover:border-primary group-hover:shadow-lg">
                         <CardHeader>
                             <CardTitle className="font-headline flex items-center justify-between">
                                  <span className="flex items-center gap-2">
                                     <Receipt className="h-6 w-6" />
-                                    EMI Calculator
+                                    Loan Calculator
                                 </span>
                                 <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
                             </CardTitle>
