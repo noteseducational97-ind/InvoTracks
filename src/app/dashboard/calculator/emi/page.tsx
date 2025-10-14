@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -15,7 +14,7 @@ interface EmiResult {
     principalAmount: number;
 }
 
-export default function LoanCalculatorPage() {
+export default function EmiCalculatorPage() {
     const [loanAmount, setLoanAmount] = useState(1000000);
     const [interestRate, setInterestRate] = useState(8.5);
     const [loanTenure, setLoanTenure] = useState(20); // in years
@@ -56,7 +55,7 @@ export default function LoanCalculatorPage() {
 
     return (
         <div>
-            <h1 className="font-headline text-3xl font-bold tracking-tight">Loan Calculator</h1>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">EMI Calculator</h1>
             <p className="text-muted-foreground">Calculate your Equated Monthly Installment for loans.</p>
 
             <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-5">
