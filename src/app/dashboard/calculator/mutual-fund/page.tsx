@@ -13,6 +13,7 @@ interface MutualFundResult {
     investedAmount: number;
     estimatedReturns: number;
     inflationAdjustedValue: number;
+    totalExpense: number;
 }
 
 export default function MutualFundCalculatorPage() {
@@ -26,22 +27,27 @@ export default function MutualFundCalculatorPage() {
 
     const calculateMutualFund = () => {
         const P = monthlyInvestment;
+        const i_gross = (annualRate / 100) / 12; // monthly gross interest rate
         const effectiveAnnualRate = annualRate - expenseRatio;
-        const i = (effectiveAnnualRate / 100) / 12; // monthly interest rate
+        const i_net = (effectiveAnnualRate / 100) / 12; // monthly net interest rate
         const n = years * 12; // total number of months
         const r_inf = inflationRate / 100;
 
-        if (P > 0 && effectiveAnnualRate > 0 && years > 0) {
-            const futureValue = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+        if (P > 0 && annualRate > 0 && years > 0) {
+            const futureValueGross = P * ((Math.pow(1 + i_gross, n) - 1) / i_gross) * (1 + i_gross);
+            const futureValueNet = P * ((Math.pow(1 + i_net, n) - 1) / i_net) * (1 + i_net);
+            
             const investedAmount = P * n;
-            const estimatedReturns = futureValue - investedAmount;
-            const inflationAdjustedValue = futureValue / Math.pow(1 + r_inf, years);
+            const estimatedReturns = futureValueNet - investedAmount;
+            const inflationAdjustedValue = futureValueNet / Math.pow(1 + r_inf, years);
+            const totalExpense = futureValueGross - futureValueNet;
 
             setResults({
-                futureValue,
+                futureValue: futureValueNet,
                 investedAmount,
                 estimatedReturns,
                 inflationAdjustedValue,
+                totalExpense,
             });
         } else {
             setResults(null);
@@ -79,7 +85,7 @@ export default function MutualFundCalculatorPage() {
                             <Label htmlFor="annual-rate">Expected Annual Return (%)</Label>
                             <Input id="annual-rate" type="number" value={annualRate} onChange={(e) => setAnnualRate(Number(e.target.value))} />
                         </div>
-                        <div className="space-y-2">
+                         <div className="space-y-2">
                             <Label htmlFor="expense-ratio">Expense Ratio (%)</Label>
                             <Input id="expense-ratio" type="number" value={expenseRatio} onChange={(e) => setExpenseRatio(Number(e.target.value))} />
                         </div>
@@ -138,11 +144,15 @@ export default function MutualFundCalculatorPage() {
                                             <span className="text-muted-foreground">Est. Returns:</span>
                                             <span className="font-medium">{formatCurrency(results.estimatedReturns)}</span>
                                         </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Total Expense Charged:</span>
+                                            <span className="font-medium">{formatCurrency(results.totalExpense)}</span>
+                                        </div>
                                         <div className="flex justify-between font-semibold">
                                             <span>Total Value:</span>
                                             <span>{formatCurrency(results.futureValue)}</span>
                                         </div>
-                                        <div className="flex justify-between font-semibold text-primary">
+                                        <div className="flex justify-between font-semibold text-primary col-span-2">
                                             <span>After Inflation (Today's Value):</span>
                                             <span>{formatCurrency(results.inflationAdjustedValue)}</span>
                                         </div>
