@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface EmiResult {
     monthlyEmi: number;
@@ -17,6 +18,13 @@ interface EmiResult {
 
 type LoanType = 'reducing' | 'flat';
 
+interface AmortizationYear {
+    year: number;
+    principalPaid: number;
+    interestPaid: number;
+    balance: number;
+}
+
 export default function EmiCalculatorPage() {
     const [loanAmount, setLoanAmount] = useState(1000000);
     const [interestRate, setInterestRate] = useState(8.5);
@@ -24,6 +32,7 @@ export default function EmiCalculatorPage() {
     const [loanType, setLoanType] = useState<LoanType>('reducing');
     
     const [results, setResults] = useState<EmiResult | null>(null);
+    const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationYear[]>([]);
 
     const calculateEmi = () => {
         const P = loanAmount;
@@ -33,22 +42,62 @@ export default function EmiCalculatorPage() {
 
         if (P <= 0 || interestRate <= 0 || n_years <= 0) {
             setResults(null);
+            setAmortizationSchedule([]);
             return;
         }
 
         let emi = 0;
         let totalPayment = 0;
         let totalInterest = 0;
+        const schedule: AmortizationYear[] = [];
 
         if (loanType === 'reducing') {
             const r_monthly = annualRate / 12;
             emi = P * r_monthly * (Math.pow(1 + r_monthly, n_months) / (Math.pow(1 + r_monthly, n_months) - 1));
             totalPayment = emi * n_months;
             totalInterest = totalPayment - P;
+
+            let balance = P;
+            let yearlyPrincipal = 0;
+            let yearlyInterest = 0;
+
+            for (let i = 1; i <= n_months; i++) {
+                const interestForMonth = balance * r_monthly;
+                const principalForMonth = emi - interestForMonth;
+                balance -= principalForMonth;
+
+                yearlyPrincipal += principalForMonth;
+                yearlyInterest += interestForMonth;
+
+                if (i % 12 === 0 || i === n_months) {
+                    schedule.push({
+                        year: Math.ceil(i / 12),
+                        principalPaid: yearlyPrincipal,
+                        interestPaid: yearlyInterest,
+                        balance: balance > 0 ? balance : 0,
+                    });
+                    yearlyPrincipal = 0;
+                    yearlyInterest = 0;
+                }
+            }
+
         } else { // Flat Rate
             totalInterest = P * annualRate * n_years;
             totalPayment = P + totalInterest;
             emi = totalPayment / n_months;
+            // Amortization for flat rate is simpler
+            const monthlyPrincipal = P / n_months;
+            const monthlyInterest = totalInterest / n_months;
+            let balance = P;
+            for(let year=1; year<= n_years; year++){
+                balance -= monthlyPrincipal * 12;
+                schedule.push({
+                    year: year,
+                    principalPaid: monthlyPrincipal * 12,
+                    interestPaid: monthlyInterest * 12,
+                    balance: balance > 0 ? balance : 0,
+                })
+            }
         }
         
 
@@ -58,6 +107,7 @@ export default function EmiCalculatorPage() {
             totalPayment,
             principalAmount: P,
         });
+        setAmortizationSchedule(schedule);
     };
     
     const formatCurrency = (value: number) => {
@@ -171,6 +221,36 @@ export default function EmiCalculatorPage() {
                     )}
                 </div>
             </div>
+             {amortizationSchedule.length > 0 && (
+                <Card className="mt-6">
+                    <CardHeader>
+                        <CardTitle className="font-headline">Amortization Schedule (Yearly)</CardTitle>
+                        <CardDescription>Yearly breakdown of your loan repayment.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Year</TableHead>
+                                    <TableHead className="text-right">Principal Paid</TableHead>
+                                    <TableHead className="text-right">Interest Paid</TableHead>
+                                    <TableHead className="text-right">End of Year Balance</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {amortizationSchedule.map((row) => (
+                                    <TableRow key={row.year}>
+                                        <TableCell>{row.year}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(row.principalPaid)}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(row.interestPaid)}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(row.balance)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     );
 }
