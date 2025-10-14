@@ -1,12 +1,28 @@
+'use client';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { AppLogo } from '@/components/app-logo';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { BarChart, Calculator, FileText } from 'lucide-react';
+import { BarChart, Calculator, FileText, Loader2 } from 'lucide-react';
+import { useUser } from '@/firebase';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-image');
+  const { user, isUserLoading } = useUser();
+
+  if (isUserLoading) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (user) {
+    redirect('/dashboard/overview');
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

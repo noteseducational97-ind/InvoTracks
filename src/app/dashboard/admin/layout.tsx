@@ -1,13 +1,23 @@
-import { getUser } from "@/app/actions";
+'use client';
+import { useUser } from "@/firebase";
 import { ADMIN_EMAIL } from "@/lib/constants";
 import { redirect } from "next/navigation";
+import { useEffect } from "react";
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const user = await getUser();
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { user, isUserLoading } = useUser();
 
-  if (!user || user.email !== ADMIN_EMAIL) {
-    redirect('/dashboard/overview');
+  useEffect(() => {
+    if (!isUserLoading) {
+      if (!user || user.email !== ADMIN_EMAIL) {
+        redirect('/dashboard/overview');
+      }
+    }
+  }, [user, isUserLoading]);
+
+  if (isUserLoading || !user || user.email !== ADMIN_EMAIL) {
+    return null; // Or a loading spinner
   }
-
+  
   return <>{children}</>;
 }

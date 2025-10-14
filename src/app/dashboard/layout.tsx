@@ -1,22 +1,50 @@
-import { redirect } from 'next/navigation';
-import { getUser } from '@/app/actions';
+'use client'
+
+import { redirect, usePathname } from 'next/navigation';
+import { useUser } from '@/firebase';
 import { AppLogo } from '@/components/app-logo';
 import { MainNav } from '@/components/main-nav';
 import { UserNav } from '@/components/user-nav';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Search } from 'lucide-react';
+import { Menu, Search, Briefcase, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getUser();
+  const { user, isUserLoading } = useUser();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!isUserLoading && !user && pathname !== '/login') {
+      redirect('/login');
+    }
+  }, [user, isUserLoading, pathname]);
+
+  if (isUserLoading) {
+    return (
+        <div className="flex min-h-screen w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    );
+  }
+  
   if (!user) {
-    redirect('/login');
+    // This can happen briefly before the redirect kicks in
+    return null; 
+  }
+
+  const appUser = {
+      id: user.uid,
+      name: user.displayName || 'User',
+      email: user.email || 'No email',
+      // This is a simplification. Role management should be handled properly.
+      role: user.email === 'prasannawarade0204@gmail.com' ? 'admin' as const : 'user' as const
   }
 
   return (
@@ -30,7 +58,7 @@ export default async function DashboardLayout({
             </Link>
           </div>
           <div className="flex-1 py-2">
-            <MainNav user={user} />
+            <MainNav user={appUser} />
           </div>
         </div>
       </div>
@@ -51,7 +79,7 @@ export default async function DashboardLayout({
                   </Link>
               </div>
               <div className="py-2">
-                 <MainNav user={user} isMobile={true} />
+                 <MainNav user={appUser} isMobile={true} />
               </div>
             </SheetContent>
           </Sheet>
@@ -67,7 +95,7 @@ export default async function DashboardLayout({
               </div>
             </form>
           </div>
-          <UserNav user={user} />
+          <UserNav user={appUser} />
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/30">
           {children}

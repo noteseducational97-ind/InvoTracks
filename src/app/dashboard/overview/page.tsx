@@ -1,6 +1,7 @@
-import { getUser } from '@/app/actions';
+'use client'
+import { useUser } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { DollarSign, Users, CreditCard, Activity } from 'lucide-react';
+import { DollarSign, Users, CreditCard, Activity, FileText } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 const chartData = [
@@ -12,13 +13,13 @@ const chartData = [
   { month: 'Jun', value: 2500 },
 ];
 
-export default async function OverviewPage() {
-    const user = await getUser();
+export default function OverviewPage() {
+    const { user } = useUser();
 
     return (
         <div>
             <h1 className="font-headline text-3xl font-bold tracking-tight">
-                Welcome back, {user?.name.split(' ')[0]}!
+                Welcome back, {user?.displayName?.split(' ')[0] || 'User'}!
             </h1>
             <p className="text-muted-foreground">Here&apos;s a snapshot of your financial world.</p>
 

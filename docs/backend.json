@@ -30,10 +30,7 @@
       },
       "required": [
         "id",
-        "email",
-        "firstName",
-        "lastName",
-        "isAdmin"
+        "email"
       ]
     },
     "Invoice": {
@@ -127,7 +124,8 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google.com"
     ]
   },
   "firestore": {

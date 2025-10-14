@@ -13,24 +13,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { logout, type User } from '@/app/actions';
+import type { User as AppUser } from '@/app/actions';
 import { CreditCard, LogOut, Settings, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 type UserNavProps = {
-  user: User;
+  user: AppUser;
 };
 
 export function UserNav({ user }: UserNavProps) {
+  const auth = useAuth();
+  const router = useRouter();
   const avatarImage = PlaceHolderImages.find(p => p.id === 'user-avatar');
   const userInitials = user.name
     .split(' ')
     .map((n) => n[0])
     .join('');
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
+  }
+
   return (
-    <form action={logout}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -71,14 +84,11 @@ export function UserNav({ user }: UserNavProps) {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <button type="submit" className="w-full flex items-center">
+          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
-            </button>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </form>
   );
 }
