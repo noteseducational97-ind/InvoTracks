@@ -5,14 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface SipResult {
     futureValue: number;
     investedAmount: number;
     estimatedReturns: number;
     inflationAdjustedValue: number;
-    yearlyData: { year: number, value: number, invested: number }[];
 }
 
 export default function SipCalculatorPage() {
@@ -26,34 +25,20 @@ export default function SipCalculatorPage() {
     const calculateSip = () => {
         const P = monthlyInvestment;
         const i = (annualRate / 100) / 12; // monthly interest rate
-        const n_total = years * 12; // total number of months
-        const r_inf = inflationRate / 100; // annual inflation rate
+        const n = years * 12; // total number of months
+        const r_inf = inflationRate / 100;
 
         if (P > 0 && annualRate > 0 && years > 0) {
-            const yearlyData: { year: number, value: number, invested: number }[] = [];
-            let futureValue = 0;
-
-            for (let year = 1; year <= years; year++) {
-                const n = year * 12;
-                futureValue = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
-                yearlyData.push({
-                    year: year,
-                    value: parseFloat(futureValue.toFixed(2)),
-                    invested: P * n
-                });
-            }
-            
-            const finalFutureValue = yearlyData[yearlyData.length - 1].value;
-            const investedAmount = P * n_total;
-            const estimatedReturns = finalFutureValue - investedAmount;
-            const inflationAdjustedValue = finalFutureValue / Math.pow(1 + r_inf, years);
+            const futureValue = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+            const investedAmount = P * n;
+            const estimatedReturns = futureValue - investedAmount;
+            const inflationAdjustedValue = futureValue / Math.pow(1 + r_inf, years);
 
             setResults({
-                futureValue: finalFutureValue,
+                futureValue,
                 investedAmount,
                 estimatedReturns,
                 inflationAdjustedValue,
-                yearlyData
             });
         } else {
             setResults(null);
@@ -63,6 +48,13 @@ export default function SipCalculatorPage() {
     const formatCurrency = (value: number) => {
         return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
+
+    const pieData = results ? [
+        { name: 'Total Investment', value: results.investedAmount },
+        { name: 'Estimated Returns', value: results.estimatedReturns },
+    ] : [];
+
+    const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))'];
 
     return (
         <div>
@@ -100,24 +92,34 @@ export default function SipCalculatorPage() {
                         <Card className="w-full">
                             <CardHeader>
                                 <CardTitle className="font-headline">Investment Projection</CardTitle>
-                                <CardDescription>This chart shows the growth of your investment over {years} years.</CardDescription>
+                                <CardDescription>This chart shows the breakdown of your investment over {years} years.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className='h-[300px] w-full relative pr-4'>
+                                <div className='h-[250px] w-full relative'>
                                     <ResponsiveContainer width="100%" height="100%">
-                                        <LineChart
-                                            data={results.yearlyData}
-                                            margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
-                                        >
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="year" label={{ value: 'Years', position: 'insideBottom', offset: -5 }} />
-                                            <YAxis tickFormatter={(value) => formatCurrency(value)} width={80} />
+                                        <PieChart>
+                                            <Pie
+                                                data={pieData}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={60}
+                                                outerRadius={80}
+                                                fill="#8884d8"
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                            >
+                                                {pieData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
                                             <Tooltip formatter={(value: number) => formatCurrency(value)} />
                                             <Legend />
-                                            <Line type="monotone" dataKey="value" name="Total Value" stroke="hsl(var(--primary))" strokeWidth={2} activeDot={{ r: 8 }} />
-                                            <Line type="monotone" dataKey="invested" name="Total Investment" stroke="hsl(var(--chart-2))" strokeWidth={2} />
-                                        </LineChart>
+                                        </PieChart>
                                     </ResponsiveContainer>
+                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span className="text-sm text-muted-foreground">Total Value</span>
+                                        <span className="text-2xl font-bold">{formatCurrency(results.futureValue)}</span>
+                                    </div>
                                 </div>
                                 <div className="space-y-2 text-sm pt-4 border-t">
                                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
