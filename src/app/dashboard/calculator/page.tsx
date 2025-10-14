@@ -52,7 +52,7 @@ export default function CalculatorPage() {
                     <CardHeader>
                         <CardTitle className="font-headline flex items-center gap-2">
                             <Target className="h-6 w-6" />
-                            Goal Calculator
+                            Partial Investment Calculator
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
