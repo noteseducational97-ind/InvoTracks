@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -20,6 +21,7 @@ interface MultiInvestmentResult {
     chartData: { year: number; value: number }[];
     totalValue: number;
     totalInvestment: number;
+    inflationAdjustedTotalValue: number;
 }
 
 interface YearlyData {
@@ -41,6 +43,7 @@ export default function LumpsumCalculatorPage() {
     const [reinvestmentFrequency, setReinvestmentFrequency] = useState<'quarterly' | 'half-yearly' | 'yearly'>('yearly');
     const [multiYears, setMultiYears] = useState(20);
     const [multiAnnualRate, setMultiAnnualRate] = useState(12);
+    const [multiInflationRate, setMultiInflationRate] = useState(6);
     const [multiResults, setMultiResults] = useState<MultiInvestmentResult | null>(null);
 
     // State for calculator type
@@ -71,6 +74,7 @@ export default function LumpsumCalculatorPage() {
     
     const calculateMultipleLumpsum = () => {
         const r = multiAnnualRate / 100; // annual rate
+        const r_inf = multiInflationRate / 100;
         const yearlyData: YearlyData[] = [];
         let totalInvestment = initialLumpsum;
         let finalValue = 0;
@@ -108,11 +112,13 @@ export default function LumpsumCalculatorPage() {
         
         finalValue = lumpsumFv + recurringFv;
         totalInvestment = initialLumpsum + (reinvestmentAmount * multiYears * ppy);
+        const inflationAdjustedTotalValue = finalValue / Math.pow(1 + r_inf, multiYears);
 
         setMultiResults({
             chartData: yearlyData,
             totalValue: finalValue,
             totalInvestment,
+            inflationAdjustedTotalValue,
         });
     };
     
@@ -203,6 +209,10 @@ export default function LumpsumCalculatorPage() {
                                     <Label htmlFor="multi-years">Investment Period (Years)</Label>
                                     <Input id="multi-years" type="number" value={multiYears} onChange={(e) => setMultiYears(Number(e.target.value))} />
                                 </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="multi-inflation-rate">Expected Inflation Rate (%)</Label>
+                                <Input id="multi-inflation-rate" type="number" value={multiInflationRate} onChange={(e) => setMultiInflationRate(Number(e.target.value))} />
                             </div>
                              <Button onClick={calculateMultipleLumpsum} className="w-full">Calculate</Button>
                          </CardContent>
@@ -303,6 +313,10 @@ export default function LumpsumCalculatorPage() {
                                                 <span>Projected Total Value:</span>
                                                 <span>{formatCurrency(multiResults.totalValue)}</span>
                                             </div>
+                                            <div className="flex justify-between font-semibold text-primary">
+                                                <span>After Inflation (Today's Value):</span>
+                                                <span>{formatCurrency(multiResults.inflationAdjustedTotalValue)}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -320,5 +334,7 @@ export default function LumpsumCalculatorPage() {
         </div>
     );
 }
+
+    
 
     
