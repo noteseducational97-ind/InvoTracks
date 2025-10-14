@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { useEffect } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 
 function LoginButton() {
   const { pending } = useFormStatus();
@@ -17,7 +17,7 @@ function LoginButton() {
 }
 
 export default function LoginPage() {
-  const [state, formAction] = useFormState(login, undefined);
+  const [state, formAction] = useActionState(login, undefined);
   const { toast } = useToast();
 
   useEffect(() => {
