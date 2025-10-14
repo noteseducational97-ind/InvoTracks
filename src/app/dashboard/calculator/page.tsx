@@ -30,7 +30,24 @@ export default function CalculatorPage() {
                         </Button>
                     </CardContent>
                 </Card>
-                {/* Future calculators can be added here as new cards */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2">
+                            <Calculator className="h-6 w-6" />
+                            Lumpsum Calculator
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                            Calculate the returns on a one-time investment.
+                        </p>
+                    </CardContent>
+                    <CardContent>
+                         <Button asChild>
+                            <Link href="/dashboard/calculator/lumpsum">Use Calculator</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );
