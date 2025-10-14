@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, LineChart, XAxis, YAxis, CartesianGrid, Line } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2 } from 'lucide-react';
 
 interface LumpsumResult {
     futureValue: number;
@@ -17,11 +16,10 @@ interface LumpsumResult {
     inflationAdjustedValue: number;
 }
 
-interface MultipleInvestment {
-    id: number;
-    amount: number;
-    year: number;
-    inflation: number;
+interface MultiInvestmentResult {
+    chartData: { year: number; value: number }[];
+    totalValue: number;
+    totalInvestment: number;
 }
 
 interface YearlyData {
@@ -38,12 +36,12 @@ export default function LumpsumCalculatorPage() {
     const [results, setResults] = useState<LumpsumResult | null>(null);
 
     // State for multiple investments
-    const [investments, setInvestments] = useState<MultipleInvestment[]>([
-        { id: 1, amount: 50000, year: 0, inflation: 6 },
-    ]);
-    const [totalYears, setTotalYears] = useState(20);
-    const [multiResults, setMultiResults] = useState<{ chartData: YearlyData[], totalValue: number, totalInvestment: number } | null>(null);
-    const [overallAnnualRate, setOverallAnnualRate] = useState(12);
+    const [initialLumpsum, setInitialLumpsum] = useState(50000);
+    const [reinvestmentAmount, setReinvestmentAmount] = useState(10000);
+    const [reinvestmentFrequency, setReinvestmentFrequency] = useState<'quarterly' | 'half-yearly' | 'yearly'>('yearly');
+    const [multiYears, setMultiYears] = useState(20);
+    const [multiAnnualRate, setMultiAnnualRate] = useState(12);
+    const [multiResults, setMultiResults] = useState<MultiInvestmentResult | null>(null);
 
     // State for calculator type
     const [investmentType, setInvestmentType] = useState('one-time');
@@ -72,44 +70,52 @@ export default function LumpsumCalculatorPage() {
     };
     
     const calculateMultipleLumpsum = () => {
-        const r = overallAnnualRate / 100;
+        const r = multiAnnualRate / 100; // annual rate
         const yearlyData: YearlyData[] = [];
-        let totalInvestment = 0;
+        let totalInvestment = initialLumpsum;
+        let finalValue = 0;
 
-        for (let year = 0; year <= totalYears; year++) {
-            let yearValue = 0;
-            investments.forEach(inv => {
-                if (year >= inv.year) {
-                    const inflation = inv.inflation / 100;
-                    const investmentAge = year - inv.year;
-                    const futureValue = inv.amount * Math.pow(1 + r, investmentAge);
-                    yearValue += futureValue / Math.pow(1 + inflation, investmentAge);
-                }
-            });
-            yearlyData.push({ year, value: yearValue });
+        const periodsPerYear = {
+            'yearly': 1,
+            'half-yearly': 2,
+            'quarterly': 4,
+        };
+        const ppy = periodsPerYear[reinvestmentFrequency];
+        const periodicRate = r / ppy;
+        const totalPeriods = multiYears * ppy;
+
+        let runningValue = initialLumpsum;
+        for (let year = 1; year <= multiYears; year++) {
+             runningValue = runningValue * (1 + r); // lumpsum growth for a year
+             
+             // Calculate future value of recurring investments made up to this year
+             let recurringFv = 0;
+             if (reinvestmentAmount > 0) {
+                const periodsSoFar = year * ppy;
+                recurringFv = reinvestmentAmount * ((Math.pow(1 + periodicRate, periodsSoFar) - 1) / periodicRate) * (1+periodicRate);
+             }
+             
+             const yearEndValue = (initialLumpsum * Math.pow(1 + r, year)) + recurringFv;
+             
+             yearlyData.push({ year, value: yearEndValue });
         }
         
-        totalInvestment = investments.reduce((acc, inv) => acc + inv.amount, 0);
+        const lumpsumFv = initialLumpsum * Math.pow(1 + r, multiYears);
+        let recurringFv = 0;
+        if (reinvestmentAmount > 0) {
+            recurringFv = reinvestmentAmount * ((Math.pow(1 + periodicRate, totalPeriods) - 1) / periodicRate) * (1+periodicRate);
+        }
+        
+        finalValue = lumpsumFv + recurringFv;
+        totalInvestment = initialLumpsum + (reinvestmentAmount * multiYears * ppy);
 
         setMultiResults({
             chartData: yearlyData,
-            totalValue: yearlyData[yearlyData.length-1].value,
+            totalValue: finalValue,
             totalInvestment,
         });
     };
     
-    const addInvestment = () => {
-        setInvestments([...investments, { id: Date.now(), amount: 10000, year: 1, inflation: 6 }]);
-    };
-
-    const removeInvestment = (id: number) => {
-        setInvestments(investments.filter(inv => inv.id !== id));
-    };
-
-    const handleInvestmentChange = (id: number, field: keyof Omit<MultipleInvestment, 'id'>, value: number) => {
-        setInvestments(investments.map(inv => inv.id === id ? { ...inv, [field]: value } : inv));
-    };
-
     const formatCurrency = (value: number) => {
         return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
@@ -132,13 +138,13 @@ export default function LumpsumCalculatorPage() {
                         <CardTitle className="font-headline">Investment Details</CardTitle>
                         <div className="pt-2">
                             <Label>Investment Type</Label>
-                            <Select value={investmentType} onValueChange={setInvestmentType}>
+                            <Select value={investmentType} onValueChange={(value) => setInvestmentType(value as 'one-time' | 'multiple-times')}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select investment type" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="one-time">One Time Investment</SelectItem>
-                                    <SelectItem value="multiple-times">Multiple Investments</SelectItem>
+                                    <SelectItem value="multiple-times">Recurring Investments</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -165,43 +171,39 @@ export default function LumpsumCalculatorPage() {
                         </CardContent>
                     ) : (
                          <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="initial-lumpsum">Initial Lumpsum Investment (₹)</Label>
+                                <Input id="initial-lumpsum" type="number" value={initialLumpsum} onChange={(e) => setInitialLumpsum(Number(e.target.value))} />
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="overall-annual-rate">Expected Annual Return (%)</Label>
-                                    <Input id="overall-annual-rate" type="number" value={overallAnnualRate} onChange={(e) => setOverallAnnualRate(Number(e.target.value))} />
+                                    <Label htmlFor="reinvestment-amount">Recurring Reinvestment (₹)</Label>
+                                    <Input id="reinvestment-amount" type="number" value={reinvestmentAmount} onChange={(e) => setReinvestmentAmount(Number(e.target.value))} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="total-years">Total Investment Period (Years)</Label>
-                                    <Input id="total-years" type="number" value={totalYears} onChange={(e) => setTotalYears(Number(e.target.value))} />
+                                    <Label>Reinvestment Frequency</Label>
+                                    <Select value={reinvestmentFrequency} onValueChange={(value) => setReinvestmentFrequency(value as 'quarterly' | 'half-yearly' | 'yearly')}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select frequency" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="yearly">Yearly</SelectItem>
+                                            <SelectItem value="half-yearly">Half-Yearly</SelectItem>
+                                            <SelectItem value="quarterly">Quarterly</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
-                            <div className="space-y-4">
-                                {investments.map((inv, index) => (
-                                    <div key={inv.id} className="p-4 border rounded-lg space-y-3 relative">
-                                        <h4 className="font-medium text-sm">Investment #{index + 1}</h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                            <div className="space-y-1.5">
-                                                <Label htmlFor={`amount-${inv.id}`}>Amount (₹)</Label>
-                                                <Input id={`amount-${inv.id}`} type="number" value={inv.amount} onChange={(e) => handleInvestmentChange(inv.id, 'amount', Number(e.target.value))} />
-                                            </div>
-                                            <div className="space-y-1.5">
-                                                <Label htmlFor={`year-${inv.id}`}>Invest in Year</Label>
-                                                <Input id={`year-${inv.id}`} type="number" value={inv.year} onChange={(e) => handleInvestmentChange(inv.id, 'year', Number(e.target.value))} />
-                                            </div>
-                                            <div className="space-y-1.5">
-                                                <Label htmlFor={`inflation-${inv.id}`}>Inflation (%)</Label>
-                                                <Input id={`inflation-${inv.id}`} type="number" value={inv.inflation} onChange={(e) => handleInvestmentChange(inv.id, 'inflation', Number(e.target.value))} />
-                                            </div>
-                                        </div>
-                                         {investments.length > 1 && (
-                                            <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => removeInvestment(inv.id)}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="multi-annual-rate">Expected Annual Return (%)</Label>
+                                    <Input id="multi-annual-rate" type="number" value={multiAnnualRate} onChange={(e) => setMultiAnnualRate(Number(e.target.value))} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="multi-years">Investment Period (Years)</Label>
+                                    <Input id="multi-years" type="number" value={multiYears} onChange={(e) => setMultiYears(Number(e.target.value))} />
+                                </div>
                             </div>
-                             <Button variant="outline" onClick={addInvestment}>Add Another Investment</Button>
                              <Button onClick={calculateMultipleLumpsum} className="w-full">Calculate</Button>
                          </CardContent>
                     )}
@@ -276,7 +278,7 @@ export default function LumpsumCalculatorPage() {
                             <Card className="w-full">
                                 <CardHeader>
                                     <CardTitle className="font-headline">Investment Projection</CardTitle>
-                                    <CardDescription>Growth of your investments over {totalYears} years (inflation-adjusted).</CardDescription>
+                                    <CardDescription>Growth of your investments over {multiYears} years.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                      <div className='h-[300px] w-full'>
@@ -284,7 +286,7 @@ export default function LumpsumCalculatorPage() {
                                             <LineChart data={multiResults.chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                                                 <CartesianGrid strokeDasharray="3 3" />
                                                 <XAxis dataKey="year" label={{ value: 'Years', position: 'insideBottom', offset: -5 }} />
-                                                <YAxis tickFormatter={(value) => `₹${Number(value) / 100000}L`} />
+                                                <YAxis tickFormatter={(value) => `₹${(Number(value) / 100000).toFixed(0)}L`} />
                                                 <Tooltip formatter={(value: number) => formatCurrency(value)} />
                                                 <Legend />
                                                 <Line type="monotone" dataKey="value" name="Portfolio Value" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
@@ -298,7 +300,7 @@ export default function LumpsumCalculatorPage() {
                                                 <span className="font-medium">{formatCurrency(multiResults.totalInvestment)}</span>
                                             </div>
                                             <div className="flex justify-between font-semibold">
-                                                <span>Projected Total Value (Inflation Adjusted):</span>
+                                                <span>Projected Total Value:</span>
                                                 <span>{formatCurrency(multiResults.totalValue)}</span>
                                             </div>
                                         </div>
@@ -308,7 +310,7 @@ export default function LumpsumCalculatorPage() {
                         ) : (
                              <Card className="w-full bg-muted/80 flex items-center justify-center h-full min-h-[400px]">
                                 <CardContent className="pt-6">
-                                    <p className="text-center text-muted-foreground">Add investments, set your time period, and click calculate.</p>
+                                    <p className="text-center text-muted-foreground">Enter your investment details and click calculate.</p>
                                 </CardContent>
                             </Card>
                         )
@@ -317,5 +319,6 @@ export default function LumpsumCalculatorPage() {
             </div>
         </div>
     );
+}
 
     
