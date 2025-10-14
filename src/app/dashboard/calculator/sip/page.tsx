@@ -13,12 +13,14 @@ interface SipResult {
     futureValue: number;
     investedAmount: number;
     estimatedReturns: number;
+    inflationAdjustedValue: number;
 }
 
 export default function SipCalculatorPage() {
     const [monthlyInvestment, setMonthlyInvestment] = useState(5000);
     const [annualRate, setAnnualRate] = useState(12);
     const [years, setYears] = useState(10);
+    const [inflationRate, setInflationRate] = useState(6);
     
     const [results, setResults] = useState<SipResult | null>(null);
 
@@ -26,16 +28,19 @@ export default function SipCalculatorPage() {
         const P = monthlyInvestment;
         const i = (annualRate / 100) / 12; // monthly interest rate
         const n = years * 12; // number of months
+        const r_inf = inflationRate / 100; // annual inflation rate
 
         if (P > 0 && i > 0 && n > 0) {
             const futureValue = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
             const investedAmount = P * n;
             const estimatedReturns = futureValue - investedAmount;
+            const inflationAdjustedValue = futureValue / Math.pow(1 + r_inf, years);
 
             setResults({
                 futureValue,
                 investedAmount,
                 estimatedReturns,
+                inflationAdjustedValue
             });
         } else {
             setResults(null);
@@ -48,7 +53,7 @@ export default function SipCalculatorPage() {
     ] : [];
 
     const formatCurrency = (value: number) => {
-        return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+        return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
     return (
@@ -75,6 +80,10 @@ export default function SipCalculatorPage() {
                             <Label htmlFor="years">Investment Period (Years)</Label>
                             <Input id="years" type="number" value={years} onChange={(e) => setYears(Number(e.target.value))} />
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="inflation-rate">Expected Inflation Rate (%)</Label>
+                            <Input id="inflation-rate" type="number" value={inflationRate} onChange={(e) => setInflationRate(Number(e.target.value))} />
+                        </div>
                         <Button onClick={calculateSip} className="w-full">Calculate</Button>
                     </CardContent>
                 </Card>
@@ -85,7 +94,7 @@ export default function SipCalculatorPage() {
                                 <CardTitle className="font-headline">Projected Value</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className='h-[200px] w-full'>
+                                <div className='h-[250px] w-full relative'>
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <Pie
@@ -93,6 +102,7 @@ export default function SipCalculatorPage() {
                                                 cx="50%"
                                                 cy="50%"
                                                 labelLine={false}
+                                                innerRadius={60}
                                                 outerRadius={80}
                                                 fill="#8884d8"
                                                 dataKey="value"
@@ -105,6 +115,10 @@ export default function SipCalculatorPage() {
                                             <Legend />
                                         </PieChart>
                                     </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <p className="text-sm text-muted-foreground">Future Value</p>
+                                        <p className="text-2xl font-bold">{formatCurrency(results.futureValue)}</p>
+                                    </div>
                                 </div>
                                 <div className="space-y-2 text-sm pt-4">
                                     <div className="flex justify-between">
@@ -118,6 +132,10 @@ export default function SipCalculatorPage() {
                                     <div className="flex justify-between text-base font-semibold">
                                         <span>Future Value:</span>
                                         <span>{formatCurrency(results.futureValue)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-base font-semibold text-primary mt-2 border-t pt-2">
+                                        <span>After Inflation (Today's Value):</span>
+                                        <span>{formatCurrency(results.inflationAdjustedValue)}</span>
                                     </div>
                                 </div>
                             </CardContent>
