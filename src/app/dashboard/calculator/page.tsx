@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calculator, Target } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CalculatorPage() {
@@ -11,7 +11,7 @@ export default function CalculatorPage() {
             <h1 className="font-headline text-3xl font-bold tracking-tight">Financial Calculators</h1>
             <p className="text-muted-foreground">Tools to help you plan your financial future.</p>
 
-            <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
                 <Card>
                     <CardHeader>
                         <CardTitle className="font-headline flex items-center gap-2">
@@ -45,24 +45,6 @@ export default function CalculatorPage() {
                     <CardContent>
                          <Button asChild>
                             <Link href="/dashboard/calculator/lumpsum">Use Calculator</Link>
-                        </Button>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline flex items-center gap-2">
-                            <Target className="h-6 w-6" />
-                            Partial Investment Calculator
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                            Model multiple investments over time to reach a financial goal.
-                        </p>
-                    </CardContent>
-                    <CardContent>
-                         <Button asChild>
-                            <Link href="/dashboard/calculator/goal">Use Calculator</Link>
                         </Button>
                     </CardContent>
                 </Card>
