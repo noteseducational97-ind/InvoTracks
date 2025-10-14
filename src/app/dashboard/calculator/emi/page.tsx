@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -23,6 +24,7 @@ interface AmortizationYear {
     principalPaid: number;
     interestPaid: number;
     balance: number;
+    emiPaid: number;
 }
 
 export default function EmiCalculatorPage() {
@@ -60,6 +62,7 @@ export default function EmiCalculatorPage() {
             let balance = P;
             let yearlyPrincipal = 0;
             let yearlyInterest = 0;
+            let monthsInYear = 0;
 
             for (let i = 1; i <= n_months; i++) {
                 const interestForMonth = balance * r_monthly;
@@ -68,6 +71,7 @@ export default function EmiCalculatorPage() {
 
                 yearlyPrincipal += principalForMonth;
                 yearlyInterest += interestForMonth;
+                monthsInYear++;
 
                 if (i % 12 === 0 || i === n_months) {
                     schedule.push({
@@ -75,9 +79,11 @@ export default function EmiCalculatorPage() {
                         principalPaid: yearlyPrincipal,
                         interestPaid: yearlyInterest,
                         balance: balance > 0 ? balance : 0,
+                        emiPaid: emi * monthsInYear,
                     });
                     yearlyPrincipal = 0;
                     yearlyInterest = 0;
+                    monthsInYear = 0;
                 }
             }
 
@@ -96,6 +102,7 @@ export default function EmiCalculatorPage() {
                     principalPaid: monthlyPrincipal * 12,
                     interestPaid: monthlyInterest * 12,
                     balance: balance > 0 ? balance : 0,
+                    emiPaid: emi * 12,
                 })
             }
         }
@@ -232,6 +239,7 @@ export default function EmiCalculatorPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Year</TableHead>
+                                    <TableHead className="text-right">EMI Paid</TableHead>
                                     <TableHead className="text-right">Principal Paid</TableHead>
                                     <TableHead className="text-right">Interest Paid</TableHead>
                                     <TableHead className="text-right">End of Year Balance</TableHead>
@@ -241,6 +249,7 @@ export default function EmiCalculatorPage() {
                                 {amortizationSchedule.map((row) => (
                                     <TableRow key={row.year}>
                                         <TableCell>{row.year}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(row.emiPaid)}</TableCell>
                                         <TableCell className="text-right">{formatCurrency(row.principalPaid)}</TableCell>
                                         <TableCell className="text-right">{formatCurrency(row.interestPaid)}</TableCell>
                                         <TableCell className="text-right">{formatCurrency(row.balance)}</TableCell>
