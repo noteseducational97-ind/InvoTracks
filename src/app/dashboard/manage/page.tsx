@@ -45,24 +45,6 @@ export default function ManagePage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="marketing-emails" className="flex flex-col space-y-1">
-              <span>Marketing emails</span>
-              <span className="font-normal leading-snug text-muted-foreground">
-                Receive emails about new products, features, and promotions.
-              </span>
-            </Label>
-            <Switch id="marketing-emails" defaultChecked />
-          </div>
-          <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="transactional-emails" className="flex flex-col space-y-1">
-              <span>Transactional emails</span>
-              <span className="font-normal leading-snug text-muted-foreground">
-                Receive emails about your account activity and security.
-              </span>
-            </Label>
-            <Switch id="transactional-emails" defaultChecked disabled />
-          </div>
-          <div className="flex items-center justify-between space-x-2">
             <Label htmlFor="monthly-reports" className="flex flex-col space-y-1">
               <span>Monthly Reports</span>
               <span className="font-normal leading-snug text-muted-foreground">
