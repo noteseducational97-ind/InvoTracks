@@ -18,7 +18,6 @@ export default function CalculatorPage() {
                             <Calculator className="h-6 w-6" />
                             SIP Calculator
                         </CardTitle>
-                        <CardDescription>Estimate the future value of your Systematic Investment Plan (SIP).</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <p className="text-sm text-muted-foreground">
