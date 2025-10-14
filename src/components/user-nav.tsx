@@ -65,7 +65,7 @@ export function UserNav({ user }: UserNavProps) {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
              <DropdownMenuItem asChild>
-              <Link href="/dashboard/manage">
+              <Link href="/dashboard/profile">
                 <UserIcon className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </Link>
@@ -77,7 +77,7 @@ export function UserNav({ user }: UserNavProps) {
                 </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-                <Link href="/dashboard/manage">
+                <Link href="/dashboard/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                 </Link>

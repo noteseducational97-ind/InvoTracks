@@ -9,15 +9,16 @@ import {
   Calculator,
   ShieldCheck,
   Settings,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { User } from '@/app/actions';
 
 const navItems = [
   { href: '/dashboard/overview', label: 'Overview', icon: LayoutDashboard },
+  { href: '/dashboard/profile', label: 'Profile', icon: User },
   { href: '/dashboard/invoices', label: 'Invoices', icon: FileText },
   { href: '/dashboard/investments', label: 'Investments', icon: Briefcase },
-  { href: '/dashboard/manage', label: 'Manage', icon: Settings },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
   { href: '/dashboard/calculator', label: 'Calculator', icon: Calculator },
 ];
 
@@ -46,7 +47,7 @@ export function MainNav({ user, isMobile = false }: MainNavProps) {
   return (
     <nav className={cn("grid items-start px-2 text-sm font-medium lg:px-4", isMobile && "gap-4 pt-4")}>
       {allNavItems.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive = pathname.startsWith(item.href);
         return (
           <Link
             key={item.href}
