@@ -1,0 +1,210 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the InvoTrack application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "User's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "User's last name."
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Indicates if the user is an administrator."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "firstName",
+        "lastName",
+        "isAdmin"
+      ]
+    },
+    "Invoice": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Invoice",
+      "type": "object",
+      "description": "Represents an investment invoice.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the invoice."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Invoice)"
+        },
+        "invoiceNumber": {
+          "type": "string",
+          "description": "Invoice number."
+        },
+        "invoiceDate": {
+          "type": "string",
+          "description": "Date of the invoice.",
+          "format": "date-time"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Invoice amount."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the invoice."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "invoiceNumber",
+        "invoiceDate",
+        "amount",
+        "description"
+      ]
+    },
+    "Investment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Investment",
+      "type": "object",
+      "description": "Represents an investment portfolio item.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the investment."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Investment)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the investment."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of investment (e.g., stock, bond, mutual fund)."
+        },
+        "purchaseDate": {
+          "type": "string",
+          "description": "Date the investment was purchased.",
+          "format": "date-time"
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Number of units purchased."
+        },
+        "purchasePrice": {
+          "type": "number",
+          "description": "Price per unit at the time of purchase."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "type",
+        "purchaseDate",
+        "quantity",
+        "purchasePrice"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Path-based ownership ensures only the authenticated user can access their own profile.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/invoices/{invoiceId}",
+        "definition": {
+          "entityName": "Invoice",
+          "schema": {
+            "$ref": "#/backend/entities/Invoice"
+          },
+          "description": "Stores invoice data for each user. Path-based ownership ensures only the authenticated user can access their own invoices.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "invoiceId",
+              "description": "The unique identifier for the invoice."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/investments/{investmentId}",
+        "definition": {
+          "entityName": "Investment",
+          "schema": {
+            "$ref": "#/backend/entities/Investment"
+          },
+          "description": "Stores investment data for each user. Path-based ownership ensures only the authenticated user can access their own investments.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "investmentId",
+              "description": "The unique identifier for the investment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "admin",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Collection to store admin roles. The existence of a document with the user's ID in this collection grants admin privileges. Existence over Content.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support the InvoTrack application, focusing on user data isolation, secure access control, and scalability. The design emphasizes authorization independence by avoiding hierarchical `get()` calls in security rules and denormalizing authorization data where necessary. The structure uses path-based ownership for user-related data and a dedicated collection for admin roles to simplify security rules.\n\nAuthorization Independence is achieved by storing all access-related information within each document or utilizing path-based ownership. For example, invoices and investments are stored under `/users/{userId}`, ensuring that access control can be determined solely based on the path and the current user's authentication status without needing to read parent documents. For the admin role, existence in the `/roles_admin/{uid}` collection grants administrative privileges.\n\nThe design supports the required QAPs (Queries are not Filters) by structuring data to allow secure list operations. User-specific data (invoices, investments) is segregated under the user's path, enabling direct and secure queries for a user's resources. The separation of admin roles into a dedicated collection ensures that listing operations on user data do not require filtering based on admin status; the admin status is checked separately before granting access to sensitive operations."
+  }
+}
