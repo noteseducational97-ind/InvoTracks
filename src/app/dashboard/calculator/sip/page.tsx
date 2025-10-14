@@ -62,7 +62,7 @@ export default function SipCalculatorPage() {
             <p className="text-muted-foreground">Estimate the total value of your monthly investments.</p>
 
             <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                <Card className="lg:col-span-2">
+                <Card className="lg:col-span-3">
                     <CardHeader>
                         <CardTitle className="font-headline">Systematic Investment Plan (SIP)</CardTitle>
                         <CardDescription>Enter your investment details below.</CardDescription>
@@ -87,7 +87,7 @@ export default function SipCalculatorPage() {
                         <Button onClick={calculateSip} className="w-full">Calculate</Button>
                     </CardContent>
                 </Card>
-                <div className="flex items-start lg:col-span-3">
+                <div className="flex items-start lg:col-span-2">
                     {results ? (
                         <Card className="w-full">
                             <CardHeader>
