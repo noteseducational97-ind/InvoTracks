@@ -116,7 +116,7 @@ export default function SipCalculatorPage() {
                                         </PieChart>
                                     </ResponsiveContainer>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                        <p className="text-sm text-muted-foreground">Future Value</p>
+                                        <p className="text-sm text-muted-foreground">Total Value</p>
                                         <p className="text-2xl font-bold">{formatCurrency(results.futureValue)}</p>
                                     </div>
                                 </div>
@@ -130,7 +130,7 @@ export default function SipCalculatorPage() {
                                         <span className="font-medium">{formatCurrency(results.estimatedReturns)}</span>
                                     </div>
                                     <div className="flex justify-between text-base font-semibold">
-                                        <span>Future Value:</span>
+                                        <span>Total Value:</span>
                                         <span>{formatCurrency(results.futureValue)}</span>
                                     </div>
                                     <div className="flex justify-between text-base font-semibold text-primary mt-2 border-t pt-2">
