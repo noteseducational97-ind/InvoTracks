@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface EmiResult {
     monthlyEmi: number;
@@ -14,32 +15,49 @@ interface EmiResult {
     principalAmount: number;
 }
 
+type LoanType = 'reducing' | 'flat';
+
 export default function EmiCalculatorPage() {
     const [loanAmount, setLoanAmount] = useState(1000000);
     const [interestRate, setInterestRate] = useState(8.5);
     const [loanTenure, setLoanTenure] = useState(20); // in years
+    const [loanType, setLoanType] = useState<LoanType>('reducing');
     
     const [results, setResults] = useState<EmiResult | null>(null);
 
     const calculateEmi = () => {
         const P = loanAmount;
-        const r = (interestRate / 100) / 12; // monthly interest rate
-        const n = loanTenure * 12; // total number of months
+        const annualRate = interestRate / 100;
+        const n_years = loanTenure;
+        const n_months = n_years * 12;
 
-        if (P > 0 && interestRate > 0 && n > 0) {
-            const emi = P * r * (Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1));
-            const totalPayment = emi * n;
-            const totalInterest = totalPayment - P;
-
-            setResults({
-                monthlyEmi: emi,
-                totalInterest,
-                totalPayment,
-                principalAmount: P,
-            });
-        } else {
+        if (P <= 0 || interestRate <= 0 || n_years <= 0) {
             setResults(null);
+            return;
         }
+
+        let emi = 0;
+        let totalPayment = 0;
+        let totalInterest = 0;
+
+        if (loanType === 'reducing') {
+            const r_monthly = annualRate / 12;
+            emi = P * r_monthly * (Math.pow(1 + r_monthly, n_months) / (Math.pow(1 + r_monthly, n_months) - 1));
+            totalPayment = emi * n_months;
+            totalInterest = totalPayment - P;
+        } else { // Flat Rate
+            totalInterest = P * annualRate * n_years;
+            totalPayment = P + totalInterest;
+            emi = totalPayment / n_months;
+        }
+        
+
+        setResults({
+            monthlyEmi: emi,
+            totalInterest,
+            totalPayment,
+            principalAmount: P,
+        });
     };
     
     const formatCurrency = (value: number) => {
@@ -65,6 +83,18 @@ export default function EmiCalculatorPage() {
                         <CardDescription>Enter your loan details below.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                             <Label>Loan Type</Label>
+                             <Select value={loanType} onValueChange={(value) => setLoanType(value as LoanType)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select loan type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="reducing">Reducing Balance EMI</SelectItem>
+                                    <SelectItem value="flat">Flat Rate Interest</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="space-y-2">
                             <Label htmlFor="loan-amount">Loan Amount (₹)</Label>
                             <Input id="loan-amount" type="number" value={loanAmount} onChange={(e) => setLoanAmount(Number(e.target.value))} />
