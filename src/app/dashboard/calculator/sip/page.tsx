@@ -48,7 +48,7 @@ export default function SipCalculatorPage() {
     ] : [];
 
     const formatCurrency = (value: number) => {
-        return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
     }
 
     return (
@@ -64,7 +64,7 @@ export default function SipCalculatorPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="monthly-investment">Monthly Investment ($)</Label>
+                            <Label htmlFor="monthly-investment">Monthly Investment (₹)</Label>
                             <Input id="monthly-investment" type="number" value={monthlyInvestment} onChange={(e) => setMonthlyInvestment(Number(e.target.value))} />
                         </div>
                         <div className="space-y-2">

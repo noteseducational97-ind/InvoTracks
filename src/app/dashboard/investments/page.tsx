@@ -8,7 +8,7 @@ const investments = [
     {
         id: '1',
         name: 'Tech Innovators Fund',
-        value: '$15,250.50',
+        value: '₹15,25,050',
         return: '+12.5%',
         isPositive: true,
         type: 'Stocks',
@@ -17,7 +17,7 @@ const investments = [
     {
         id: '2',
         name: 'Downtown Real Estate',
-        value: '$25,500.00',
+        value: '₹25,50,000',
         return: '+8.2%',
         isPositive: true,
         type: 'Real Estate',
@@ -26,7 +26,7 @@ const investments = [
     {
         id: '3',
         name: 'Green Energy Bonds',
-        value: '$5,120.75',
+        value: '₹5,12,075',
         return: '-1.8%',
         isPositive: false,
         type: 'Bonds',
@@ -35,7 +35,7 @@ const investments = [
     {
         id: '4',
         name: 'Emerging Markets ETF',
-        value: '$9,360.25',
+        value: '₹9,36,025',
         return: '+25.7%',
         isPositive: true,
         type: 'ETF',

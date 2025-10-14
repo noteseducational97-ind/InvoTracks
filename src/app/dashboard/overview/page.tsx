@@ -30,7 +30,7 @@ export default function OverviewPage() {
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">$45,231.89</div>
+                        <div className="text-2xl font-bold">₹45,23,189</div>
                         <p className="text-xs text-muted-foreground">+20.1% from last month</p>
                     </CardContent>
                 </Card>
@@ -40,7 +40,7 @@ export default function OverviewPage() {
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">$51,024.12</div>
+                        <div className="text-2xl font-bold">₹51,02,412</div>
                         <p className="text-xs text-muted-foreground">+18.3% from last month</p>
                     </CardContent>
                 </Card>
@@ -51,7 +51,7 @@ export default function OverviewPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">3</div>
-                        <p className="text-xs text-muted-foreground">Totaling $1,250.00</p>
+                        <p className="text-xs text-muted-foreground">Totaling ₹1,25,000</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -76,13 +76,14 @@ export default function OverviewPage() {
                         <ResponsiveContainer width="100%" height={350}>
                             <BarChart data={chartData}>
                                 <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value/1000}k`} />
                                 <Tooltip
                                     contentStyle={{ 
                                         backgroundColor: 'hsl(var(--background))', 
                                         border: '1px solid hsl(var(--border))',
                                         borderRadius: 'var(--radius)'
                                     }}
+                                    formatter={(value: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)}
                                 />
                                 <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                             </BarChart>
@@ -103,7 +104,7 @@ export default function OverviewPage() {
                                     <p className="text-sm font-medium">Dividend Received - AAPL</p>
                                     <p className="text-xs text-muted-foreground">June 20, 2024</p>
                                 </div>
-                                <div className="ml-auto font-medium">+$55.40</div>
+                                <div className="ml-auto font-medium">+₹5,540</div>
                             </div>
                             <div className="flex items-center">
                                 <FileText className="h-5 w-5 text-blue-500 mr-3"/>
@@ -111,7 +112,7 @@ export default function OverviewPage() {
                                     <p className="text-sm font-medium">Invoice #INV-007 Paid</p>
                                     <p className="text-xs text-muted-foreground">June 18, 2024</p>
                                 </div>
-                                <div className="ml-auto font-medium">$250.00</div>
+                                <div className="ml-auto font-medium">₹25,000</div>
                             </div>
                             <div className="flex items-center">
                                 <DollarSign className="h-5 w-5 text-red-500 mr-3"/>
@@ -119,7 +120,7 @@ export default function OverviewPage() {
                                     <p className="text-sm font-medium">Bought - TSLA</p>
                                     <p className="text-xs text-muted-foreground">June 15, 2024</p>
                                 </div>
-                                <div className="ml-auto font-medium">-$2,000.00</div>
+                                <div className="ml-auto font-medium">-₹2,00,000</div>
                             </div>
                         </div>
                     </CardContent>

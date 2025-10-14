@@ -7,12 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { File, ListFilter, PlusCircle } from 'lucide-react';
 
 const invoices = [
-    { id: 'INV-001', client: 'Alpha Corp', amount: '$2,500.00', due: '2024-07-30', status: 'Paid' },
-    { id: 'INV-002', client: 'Beta Inc.', amount: '$1,500.00', due: '2024-08-15', status: 'Pending' },
-    { id: 'INV-003', client: 'Gamma LLC', amount: '$350.00', due: '2024-06-25', status: 'Overdue' },
-    { id: 'INV-004', client: 'Delta Co.', amount: '$450.00', due: '2024-07-22', status: 'Pending' },
-    { id: 'INV-005', client: 'Epsilon Ltd.', amount: '$5,600.00', due: '2024-05-30', status: 'Paid' },
-    { id: 'INV-006', client: 'Zeta Solutions', amount: '$750.00', due: '2024-08-01', status: 'Draft' },
+    { id: 'INV-001', client: 'Alpha Corp', amount: '₹2,50,000', due: '2024-07-30', status: 'Paid' },
+    { id: 'INV-002', client: 'Beta Inc.', amount: '₹1,50,000', due: '2024-08-15', status: 'Pending' },
+    { id: 'INV-003', client: 'Gamma LLC', amount: '₹35,000', due: '2024-06-25', status: 'Overdue' },
+    { id: 'INV-004', client: 'Delta Co.', amount: '₹45,000', due: '2024-07-22', status: 'Pending' },
+    { id: 'INV-005', client: 'Epsilon Ltd.', amount: '₹5,60,000', due: '2024-05-30', status: 'Paid' },
+    { id: 'INV-006', client: 'Zeta Solutions', amount: '₹75,000', due: '2024-08-01', status: 'Draft' },
 ];
 
 const statusVariant: { [key: string]: "default" | "secondary" | "destructive" | "outline" } = {
