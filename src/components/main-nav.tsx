@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Settings,
   User,
+  Tags,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,7 +18,7 @@ const navItems = [
   { href: '/dashboard/overview', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/invoices', label: 'Invoices', icon: FileText },
   { href: '/dashboard/investments', label: 'Investments', icon: Briefcase },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+  { href: '/dashboard/manage', label: 'Manage', icon: Tags },
   { href: '/dashboard/calculator', label: 'Calculator', icon: Calculator },
 ];
 

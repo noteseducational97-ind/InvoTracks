@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { User as AppUser } from '@/app/actions';
-import { CreditCard, LogOut, Settings, User as UserIcon } from 'lucide-react';
+import { CreditCard, LogOut, Settings, User as UserIcon, Tags } from 'lucide-react';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useAuth } from '@/firebase';
@@ -77,9 +77,9 @@ export function UserNav({ user }: UserNavProps) {
                 </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                <Link href="/dashboard/manage">
+                    <Tags className="mr-2 h-4 w-4" />
+                    <span>Manage</span>
                 </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
