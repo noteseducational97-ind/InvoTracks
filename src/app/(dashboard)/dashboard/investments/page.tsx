@@ -326,7 +326,6 @@ export default function InvestmentsPage() {
                     <Card>
                          <CardHeader>
                             <CardTitle className="font-headline text-lg">Remaining Amount</CardTitle>
-                            <CardDescription>Suggested mutual fund SIP breakdown for your investable amount.</CardDescription>
                         </CardHeader>
                          <CardContent className="grid gap-6 lg:grid-cols-2">
                              <div className="flex items-center justify-center">
@@ -393,5 +392,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
