@@ -2,10 +2,13 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet } from "lucide-react";
+import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet, Info } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
 
@@ -117,6 +120,16 @@ export default function ManagePage() {
   
   const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
   const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
+
+  // 50-30-20 Rule Calculations
+  const expensePercentage = totalMonthlyIncome > 0 ? (totalMonthlyExpenses / totalMonthlyIncome) * 100 : 0;
+  const emiPercentage = totalMonthlyIncome > 0 ? (totalMonthlyEmi / totalMonthlyIncome) * 100 : 0;
+  const investmentPercentage = totalMonthlyIncome > 0 ? (netMonthlyCashflow / totalMonthlyIncome) * 100 : 0;
+
+  const expenseStatus = expensePercentage <= 50;
+  const emiStatus = emiPercentage <= 30;
+  const investmentStatus = investmentPercentage >= 20;
+  
 
   if (isUserLoading || isProfileLoading) {
     return (
@@ -320,6 +333,60 @@ export default function ManagePage() {
                 </div>
             </CardContent>
         </Card>
+        
+        {/* 50-30-20 Rule Suggestion Card */}
+        {totalMonthlyIncome > 0 && (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                        <Info className="h-5 w-5 text-primary" />
+                        50-30-20 Rule Analysis
+                    </CardTitle>
+                    <CardDescription>
+                        A guideline for budgeting: 50% on needs, 30% on wants/loans, and 20% on savings.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6 text-sm">
+                    {/* Expenses */}
+                    <div>
+                        <div className="flex justify-between mb-1">
+                            <span className="font-medium">Expenses (Needs): {expensePercentage.toFixed(1)}%</span>
+                            <span className={cn("font-semibold", expenseStatus ? 'text-green-600' : 'text-red-600')}>
+                                {expenseStatus ? 'On Track (<= 50%)' : 'High (> 50%)'}
+                            </span>
+                        </div>
+                        <Progress value={expensePercentage} className={cn(expenseStatus ? '[&>div]:bg-green-500' : '[&>div]:bg-red-500')} />
+                    </div>
+                    {/* EMIs */}
+                    <div>
+                        <div className="flex justify-between mb-1">
+                            <span className="font-medium">EMIs (Wants/Debts): {emiPercentage.toFixed(1)}%</span>
+                            <span className={cn("font-semibold", emiStatus ? 'text-green-600' : 'text-red-600')}>
+                                {emiStatus ? 'On Track (<= 30%)' : 'High (> 30%)'}
+                            </span>
+                        </div>
+                        <Progress value={emiPercentage} className={cn(emiStatus ? '[&>div]:bg-green-500' : '[&>div]:bg-red-500')} />
+                    </div>
+                    {/* Investments */}
+                    <div>
+                        <div className="flex justify-between mb-1">
+                            <span className="font-medium">Investments (Savings): {investmentPercentage.toFixed(1)}%</span>
+                             <span className={cn("font-semibold", investmentStatus ? 'text-green-600' : 'text-red-600')}>
+                                {investmentStatus ? 'On Track (>= 20%)' : 'Low (< 20%)'}
+                            </span>
+                        </div>
+                         <Progress value={investmentPercentage} className={cn(investmentStatus ? '[&>div]:bg-green-500' : '[&>div]:bg-red-500')} />
+                    </div>
+                    {/* Suggestion Text */}
+                    <div className="pt-4 text-center text-muted-foreground">
+                        {!expenseStatus && <p>Your expenses are higher than the recommended 50%. Consider reviewing your spending on non-essential items.</p>}
+                        {!emiStatus && <p>Your loan EMIs are taking up a significant portion of your income. Focusing on prepayments could be beneficial.</p>}
+                        {!investmentStatus && <p>Your investment rate is below the recommended 20%. Try to increase your savings to build wealth faster.</p>}
+                        {expenseStatus && emiStatus && investmentStatus && <p className="text-green-600 font-medium">Great job! Your budget aligns well with the 50-30-20 rule.</p>}
+                    </div>
+                </CardContent>
+            </Card>
+        )}
 
       </div>
     </div>
