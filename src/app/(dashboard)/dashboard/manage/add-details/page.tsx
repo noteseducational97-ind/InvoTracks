@@ -8,6 +8,7 @@ import { User, DollarSign, Landmark, TrendingUp, CreditCard } from "lucide-react
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser } from "@/firebase";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AddDetailsPage() {
   const { user } = useUser();
@@ -91,31 +92,31 @@ export default function AddDetailsPage() {
           <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
              <div className="space-y-2">
                 <Label htmlFor="rent">Housing (Rent/EMI)</Label>
-                <Input id="rent" type="number" />
+                <Input id="rent" type="number" placeholder="" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="utilities">Utilities</Label>
-                <Input id="utilities" type="number" />
+                <Input id="utilities" type="number" placeholder="" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="transport">Transportation</Label>
-                <Input id="transport" type="number" />
+                <Input id="transport" type="number" placeholder="" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="food">Groceries & Food</Label>
-                <Input id="food" type="number" />
+                <Input id="food" type="number" placeholder="" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="entertainment">Entertainment</Label>
-                <Input id="entertainment" type="number" />
+                <Input id="entertainment" type="number" placeholder="" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="healthcare">Healthcare</Label>
-                <Input id="healthcare" type="number" />
+                <Input id="healthcare" type="number" placeholder="" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="other-expenses">Other</Label>
-                <Input id="other-expenses" type="number" />
+                <Input id="other-expenses" type="number" placeholder="" />
             </div>
           </CardContent>
         </Card>
@@ -127,45 +128,42 @@ export default function AddDetailsPage() {
                     <Landmark className="h-5 w-5 text-primary" />
                     Loans
                 </CardTitle>
-                <CardDescription>Enter the outstanding balance for any active loans.</CardDescription>
+                <CardDescription>Enter the details for an active loan or credit card debt.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-2">
-                    <Label htmlFor="home-loan">Home Loan</Label>
-                    <Input id="home-loan" type="number" />
+                 <div className="space-y-2">
+                    <Label>Loan Type</Label>
+                    <Select>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select loan type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="home">Home Loan</SelectItem>
+                            <SelectItem value="car">Car Loan</SelectItem>
+                            <SelectItem value="personal">Personal Loan</SelectItem>
+                            <SelectItem value="credit-card">Credit Card Debt</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="car-loan">Car Loan</Label>
-                    <Input id="car-loan" type="number" />
+                    <Label htmlFor="loan-amount">Loan Amount (₹)</Label>
+                    <Input id="loan-amount" type="number" placeholder="e.g., 500000" />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="personal-loan">Personal Loan</Label>
-                    <Input id="personal-loan" type="number" />
+                    <Label htmlFor="monthly-emi">Monthly EMI (₹)</Label>
+                    <Input id="monthly-emi" type="number" placeholder="e.g., 12000" />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="other-debt">Other Loan</Label>
-                    <Input id="other-debt" type="number" />
+                    <Label htmlFor="interest-rate">Interest Rate (%)</Label>
+                    <Input id="interest-rate" type="number" placeholder="e.g., 8.5" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="tenure">Tenure (Years)</Label>
+                    <Input id="tenure" type="number" placeholder="e.g., 5" />
                 </div>
             </CardContent>
         </Card>
-
-        {/* Credit Card Debt Card */}
-        <Card>
-            <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-primary" />
-                    Credit Card Debt
-                </CardTitle>
-                <CardDescription>Enter the outstanding balance for your credit cards.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-2">
-                    <Label htmlFor="credit-card-debt">Total Credit Card Debt</Label>
-                    <Input id="credit-card-debt" type="number" />
-                </div>
-            </CardContent>
-        </Card>
-
 
         {/* Existing Investment Card */}
         <Card>
@@ -179,27 +177,27 @@ export default function AddDetailsPage() {
             <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-2">
                     <Label htmlFor="stocks">Stocks</Label>
-                    <Input id="stocks" type="number" />
+                    <Input id="stocks" type="number" placeholder="" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="bonds">Bonds</Label>
-                    <Input id="bonds" type="number" />
+                    <Input id="bonds" type="number" placeholder="" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="mutual-funds">Mutual Funds</Label>
-                    <Input id="mutual-funds" type="number" />
+                    <Input id="mutual-funds" type="number" placeholder="" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="real-estate">Real Estate</Label>
-                    <Input id="real-estate" type="number" />
+                    <Input id="real-estate" type="number" placeholder="" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="commodities">Commodities</Label>
-                    <Input id="commodities" type="number" />
+                    <Input id="commodities" type="number" placeholder="" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="other-investments">Other</Label>
-                    <Input id="other-investments" type="number" />
+                    <Input id="other-investments" type="number" placeholder="" />
                 </div>
             </CardContent>
         </Card>
