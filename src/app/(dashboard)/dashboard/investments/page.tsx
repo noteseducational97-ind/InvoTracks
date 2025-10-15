@@ -254,7 +254,6 @@ export default function InvestmentsPage() {
                 <Card className="mt-6">
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
-                        <CardDescription>A summary of your monthly savings allocation and investment strategy.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -403,3 +402,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
