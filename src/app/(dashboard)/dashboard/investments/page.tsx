@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Target, Sprout, Building, Factory, Briefcase } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Target, Sprout, Building, Factory, Briefcase, PiggyBank, Droplets } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
@@ -28,6 +28,8 @@ type InvestmentPlan = {
   largeCapAmount: number;
   midCapAmount: number;
   smallCapAmount: number;
+  midTermDebtAmount: number;
+  liquidGoldFundAmount: number;
 };
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -161,7 +163,6 @@ export default function InvestmentsPage() {
                     return;
                 }
 
-                // New calculation logic
                 const loanRepaymentAmount = totalMonthlyEmi > 0 ? netMonthlyCashflow * 0.10 : 0;
                 const amountAfterLoanRepayment = netMonthlyCashflow - loanRepaymentAmount;
                 
@@ -174,16 +175,16 @@ export default function InvestmentsPage() {
                 const equityAmount = mutualFundAmount * equityPercentage;
                 const debtAmount = mutualFundAmount * debtPercentage;
 
-                // Market Cap Breakdown Logic
+                const midTermDebtAmount = debtAmount * 0.5;
+                const liquidGoldFundAmount = debtAmount * 0.5;
+
                 const riskFactor = (Number(financialProfile.riskPercentage) || 50) / 100; // 0 to 1
                 const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
 
-                // Base allocation
                 let baseLargeCap = 0.50;
                 let baseMidCap = 0.30;
                 let baseSmallCap = 0.20;
 
-                // Adjust for risk and age
                 const smallCapAdjustment = (riskFactor - 0.5) * 0.2 + ageFactor * 0.1;
                 const largeCapAdjustment = -smallCapAdjustment;
                 
@@ -191,7 +192,6 @@ export default function InvestmentsPage() {
                 let midCapPercentage = baseMidCap;
                 let smallCapPercentage = baseSmallCap + smallCapAdjustment;
                 
-                // Normalize percentages
                 const total = largeCapPercentage + midCapPercentage + smallCapPercentage;
                 largeCapPercentage /= total;
                 midCapPercentage /= total;
@@ -212,6 +212,8 @@ export default function InvestmentsPage() {
                     largeCapAmount,
                     midCapAmount,
                     smallCapAmount,
+                    midTermDebtAmount,
+                    liquidGoldFundAmount
                 };
 
                 setPlan(generatedPlan);
@@ -226,7 +228,7 @@ export default function InvestmentsPage() {
 
     }, [financialProfile]);
     
-     const chartConfig = plan ? {
+    const chartConfig = plan ? {
         equity: { label: 'Equity', color: 'hsl(var(--chart-1))' },
         debt: { label: 'Debt', color: 'hsl(var(--chart-5))' },
         emergencyFund: { label: 'Emergency Fund', color: 'hsl(var(--chart-2))' },
@@ -288,7 +290,7 @@ export default function InvestmentsPage() {
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-2">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                              <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -329,13 +331,13 @@ export default function InvestmentsPage() {
                         </div>
 
                         <Separator />
-
-                        <div className="space-y-2">
-                            <div className="text-center">
-                                <h3 className="font-headline text-lg flex items-center justify-center gap-2 mb-1"><PieChartIcon className="h-5 w-5 text-primary"/>Allocation Breakdown</h3>
-                                <p className="text-sm text-muted-foreground">A visual breakdown of where your monthly savings are going.</p>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                            <div className="space-y-2">
+                                <div className="text-center">
+                                    <h3 className="font-headline text-lg flex items-center justify-center gap-2 mb-1"><PieChartIcon className="h-5 w-5 text-primary"/>Allocation Breakdown</h3>
+                                    <p className="text-sm text-muted-foreground">A visual breakdown of where your monthly savings are going.</p>
+                                </div>
                                 <ChartContainer config={chartConfig} className="relative mx-auto aspect-square h-64">
                                      <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
@@ -352,28 +354,28 @@ export default function InvestmentsPage() {
                                         <span className="text-2xl font-bold">{formatCurrency(plan.netMonthlyCashflow)}</span>
                                     </div>
                                 </ChartContainer>
+                            </div>
 
-                                <div className="space-y-4">
-                                    {chartData.map((item) => {
-                                        const config = chartConfig[item.name as keyof typeof chartConfig];
-                                        return (
-                                            <div key={item.name}>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
-                                                    <div className="flex-1">
-                                                        <p className="font-medium">{config?.label}</p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="font-semibold">{formatCurrency(item.value)}</p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {((item.value / plan.netMonthlyCashflow) * 100).toFixed(1)}%
-                                                        </p>
-                                                    </div>
+                            <div className="space-y-4">
+                                {chartData.map((item) => {
+                                    const config = chartConfig[item.name as keyof typeof chartConfig];
+                                    return (
+                                        <div key={item.name}>
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
+                                                <div className="flex-1">
+                                                    <p className="font-medium">{config?.label}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-semibold">{formatCurrency(item.value)}</p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {((item.value / plan.netMonthlyCashflow) * 100).toFixed(1)}%
+                                                    </p>
                                                 </div>
                                             </div>
-                                        )
-                                    })}
-                                </div>
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
                     </CardContent>
@@ -425,17 +427,28 @@ export default function InvestmentsPage() {
                                 </Card>
                             </div>
                         </div>
-                         <div>
+                         <div className="border rounded-lg p-4">
                             <h4 className="font-semibold mb-4 text-center">Debt Allocation</h4>
-                             <Card className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800 max-w-xs mx-auto">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-sky-800 dark:text-sky-300">Debt Investment</CardTitle>
-                                    <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-sky-900 dark:text-sky-200">{formatCurrency(plan.debtAmount)}</div>
-                                </CardContent>
-                            </Card>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Card className="bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800">
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium text-teal-800 dark:text-teal-300">Mid-Term Debt Fund</CardTitle>
+                                        <PiggyBank className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-teal-900 dark:text-teal-200">{formatCurrency(plan.midTermDebtAmount)}</div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800">
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium text-cyan-800 dark:text-cyan-300">Liquid/Gold Fund</CardTitle>
+                                        <Droplets className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-cyan-900 dark:text-cyan-200">{formatCurrency(plan.liquidGoldFundAmount)}</div>
+                                    </CardContent>
+                                </Card>
+                             </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -462,5 +475,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
