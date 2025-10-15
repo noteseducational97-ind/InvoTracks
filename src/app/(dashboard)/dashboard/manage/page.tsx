@@ -115,7 +115,8 @@ export default function ManagePage() {
   const totalMonthlyEmi = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0) : 0;
 
   const monthlySIP = (financialProfile?.investments.mutualFunds.invested === 'yes' ? Number(financialProfile.investments.mutualFunds.amount) : 0) || 0;
-  const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
+  const monthlyIncome = Number(financialProfile?.monthlyIncome || 0);
+  const totalMonthlyIncome = monthlyIncome + (Number(financialProfile?.annualIncome || 0) / 12);
   const monthlyHealthInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.healthInsurance);
   const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.termInsurance);
   
@@ -129,8 +130,8 @@ export default function ManagePage() {
 
   // Emergency Fund Calculations
   const currentEmergencyFund = Number(financialProfile?.investments.emergencyFund?.amount || 0);
-  const minRecommendedFund = totalMonthlyIncome * 6;
-  const maxRecommendedFund = totalMonthlyIncome * 18;
+  const minRecommendedFund = monthlyIncome * 6;
+  const maxRecommendedFund = monthlyIncome * 18;
   let emergencyFundStatus: 'low' | 'good' | 'high' = 'low';
   if (currentEmergencyFund >= minRecommendedFund && currentEmergencyFund <= maxRecommendedFund) {
     emergencyFundStatus = 'good';
@@ -355,7 +356,7 @@ export default function ManagePage() {
         </Card>
 
         {/* Emergency Fund Plan Card */}
-        {totalMonthlyIncome > 0 && (
+        {monthlyIncome > 0 && (
             <Card className={cn(
                 emergencyFundStatus === 'low'
                 ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
