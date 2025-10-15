@@ -116,13 +116,6 @@ export default function InvestmentsPage() {
                 </Card>
             ) : (
                 <div className="mt-6">
-                    {!plan && !isGenerating && (
-                         <Button onClick={handleGeneratePlan}>
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Generate Plan
-                        </Button>
-                    )}
-
                     {isGenerating && (
                         <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
                             <div className="text-center">
@@ -179,7 +172,7 @@ export default function InvestmentsPage() {
                                  <Button onClick={handleGeneratePlan} className="mt-6">
                                     <Sparkles className="mr-2 h-4 w-4" />
                                     Re-generate Plan
-                                </Button>
+                                 </Button>
                             </div>
                         </div>
                     )}
