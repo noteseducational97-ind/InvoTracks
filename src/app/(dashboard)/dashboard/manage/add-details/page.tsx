@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, DollarSign, Landmark, TrendingUp, PlusCircle, Trash2 } from "lucide-react";
+import { User, DollarSign, Landmark, TrendingUp, PlusCircle, Trash2, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
@@ -23,12 +23,18 @@ type Loan = {
   tenure: string;
 };
 
-type InvestmentCategory = 'stocks' | 'mutualFunds' | 'bonds' | 'realEstate' | 'commodities' | 'other';
+type InvestmentCategory = 'stocks' | 'bonds' | 'realEstate' | 'commodities' | 'other';
+type MonthlyInvestmentCategory = 'mutualFunds';
 type InsuranceCategory = 'termInsurance' | 'healthInsurance';
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
 
 type InvestmentsState = {
   [key in InvestmentCategory]: {
+    invested: 'yes' | 'no';
+    amount: string;
+  }
+} & {
+  [key in MonthlyInvestmentCategory]: {
     invested: 'yes' | 'no';
     amount: string;
   }
@@ -193,6 +199,9 @@ export default function AddDetailsPage() {
     return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
 
+  const existingAssetCategories: InvestmentCategory[] = ['stocks', 'bonds', 'realEstate', 'commodities', 'other'];
+  const monthlyInvestmentCategories: (MonthlyInvestmentCategory | InsuranceCategory)[] = ['mutualFunds', 'termInsurance', 'healthInsurance'];
+
   return (
     <div>
       <h1 className="font-headline text-3xl font-bold tracking-tight">Add Your Financial Details</h1>
@@ -341,32 +350,86 @@ export default function AddDetailsPage() {
             </CardFooter>
         </Card>
 
-        {/* Existing Investment Card */}
+        {/* Existing Assets Card */}
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-primary" />
-                    Existing Investments & Insurance
+                    Existing Assets
                 </CardTitle>
-                <CardDescription>Enter the current value of your existing investments and insurance policies.</CardDescription>
+                <CardDescription>Enter the current value of your existing assets like stocks, bonds, etc.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  <div className="grid gap-6 md:grid-cols-2">
-                    {(Object.keys(investments) as Array<keyof InvestmentsState>).map((key) => {
-                      const isInsurance = key === 'termInsurance' || key === 'healthInsurance';
+                    {existingAssetCategories.map((key) => {
                       const label = {
                         stocks: "Stocks",
-                        mutualFunds: "Mutual Funds",
                         bonds: "Bonds",
                         realEstate: "Real Estate",
                         commodities: "Commodities",
                         other: "Other Investments",
+                      }[key];
+                      
+                      const question = `Do you have any ${label}?`;
+                      const valueLabel = `Current Value of ${label} (₹)`;
+
+                      return (
+                        <div key={key} className="p-4 border rounded-lg space-y-3">
+                          <div className="space-y-2">
+                            <Label>{question}</Label>
+                            <RadioGroup value={investments[key].invested} onValueChange={(value) => handleInvestmentToggle(key, value as 'yes' | 'no')} className="flex items-center gap-4">
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="yes" id={`${key}-yes`} />
+                                    <Label htmlFor={`${key}-yes`}>Yes</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="no" id={`${key}-no`} />
+                                    <Label htmlFor={`${key}-no`}>No</Label>
+                                </div>
+                            </RadioGroup>
+                          </div>
+                          {investments[key].invested === 'yes' && (
+                            <div className="space-y-4 pt-4 border-t">
+                                <div className="space-y-2">
+                                    <Label htmlFor={`${key}-amount`}>{valueLabel}</Label>
+                                    <Input 
+                                      id={`${key}-amount`} 
+                                      type="number" 
+                                      placeholder="Enter amount"
+                                      value={investments[key].amount}
+                                      onChange={(e) => handleInvestmentAmountChange(key, e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                 </div>
+            </CardContent>
+        </Card>
+        
+        {/* Monthly Investment & Insurance Card */}
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-primary" />
+                    Monthly Investments &amp; Insurance
+                </CardTitle>
+                <CardDescription>Enter your recurring monthly investments and insurance premiums.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid gap-6 md:grid-cols-2">
+                    {monthlyInvestmentCategories.map((key) => {
+                      const isInsurance = key === 'termInsurance' || key === 'healthInsurance';
+                      const label = {
+                        mutualFunds: "Mutual Funds (SIP)",
                         termInsurance: "Term Insurance",
                         healthInsurance: "Health Insurance"
                       }[key];
                       
-                      const question = `Do you have any ${label}?`;
-                      const valueLabel = isInsurance ? "Premium Amount (₹)" : `Current Value of ${label} (₹)`;
+                      const question = `Do you have ${label}?`;
+                      const valueLabel = isInsurance ? "Premium Amount (₹)" : `Monthly SIP Amount (₹)`;
 
                       return (
                         <div key={key} className="p-4 border rounded-lg space-y-3">
@@ -419,10 +482,9 @@ export default function AddDetailsPage() {
                         </div>
                       )
                     })}
-                 </div>
+                </div>
             </CardContent>
         </Card>
-
 
         <div className="flex justify-end gap-2">
             <Button variant="outline" asChild>
@@ -434,7 +496,5 @@ export default function AddDetailsPage() {
     </div>
   );
 }
-
-    
 
     
