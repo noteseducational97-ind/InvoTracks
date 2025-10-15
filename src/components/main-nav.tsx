@@ -19,7 +19,6 @@ const navItems = [
   { href: '/dashboard/investments', label: 'Investment Plan', icon: Briefcase },
   { href: '/dashboard/manage', label: 'Manage', icon: Tags },
   { href: '/dashboard/calculator', label: 'Calculator', icon: Calculator },
-  { href: '/dashboard/ai-plan', label: 'AI Plan', icon: Sparkles },
 ];
 
 const adminNavItem = {

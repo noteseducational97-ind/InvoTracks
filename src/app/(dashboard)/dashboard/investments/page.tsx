@@ -1,4 +1,3 @@
-
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -111,7 +110,7 @@ export default function InvestmentsPage() {
                 ) : !plan && !isGenerating && !error ? (
                      <Card className="mt-6 text-center">
                         <CardHeader>
-                            <CardTitle className="font-headline">Generate Your AI-Powered Investment Plan</CardTitle>
+                            <CardTitle className="font-headline">Generate Your Investment Plan</CardTitle>
                             <CardDescription>You have added your financial details. You can now generate your personalized investment plan.</CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -127,7 +126,7 @@ export default function InvestmentsPage() {
                     <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
                         <div className="text-center">
                             <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                            <p className="text-muted-foreground">Our AI is generating your personalized plan...</p>
+                            <p className="text-muted-foreground">Generating your personalized plan...</p>
                         </div>
                     </div>
                 )}
