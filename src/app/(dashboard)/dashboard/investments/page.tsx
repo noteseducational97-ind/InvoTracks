@@ -251,7 +251,7 @@ export default function InvestmentsPage() {
         
         if (plan) {
             return (
-                 <Card className="mt-6">
+                <Card className="mt-6">
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
                         <CardDescription>A summary of your monthly savings allocation and investment strategy.</CardDescription>
@@ -265,7 +265,6 @@ export default function InvestmentsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.netMonthlyCashflow)}</div>
-                                    <p className="text-xs text-blue-700 dark:text-blue-400/80">Your net monthly savings.</p>
                                 </CardContent>
                             </Card>
                             <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
@@ -275,7 +274,6 @@ export default function InvestmentsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-orange-900 dark:text-orange-200">{formatCurrency(plan.loanRepaymentAmount)}</div>
-                                     <p className="text-xs text-orange-700 dark:text-orange-400/80">10% of your total monthly EMIs.</p>
                                 </CardContent>
                             </Card>
                             <Card className="bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800">
@@ -285,7 +283,6 @@ export default function InvestmentsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-200">{formatCurrency(plan.emergencyFundAmount)}</div>
-                                    <p className="text-xs text-indigo-700 dark:text-indigo-400/80"></p>
                                 </CardContent>
                             </Card>
                             <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
@@ -295,7 +292,6 @@ export default function InvestmentsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-green-900 dark:text-green-200">{formatCurrency(plan.mutualFundAmount)}</div>
-                                    <p className="text-xs text-green-700 dark:text-green-400/80">Final remaining amount for investment.</p>
                                 </CardContent>
                             </Card>
                         </div>
