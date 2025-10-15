@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { useState } from "react";
-import type { FinancialProfile, InvestmentPlan } from "@/ai/flows/generate-investment-plan";
+import type { FinancialProfile, InvestmentPlan } from "@/ai/schemas/investment-plan-schemas";
 import { generateInvestmentPlan } from "@/ai/flows/generate-investment-plan";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Pie, PieChart, ResponsiveContainer } from "recharts";
