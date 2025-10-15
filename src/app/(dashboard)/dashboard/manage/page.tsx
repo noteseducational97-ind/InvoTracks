@@ -401,7 +401,7 @@ export default function ManagePage() {
             </Card>
         )}
         
-        {/* 50-30-20 Rule Suggestion Card */}
+        {/* 50-30-20 Rule Analysis Card */}
         {totalMonthlyIncome > 0 && (
             <Card>
                 <CardHeader>
@@ -414,88 +414,58 @@ export default function ManagePage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {totalMonthlyIncome > 50000 && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                             <Card className="text-center">
-                                <CardHeader className="p-4">
-                                    <CardDescription>Expenses</CardDescription>
-                                    <CardTitle className="text-2xl">{expensePercentage.toFixed(1)}%</CardTitle>
-                                    <p className="text-sm text-muted-foreground">Ideal: 50%</p>
-                                </CardHeader>
-                            </Card>
-                             <Card className="text-center">
-                                <CardHeader className="p-4">
-                                    <CardDescription>EMI</CardDescription>
-                                    <CardTitle className="text-2xl">{emiPercentage.toFixed(1)}%</CardTitle>
-                                    <p className="text-sm text-muted-foreground">Ideal: 30%</p>
-                                </CardHeader>
-                            </Card>
-                             <Card className="text-center">
-                                <CardHeader className="p-4">
-                                    <CardDescription>Investment</CardDescription>
-                                    <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
-                                    <p className="text-sm text-muted-foreground">Ideal: 20%</p>
-                                </CardHeader>
-                            </Card>
-                        </div>
-                    )}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline text-lg">Your Comparison</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <Card className={cn(
+                            expensePercentage <= 50
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+                            : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                        )}>
+                            <CardHeader className="p-4">
+                                <CardDescription>Needs (Expenses)</CardDescription>
+                                <CardTitle className="text-2xl">{expensePercentage.toFixed(1)}%</CardTitle>
+                                <p className={cn("font-semibold", expensePercentage <= 50 ? 'text-green-600' : 'text-red-600')}>
+                                    {expensePercentage <= 50 ? 'On Track (<= 50%)' : 'High (> 50%)'}
+                                </p>
+                            </CardHeader>
+                        </Card>
+                         <Card className={cn(
+                            emiPercentage <= 30
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+                            : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                        )}>
+                            <CardHeader className="p-4">
+                                <CardDescription>Wants (EMIs/Debts)</CardDescription>
+                                <CardTitle className="text-2xl">{emiPercentage.toFixed(1)}%</CardTitle>
+                                <p className={cn("font-semibold", emiPercentage <= 30 ? 'text-green-600' : 'text-red-600')}>
+                                    {emiPercentage <= 30 ? 'On Track (<= 30%)' : 'High (> 30%)'}
+                                </p>
+                            </CardHeader>
+                        </Card>
+                        <Link href="/dashboard/manage/edit" className="group">
                             <Card className={cn(
-                                expensePercentage <= 50
+                                "transition-all group-hover:ring-2 group-hover:ring-primary h-full",
+                                investmentPercentage >= 20
                                 ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
                                 : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
                             )}>
                                 <CardHeader className="p-4">
-                                    <CardDescription>Needs (Expenses)</CardDescription>
-                                    <CardTitle className="text-2xl">{expensePercentage.toFixed(1)}%</CardTitle>
-                                    <p className={cn("font-semibold", expensePercentage <= 50 ? 'text-green-600' : 'text-red-600')}>
-                                        {expensePercentage <= 50 ? 'On Track (<= 50%)' : 'High (> 50%)'}
+                                    <CardDescription>Savings (Investments)</CardDescription>
+                                    <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
+                                    <p className={cn("font-semibold", investmentPercentage >= 20 ? 'text-green-600' : 'text-red-600')}>
+                                        {investmentPercentage >= 20 ? 'On Track (>= 20%)' : 'Low (< 20%)'}
                                     </p>
                                 </CardHeader>
                             </Card>
-                             <Card className={cn(
-                                emiPercentage <= 30
-                                ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
-                                : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
-                            )}>
-                                <CardHeader className="p-4">
-                                    <CardDescription>Wants (EMIs/Debts)</CardDescription>
-                                    <CardTitle className="text-2xl">{emiPercentage.toFixed(1)}%</CardTitle>
-                                    <p className={cn("font-semibold", emiPercentage <= 30 ? 'text-green-600' : 'text-red-600')}>
-                                        {emiPercentage <= 30 ? 'On Track (<= 30%)' : 'High (> 30%)'}
-                                    </p>
-                                </CardHeader>
-                            </Card>
-                            <Link href="/dashboard/manage/edit" className="group">
-                                <Card className={cn(
-                                    "transition-all group-hover:ring-2 group-hover:ring-primary h-full",
-                                    investmentPercentage >= 20
-                                    ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
-                                    : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
-                                )}>
-                                    <CardHeader className="p-4">
-                                        <CardDescription>Savings (Investments)</CardDescription>
-                                        <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
-                                        <p className={cn("font-semibold", investmentPercentage >= 20 ? 'text-green-600' : 'text-red-600')}>
-                                            {investmentPercentage >= 20 ? 'On Track (>= 20%)' : 'Low (< 20%)'}
-                                        </p>
-                                    </CardHeader>
-                                </Card>
-                            </Link>
-                        </CardContent>
-                        <CardFooter>
-                             <div className="text-center text-muted-foreground text-sm w-full">
-                                {expensePercentage > 50 && <p>Your expenses are higher than the recommended 50%. Consider reviewing your spending on non-essential items.</p>}
-                                {emiPercentage > 30 && <p>Your loan EMIs are taking up a significant portion of your income. Focusing on prepayments could be beneficial.</p>}
-                                {investmentPercentage < 20 && <p>Your investment rate is below the recommended 20%. Try to increase your savings to build wealth faster.</p>}
-                                {expensePercentage <= 50 && emiPercentage <= 30 && investmentPercentage >= 20 && <p className="text-green-600 font-medium">Great job! Your budget aligns well with the 50-30-20 rule.</p>}
-                            </div>
-                        </CardFooter>
-                    </Card>
+                        </Link>
+                    </div>
+                    <CardFooter>
+                         <div className="text-center text-muted-foreground text-sm w-full">
+                            {expensePercentage > 50 && <p>Your expenses are higher than the recommended 50%. Consider reviewing your spending on non-essential items.</p>}
+                            {emiPercentage > 30 && <p>Your loan EMIs are taking up a significant portion of your income. Focusing on prepayments could be beneficial.</p>}
+                            {investmentPercentage < 20 && <p>Your investment rate is below the recommended 20%. Try to increase your savings to build wealth faster.</p>}
+                            {expensePercentage <= 50 && emiPercentage <= 30 && investmentPercentage >= 20 && <p className="text-green-600 font-medium">Great job! Your budget aligns well with the 50-30-20 rule.</p>}
+                        </div>
+                    </CardFooter>
                 </CardContent>
             </Card>
         )}
@@ -503,5 +473,4 @@ export default function ManagePage() {
       </div>
     </div>
   );
-
-    
+}
