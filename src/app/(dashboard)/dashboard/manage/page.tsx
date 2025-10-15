@@ -1,9 +1,34 @@
 
+'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil } from "lucide-react";
+import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle } from "lucide-react";
+import { useState } from "react";
 
 export default function ManagePage() {
+  const [hasDetails, setHasDetails] = useState(false);
+
+  if (!hasDetails) {
+    return (
+      <div>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
+        <p className="text-muted-foreground">A centralized view of your financial details and commitments.</p>
+        <Card className="mt-6 text-center">
+            <CardHeader>
+                <CardTitle className="font-headline">Welcome to Your Financial Hub</CardTitle>
+                <CardDescription>Get started by adding your financial details.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button onClick={() => setHasDetails(true)}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Details
+                </Button>
+            </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div>
       <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
