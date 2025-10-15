@@ -9,12 +9,14 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function AddDetailsPage() {
-  const [monthlyIncome, setMonthlyIncome] = useState(150000);
-  const [annualIncome, setAnnualIncome] = useState(200000);
+  const [monthlyIncome, setMonthlyIncome] = useState<number | string>("");
+  const [annualIncome, setAnnualIncome] = useState<number | string>("");
   const [overallMonthlyIncome, setOverallMonthlyIncome] = useState(0);
 
   useEffect(() => {
-    const calculatedOverall = monthlyIncome + (annualIncome / 12);
+    const monthly = Number(monthlyIncome) || 0;
+    const annual = Number(annualIncome) || 0;
+    const calculatedOverall = monthly + (annual / 12);
     setOverallMonthlyIncome(calculatedOverall);
   }, [monthlyIncome, annualIncome]);
 
@@ -53,12 +55,12 @@ export default function AddDetailsPage() {
             </div>
             <div className="space-y-2">
                 <Label htmlFor="monthly-income">Monthly Income (₹)</Label>
-                <Input id="monthly-income" type="number" value={monthlyIncome} onChange={(e) => setMonthlyIncome(Number(e.target.value))} />
+                <Input id="monthly-income" type="number" placeholder="150000" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} />
             </div>
             <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="annual-income">Annual Income (₹)</Label>
-                    <Input id="annual-income" type="number" value={annualIncome} onChange={(e) => setAnnualIncome(Number(e.target.value))} />
+                    <Input id="annual-income" type="number" placeholder="200000" value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="overall-monthly-income">Overall Monthly Income</Label>
