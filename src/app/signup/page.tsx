@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase';
-import { createUserWithEmailAndPassword, updateProfile, AuthError } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, AuthError, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 function SignupButton({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
   return <Button onClick={onClick} className="w-full" disabled={disabled}>{disabled ? 'Creating Account...' : 'Create an account'}</Button>;
@@ -39,10 +39,10 @@ export default function SignupPage() {
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (!isUserLoading && user) {
       router.push('/dashboard/overview');
     }
-  }, [user, router]);
+  }, [user, isUserLoading, router]);
 
   useEffect(() => {
     if (error) {
@@ -57,6 +57,10 @@ export default function SignupPage() {
   }, [error, toast]);
   
   const handleSignup = () => {
+    if (!auth) {
+        setError("Authentication service is not ready. Please try again in a moment.");
+        return;
+    }
     if (!name || !email || !password) {
         setError("Please fill in all fields.");
         return;
@@ -74,12 +78,23 @@ export default function SignupPage() {
         });
   }
 
-  // On the signup page, we just redirect to the login page to handle Google sign-in.
-  // This centralizes the Google sign-in logic and avoids potential issues with
-  // multiple redirect handlers. Firebase handles account creation automatically
-  // if the user signs in with a new Google account.
   const handleGoogleSignIn = () => {
-      router.push('/login');
+      if (!auth) {
+        setError("Authentication service is not ready. Please try again in a moment.");
+        return;
+      }
+      setIsPending(true);
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider)
+          .catch((e) => {
+              const err = e as AuthError;
+              setError(err.message);
+          });
+  }
+
+  // Prevent rendering the form until we know if a user is logged in or not
+  if (isUserLoading || user) {
+    return null; // Or a loading spinner
   }
 
   return (
@@ -106,7 +121,7 @@ export default function SignupPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" name="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} disabled={isPending} />
             </div>
-            <SignupButton onClick={handleSignup} disabled={isPending || isUserLoading} />
+            <SignupButton onClick={handleSignup} disabled={isPending} />
           </div>
           <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
@@ -116,7 +131,7 @@ export default function SignupPage() {
                   <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
           </div>
-          <GoogleSignInButton onClick={handleGoogleSignIn} disabled={isPending || isUserLoading} />
+          <GoogleSignInButton onClick={handleGoogleSignIn} disabled={isPending} />
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="underline">

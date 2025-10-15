@@ -38,10 +38,10 @@ export default function LoginPage() {
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (!isUserLoading && user) {
       router.push('/dashboard/overview');
     }
-  }, [user, router]);
+  }, [user, isUserLoading, router]);
 
   useEffect(() => {
     if (error) {
@@ -56,6 +56,10 @@ export default function LoginPage() {
   }, [error, toast]);
 
   const handleLogin = () => {
+    if (!auth) {
+        setError("Authentication service is not ready. Please try again in a moment.");
+        return;
+    }
     if (!email || !password) {
         setError("Please enter both email and password.");
         return;
@@ -69,6 +73,10 @@ export default function LoginPage() {
   };
   
   const handleGoogleSignIn = () => {
+      if (!auth) {
+        setError("Authentication service is not ready. Please try again in a moment.");
+        return;
+      }
       setIsPending(true);
       const provider = new GoogleAuthProvider();
       signInWithPopup(auth, provider)
@@ -76,6 +84,11 @@ export default function LoginPage() {
               const err = e as AuthError;
               setError(err.message);
           });
+  }
+
+  // Prevent rendering the form until we know if a user is logged in or not
+  if (isUserLoading || user) {
+    return null; // Or a loading spinner
   }
 
   return (
@@ -103,7 +116,7 @@ export default function LoginPage() {
               </div>
               <Input id="password" name="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} disabled={isPending} />
             </div>
-            <LoginButton onClick={handleLogin} disabled={isPending || isUserLoading} />
+            <LoginButton onClick={handleLogin} disabled={isPending} />
           </div>
            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
@@ -113,7 +126,7 @@ export default function LoginPage() {
                   <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
           </div>
-          <GoogleSignInButton onClick={handleGoogleSignIn} disabled={isPending || isUserLoading} />
+          <GoogleSignInButton onClick={handleGoogleSignIn} disabled={isPending} />
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
             <Link href="/signup" className="underline">
