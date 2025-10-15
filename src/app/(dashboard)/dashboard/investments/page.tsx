@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit, Balance, Anchor } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
@@ -31,6 +31,8 @@ type InvestmentPlan = {
   flexiCapAmount: number;
   midTermDebtAmount: number;
   liquidGoldFundAmount: number;
+  multiCapLoanRepaymentAmount: number;
+  corporateBondLoanRepaymentAmount: number;
 };
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -176,6 +178,19 @@ export default function InvestmentsPage() {
 
                 const equityAmount = mutualFundAmount * equityPercentage;
                 const debtAmount = mutualFundAmount * debtPercentage;
+                
+                // Loan Repayment Fund Allocation
+                let multiCapLoanRepaymentAmount = 0;
+                let corporateBondLoanRepaymentAmount = 0;
+                if (loanRepaymentAmount > 0) {
+                    if (riskPercentage < 60) { // Lower risk
+                        corporateBondLoanRepaymentAmount = loanRepaymentAmount * 0.70;
+                        multiCapLoanRepaymentAmount = loanRepaymentAmount * 0.30;
+                    } else { // Higher risk
+                        multiCapLoanRepaymentAmount = loanRepaymentAmount * 0.70;
+                        corporateBondLoanRepaymentAmount = loanRepaymentAmount * 0.30;
+                    }
+                }
 
                 
                 // Debt Allocation Logic based on risk profile
@@ -209,6 +224,7 @@ export default function InvestmentsPage() {
                     largeCapAmount = equityAmount * largeCapPercentage;
                     midCapAmount = equityAmount * midCapPercentage;
                     flexiCapAmount = equityAmount * flexiCapPercentage;
+                    smallCapAmount = 0; // No small cap for lower risk
                 } else {
                     // Higher risk: Large, Mid, Small
                     const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
@@ -233,6 +249,7 @@ export default function InvestmentsPage() {
                     largeCapAmount = equityAmount * largeCapPercentage;
                     midCapAmount = equityAmount * midCapPercentage;
                     smallCapAmount = equityAmount * smallCapPercentage;
+                    flexiCapAmount = 0; // No flexi cap for higher risk
                 }
 
                 const generatedPlan: InvestmentPlan = {
@@ -248,7 +265,9 @@ export default function InvestmentsPage() {
                     smallCapAmount,
                     flexiCapAmount,
                     midTermDebtAmount,
-                    liquidGoldFundAmount
+                    liquidGoldFundAmount,
+                    multiCapLoanRepaymentAmount,
+                    corporateBondLoanRepaymentAmount,
                 };
 
                 setPlan(generatedPlan);
@@ -499,6 +518,31 @@ export default function InvestmentsPage() {
                                 </Card>
                              </div>
                         </div>
+                         { plan.loanRepaymentAmount > 0 && (
+                            <div className="border rounded-lg p-4">
+                                <h4 className="font-semibold mb-4 text-center">Loan Repayment Allocation</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Card className="bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800">
+                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                            <CardTitle className="text-sm font-medium text-rose-800 dark:text-rose-300">Multi-Cap Fund</CardTitle>
+                                            <Balance className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="text-2xl font-bold text-rose-900 dark:text-rose-200">{formatCurrency(plan.multiCapLoanRepaymentAmount)}</div>
+                                        </CardContent>
+                                    </Card>
+                                    <Card className="bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800">
+                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                            <CardTitle className="text-sm font-medium text-slate-800 dark:text-slate-300">Corporate Bond Fund</CardTitle>
+                                            <Anchor className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="text-2xl font-bold text-slate-900 dark:text-slate-200">{formatCurrency(plan.corporateBondLoanRepaymentAmount)}</div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </div>
+                         )}
                     </CardContent>
                 </Card>
                 </>
@@ -524,5 +568,7 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
 
     
