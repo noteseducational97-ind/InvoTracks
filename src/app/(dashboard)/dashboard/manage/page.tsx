@@ -352,21 +352,21 @@ export default function ManagePage() {
                              <Card className="text-center">
                                 <CardHeader className="p-4">
                                     <CardDescription>Expenses</CardDescription>
-                                    <p className="text-2xl font-bold">{expensePercentage.toFixed(1)}%</p>
+                                    <CardTitle className="text-2xl">{expensePercentage.toFixed(1)}%</CardTitle>
                                     <p className="text-sm text-muted-foreground">Ideal: 50%</p>
                                 </CardHeader>
                             </Card>
                              <Card className="text-center">
                                 <CardHeader className="p-4">
                                     <CardDescription>EMI</CardDescription>
-                                    <p className="text-2xl font-bold">{emiPercentage.toFixed(1)}%</p>
+                                    <CardTitle className="text-2xl">{emiPercentage.toFixed(1)}%</CardTitle>
                                     <p className="text-sm text-muted-foreground">Ideal: 30%</p>
                                 </CardHeader>
                             </Card>
                              <Card className="text-center">
                                 <CardHeader className="p-4">
                                     <CardDescription>Investment</CardDescription>
-                                    <p className="text-2xl font-bold">{investmentPercentage.toFixed(1)}%</p>
+                                    <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
                                     <p className="text-sm text-muted-foreground">Ideal: 20%</p>
                                 </CardHeader>
                             </Card>
@@ -377,7 +377,11 @@ export default function ManagePage() {
                             <CardTitle className="font-headline text-lg">Your Comparison</CardTitle>
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <Card className={cn(!expenseStatus && "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700")}>
+                            <Card className={cn(
+                                expenseStatus
+                                ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+                                : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                            )}>
                                 <CardHeader className="p-4">
                                     <CardDescription>Needs (Expenses)</CardDescription>
                                     <CardTitle className="text-2xl">{expensePercentage.toFixed(1)}%</CardTitle>
@@ -386,7 +390,11 @@ export default function ManagePage() {
                                     </p>
                                 </CardHeader>
                             </Card>
-                             <Card className={cn(!emiStatus && "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700")}>
+                             <Card className={cn(
+                                emiStatus
+                                ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+                                : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                            )}>
                                 <CardHeader className="p-4">
                                     <CardDescription>Wants (EMIs/Debts)</CardDescription>
                                     <CardTitle className="text-2xl">{emiPercentage.toFixed(1)}%</CardTitle>
@@ -395,7 +403,11 @@ export default function ManagePage() {
                                     </p>
                                 </CardHeader>
                             </Card>
-                            <Card className={cn(!investmentStatus && "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700")}>
+                            <Card className={cn(
+                                investmentStatus
+                                ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+                                : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                            )}>
                                 <CardHeader className="p-4">
                                     <CardDescription>Savings (Investments)</CardDescription>
                                     <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
@@ -421,6 +433,8 @@ export default function ManagePage() {
       </div>
     </div>
   );
+
+    
 
     
 
