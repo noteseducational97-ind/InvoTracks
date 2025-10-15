@@ -4,11 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, DollarSign, Landmark, TrendingUp, CreditCard } from "lucide-react";
+import { User, DollarSign, Landmark, TrendingUp, CreditCard, PlusCircle, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser } from "@/firebase";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type Loan = {
+  id: number;
+  type: string;
+  amount: string;
+  emi: string;
+  rate: string;
+  tenure: string;
+};
 
 export default function AddDetailsPage() {
   const { user } = useUser();
@@ -16,6 +25,9 @@ export default function AddDetailsPage() {
   const [monthlyIncome, setMonthlyIncome] = useState<number | string>("");
   const [annualIncome, setAnnualIncome] = useState<number | string>("");
   const [overallMonthlyIncome, setOverallMonthlyIncome] = useState(0);
+  const [loans, setLoans] = useState<Loan[]>([
+    { id: 1, type: '', amount: '', emi: '', rate: '', tenure: '' }
+  ]);
 
   useEffect(() => {
     if (user?.displayName) {
@@ -29,6 +41,24 @@ export default function AddDetailsPage() {
     const calculatedOverall = monthly + (annual / 12);
     setOverallMonthlyIncome(calculatedOverall);
   }, [monthlyIncome, annualIncome]);
+  
+  const handleLoanChange = (id: number, field: keyof Omit<Loan, 'id'>, value: string) => {
+    setLoans(prevLoans => 
+      prevLoans.map(loan => loan.id === id ? { ...loan, [field]: value } : loan)
+    );
+  };
+
+  const addLoan = () => {
+    setLoans(prevLoans => [
+      ...prevLoans,
+      { id: Date.now(), type: '', amount: '', emi: '', rate: '', tenure: '' }
+    ]);
+  };
+
+  const removeLoan = (id: number) => {
+    setLoans(prevLoans => prevLoans.filter(loan => loan.id !== id));
+  };
+
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -128,41 +158,58 @@ export default function AddDetailsPage() {
                     <Landmark className="h-5 w-5 text-primary" />
                     Loans
                 </CardTitle>
-                <CardDescription>Enter the details for an active loan or credit card debt.</CardDescription>
+                <CardDescription>Enter the details for each active loan or credit card debt.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                 <div className="space-y-2">
-                    <Label>Loan Type</Label>
-                    <Select>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select loan type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="home">Home Loan</SelectItem>
-                            <SelectItem value="car">Car Loan</SelectItem>
-                            <SelectItem value="personal">Personal Loan</SelectItem>
-                            <SelectItem value="credit-card">Credit Card Debt</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                    </Select>
+            <CardContent className="space-y-6">
+              {loans.map((loan, index) => (
+                <div key={loan.id} className="p-4 border rounded-lg relative">
+                    {loans.length > 1 && (
+                      <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeLoan(loan.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      <div className="space-y-2">
+                          <Label>Loan Type</Label>
+                          <Select value={loan.type} onValueChange={(value) => handleLoanChange(loan.id, 'type', value)}>
+                              <SelectTrigger>
+                                  <SelectValue placeholder="Select loan type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                  <SelectItem value="home">Home Loan</SelectItem>
+                                  <SelectItem value="car">Car Loan</SelectItem>
+                                  <SelectItem value="personal">Personal Loan</SelectItem>
+                                  <SelectItem value="credit-card">Credit Card Debt</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                          </Select>
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor={`loan-amount-${loan.id}`}>Loan Amount (₹)</Label>
+                          <Input id={`loan-amount-${loan.id}`} type="number" placeholder="e.g., 500000" value={loan.amount} onChange={e => handleLoanChange(loan.id, 'amount', e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor={`monthly-emi-${loan.id}`}>Monthly EMI (₹)</Label>
+                          <Input id={`monthly-emi-${loan.id}`} type="number" placeholder="e.g., 12000" value={loan.emi} onChange={e => handleLoanChange(loan.id, 'emi', e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor={`interest-rate-${loan.id}`}>Interest Rate (%)</Label>
+                          <Input id={`interest-rate-${loan.id}`} type="number" placeholder="e.g., 8.5" value={loan.rate} onChange={e => handleLoanChange(loan.id, 'rate', e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor={`tenure-${loan.id}`}>Tenure (Years)</Label>
+                          <Input id={`tenure-${loan.id}`} type="number" placeholder="e.g., 5" value={loan.tenure} onChange={e => handleLoanChange(loan.id, 'tenure', e.target.value)} />
+                      </div>
+                    </div>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="loan-amount">Loan Amount (₹)</Label>
-                    <Input id="loan-amount" type="number" placeholder="e.g., 500000" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="monthly-emi">Monthly EMI (₹)</Label>
-                    <Input id="monthly-emi" type="number" placeholder="e.g., 12000" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="interest-rate">Interest Rate (%)</Label>
-                    <Input id="interest-rate" type="number" placeholder="e.g., 8.5" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="tenure">Tenure (Years)</Label>
-                    <Input id="tenure" type="number" placeholder="e.g., 5" />
-                </div>
+              ))}
             </CardContent>
+            <CardFooter>
+               <Button variant="outline" onClick={addLoan}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Another Loan
+                </Button>
+            </CardFooter>
         </Card>
 
         {/* Existing Investment Card */}
@@ -213,3 +260,5 @@ export default function AddDetailsPage() {
     </div>
   );
 }
+
+    
