@@ -8,14 +8,13 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Pie, PieChart, ResponsiveContainer, Cell, Legend } from "recharts";
+import { Pie, PieChart, ResponsiveContainer, Cell } from "recharts";
 
 // Define simpler, local types for the plan
 type AssetAllocation = {
   largeCap?: { percentage: number };
   midCap?: { percentage: number };
   smallCap?: { percentage: number };
-  emergencyFund?: { percentage: number };
 };
 
 type InvestmentPlan = {
@@ -26,6 +25,7 @@ type InvestmentPlan = {
     description: string;
     suggestedAmount?: string;
   }[];
+  reasoning: string;
 };
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -93,10 +93,6 @@ const chartConfig = {
     label: "Small Cap",
     color: "hsl(var(--chart-3))",
   },
-  emergencyFund: {
-      label: "Emergency Fund",
-      color: "hsl(var(--chart-4))",
-  }
 } satisfies ChartConfig
 
 
@@ -257,7 +253,8 @@ export default function InvestmentsPage() {
 
                 const generatedPlan: InvestmentPlan = {
                     assetAllocation: allocation,
-                    suggestions: suggestions
+                    suggestions: suggestions,
+                    reasoning: `This plan is tailored for a ${age}-year-old with a ${risk}% risk tolerance. It prioritizes foundational security with insurance and an emergency fund. The mutual fund allocation is designed to balance growth and risk according to your age and profile, while also suggesting efficient loan repayment.`
                 };
 
                 setPlan(generatedPlan);
@@ -323,7 +320,7 @@ export default function InvestmentsPage() {
                 <div className="mt-6 grid gap-6">
                     <Card>
                          <CardHeader>
-                            <CardTitle className="font-headline text-lg">Remaining Amount</CardTitle>
+                            <CardTitle className="font-headline text-lg">Asset Allocation</CardTitle>
                         </CardHeader>
                          <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -376,6 +373,15 @@ export default function InvestmentsPage() {
                             ))}
                         </div>
                     </div>
+                    
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline text-lg">Plan Reasoning</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                           <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{plan.reasoning}</p>
+                        </CardContent>
+                    </Card>
                 </div>
             );
         }
@@ -397,5 +403,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
