@@ -166,10 +166,26 @@ export default function EditDetailsPage() {
   };
   
   const handleInvestmentToggle = (category: keyof InvestmentsState, value: 'yes' | 'no') => {
-    setInvestments(prev => ({
-      ...prev,
-      [category]: { ...prev[category], invested: value, amount: value === 'no' ? '' : prev[category].amount }
-    }));
+    setInvestments(prev => {
+      const isInsurance = category === 'termInsurance' || category === 'healthInsurance';
+      const currentCategoryState = prev[category];
+      
+      const newCategoryState = {
+        ...currentCategoryState,
+        invested: value,
+        amount: value === 'no' ? '' : currentCategoryState.amount,
+      };
+
+      // Ensure frequency is preserved for insurance categories
+      if (isInsurance) {
+        (newCategoryState as any).frequency = (currentCategoryState as any).frequency || 'yearly';
+      }
+
+      return {
+        ...prev,
+        [category]: newCategoryState,
+      };
+    });
   };
 
   const handleInvestmentAmountChange = (category: keyof InvestmentsState, amount: string) => {
@@ -478,3 +494,5 @@ export default function EditDetailsPage() {
     </div>
   );
 }
+
+    
