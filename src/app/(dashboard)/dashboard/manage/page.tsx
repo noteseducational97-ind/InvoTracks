@@ -349,22 +349,25 @@ export default function ManagePage() {
                 <CardContent className="space-y-6">
                     {totalMonthlyIncome > 50000 && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Card className="text-center">
-                                <CardHeader className="pb-2">
-                                    <CardDescription>Expenses %</CardDescription>
-                                    <CardTitle className="text-3xl">{expensePercentage.toFixed(1)}%</CardTitle>
+                             <Card className="text-center">
+                                <CardHeader className="p-4">
+                                    <CardDescription>Expenses</CardDescription>
+                                    <p className="text-2xl font-bold">{expensePercentage.toFixed(1)}%</p>
+                                    <p className="text-xs text-muted-foreground">Ideal: 50%</p>
                                 </CardHeader>
                             </Card>
                              <Card className="text-center">
-                                <CardHeader className="pb-2">
-                                    <CardDescription>EMI %</CardDescription>
-                                    <CardTitle className="text-3xl">{emiPercentage.toFixed(1)}%</CardTitle>
+                                <CardHeader className="p-4">
+                                    <CardDescription>EMI</CardDescription>
+                                    <p className="text-2xl font-bold">{emiPercentage.toFixed(1)}%</p>
+                                    <p className="text-xs text-muted-foreground">Ideal: 30%</p>
                                 </CardHeader>
                             </Card>
                              <Card className="text-center">
-                                <CardHeader className="pb-2">
-                                    <CardDescription>Investment %</CardDescription>
-                                    <CardTitle className="text-3xl">{investmentPercentage.toFixed(1)}%</CardTitle>
+                                <CardHeader className="p-4">
+                                    <CardDescription>Investment</CardDescription>
+                                    <p className="text-2xl font-bold">{investmentPercentage.toFixed(1)}%</p>
+                                    <p className="text-xs text-muted-foreground">Ideal: 20%</p>
                                 </CardHeader>
                             </Card>
                         </div>
