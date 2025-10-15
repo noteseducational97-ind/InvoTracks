@@ -249,7 +249,7 @@ export default function InvestmentsPage() {
         
         if (plan) {
             return (
-                <Card className="mt-6">
+                 <Card className="mt-6">
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
                         <CardDescription>A summary of your monthly savings allocation and investment strategy.</CardDescription>
@@ -303,8 +303,8 @@ export default function InvestmentsPage() {
                         <div>
                             <h3 className="font-headline text-lg flex items-center gap-2 mb-4"><PieChartIcon className="h-5 w-5 text-primary"/>Allocation Breakdown</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                                <ChartContainer config={chartConfig} className="relative h-64 w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                 <ChartContainer config={chartConfig} className="relative mx-auto aspect-square h-64">
+                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <ChartTooltip content={<ChartTooltipContent nameKey="label" hideLabel />} />
                                             <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={60} strokeWidth={5}>
@@ -323,6 +323,34 @@ export default function InvestmentsPage() {
                                 <div className="space-y-4">
                                     {chartData.map((item) => {
                                         const config = chartConfig[item.name as keyof typeof chartConfig];
+                                        if (item.name === 'mutualFunds') {
+                                            return (
+                                                <div key={item.name} className="flex flex-col gap-2">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
+                                                        <div className="flex-1">
+                                                            <p className="font-medium">{config?.label}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="font-semibold">{formatCurrency(item.value)}</p>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                {((item.value / plan.netMonthlyCashflow) * 100).toFixed(1)}%
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="ml-7 border-l pl-4 space-y-2">
+                                                         <div className="flex justify-between text-sm">
+                                                            <span className="text-muted-foreground">Equity</span>
+                                                            <span className="font-medium">{formatCurrency(plan.equityAmount)}</span>
+                                                         </div>
+                                                         <div className="flex justify-between text-sm">
+                                                            <span className="text-muted-foreground">Debt</span>
+                                                            <span className="font-medium">{formatCurrency(plan.debtAmount)}</span>
+                                                         </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
                                         return(
                                             <div key={item.name} className="flex items-center gap-4">
                                                 <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
