@@ -6,35 +6,79 @@ import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { useState } from "react";
-import type { FinancialProfile, InvestmentPlan } from "@/ai/schemas/investment-plan-schemas";
-import { generateInvestmentPlan } from "@/ai/flows/generate-investment-plan";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Pie, PieChart, ResponsiveContainer } from "recharts";
+
+// Define simpler, local types for the plan
+type InvestmentPlan = {
+  assetAllocation: {
+    [key: string]: { percentage: number };
+  };
+  suggestions: {
+    category: string;
+    description: string;
+    suggestedAmount: string;
+  }[];
+  reasoning: string;
+};
+
+type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
+
+interface Loan {
+  id: number;
+  type: string;
+  amount: string;
+  emi: string;
+  rate: string;
+  tenure: string;
+};
+
+interface InvestmentCategory {
+  invested: 'yes' | 'no';
+  amount: string;
+}
+
+interface InsuranceCategory extends InvestmentCategory {
+    frequency: Frequency;
+}
+
+interface FinancialProfile {
+    id: string;
+    name: string;
+    dob: string;
+    riskPercentage: string;
+    monthlyIncome: string;
+    annualIncome: string;
+    expenses: {
+        rent: string;
+        utilities: string;
+        transport: string;
+        food: string;
+        entertainment: string;
+        healthcare: string;
+        other: string;
+    },
+    loans: Loan[];
+    investments: {
+        stocks: InvestmentCategory;
+        mutualFunds: InvestmentCategory;
+        bonds: InvestmentCategory;
+        realEstate: InvestmentCategory;
+        commodities: InvestmentCategory;
+        other: InvestmentCategory;
+        termInsurance: InsuranceCategory;
+        healthInsurance: InsuranceCategory;
+    };
+}
 
 
 const chartConfig = {
   amount: {
     label: "Amount",
   },
-  stocks: {
-    label: "Stocks",
-    color: "hsl(var(--chart-1))",
-  },
-  bonds: {
-    label: "Bonds",
-    color: "hsl(var(--chart-2))",
-  },
   mutualFunds: {
     label: "Mutual Funds",
     color: "hsl(var(--chart-3))",
-  },
-  realEstate: {
-    label: "Real Estate",
-    color: "hsl(var(--chart-4))",
-  },
-    other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
   },
 } satisfies ChartConfig
 
@@ -43,7 +87,7 @@ export default function InvestmentsPage() {
     const firestore = useFirestore();
 
     const [plan, setPlan] = useState<InvestmentPlan | null>(null);
-    const [isGenerating, setIsGenerating] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false); // Kept for UI feedback, though generation is instant
     const [error, setError] = useState<string | null>(null);
 
     const financialProfileRef = useMemoFirebase(() => {
@@ -53,23 +97,72 @@ export default function InvestmentsPage() {
 
     const { data: financialProfile, isLoading: isProfileLoading } = useDoc<FinancialProfile>(financialProfileRef);
 
-    const handleGeneratePlan = async () => {
+    const formatCurrency = (value: number) => {
+        return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    const calculateMonthlyInsurancePremium = (insurance: InsuranceCategory | undefined): number => {
+        if (!insurance || insurance.invested !== 'yes' || !insurance.amount) {
+            return 0;
+        }
+        const amount = Number(insurance.amount) || 0;
+        const frequency = insurance.frequency || 'yearly';
+
+        switch (frequency) {
+            case 'monthly':
+                return amount;
+            case 'quarterly':
+                return amount / 3;
+            case 'half-yearly':
+                return amount / 6;
+            case 'yearly':
+                return amount / 12;
+            default:
+                return 0;
+        }
+    };
+
+    const handleGeneratePlan = () => {
         if (!financialProfile) {
             setError("Financial profile is not available.");
             return;
         }
         setIsGenerating(true);
         setError(null);
-        setPlan(null);
-        try {
-            const result = await generateInvestmentPlan(financialProfile);
-            setPlan(result);
-        } catch (e) {
-            console.error(e);
-            setError("Failed to generate investment plan. Please try again.");
-        } finally {
+        
+        // --- Start of local calculation ---
+        const totalMonthlyExpenses = Object.values(financialProfile.expenses).reduce((acc, val) => acc + (Number(val) || 0), 0);
+        const totalMonthlyEmi = financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0);
+        const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
+        const monthlyHealthInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.healthInsurance);
+        const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.termInsurance);
+        const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
+        const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
+
+        if (netMonthlyCashflow <= 0) {
+            setError("Your net monthly cashflow is not positive. Adjust your expenses or income to generate an investment plan.");
             setIsGenerating(false);
+            setPlan(null);
+            return;
         }
+
+        const generatedPlan: InvestmentPlan = {
+            assetAllocation: {
+                mutualFunds: { percentage: 100 },
+            },
+            suggestions: [
+                {
+                    category: "Equity Mutual Funds",
+                    description: "Investing your entire net monthly cashflow in equity mutual funds via a Systematic Investment Plan (SIP) is a great strategy for long-term wealth creation, leveraging the power of compounding.",
+                    suggestedAmount: formatCurrency(netMonthlyCashflow),
+                }
+            ],
+            reasoning: `Based on your profile, you have a net monthly cashflow of ${formatCurrency(netMonthlyCashflow)}. This plan allocates 100% of this amount to mutual funds, which is a suitable starting point for disciplined, long-term growth.`
+        };
+        // --- End of local calculation ---
+
+        setPlan(generatedPlan);
+        setIsGenerating(false);
     };
     
     const chartData = plan ? Object.entries(plan.assetAllocation).map(([key, value]) => ({
