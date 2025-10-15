@@ -92,92 +92,98 @@ export default function InvestmentsPage() {
             <h1 className="font-headline text-3xl font-bold tracking-tight">Investment Plan</h1>
             <p className="text-muted-foreground">Here is a detailed view of your portfolio.</p>
 
-            {!financialProfile ? (
-                 <Card className="mt-6 text-center">
-                    <CardHeader>
-                        <CardTitle className="font-headline">Generate Your Investment Plan</CardTitle>
-                        <CardDescription>First, we need your financial details to create a personalized plan.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center gap-4">
-                        <p className="text-sm text-muted-foreground">Click below to add your financial information.</p>
-                        <div className="flex items-center gap-4">
+            <div className="mt-6">
+                {!financialProfile ? (
+                     <Card className="mt-6 text-center">
+                        <CardHeader>
+                            <CardTitle className="font-headline">Create Your Personalized Investment Plan</CardTitle>
+                            <CardDescription>To create your personalized investment plan, please add your financial details first.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col items-center gap-4">
                             <Button asChild>
                                 <Link href="/dashboard/manage/add-details">
                                     <PlusCircle className="mr-2 h-4 w-4" />
-                                    Add Information
+                                    Add Financial Details
                                 </Link>
                             </Button>
-                            <Button disabled>
+                        </CardContent>
+                    </Card>
+                ) : !plan && !isGenerating && !error ? (
+                     <Card className="mt-6 text-center">
+                        <CardHeader>
+                            <CardTitle className="font-headline">Generate Your AI-Powered Investment Plan</CardTitle>
+                            <CardDescription>You have added your financial details. You can now generate your personalized investment plan.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button onClick={handleGeneratePlan}>
                                 <Sparkles className="mr-2 h-4 w-4" />
-                                Generate Plan
+                                Generate Investment Plan
                             </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            ) : (
-                <div className="mt-6">
-                    {isGenerating && (
-                        <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
-                            <div className="text-center">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                                <p className="text-muted-foreground">Our AI is generating your personalized plan...</p>
-                            </div>
-                        </div>
-                    )}
+                        </CardContent>
+                    </Card>
+                ) : null}
 
-                     {error && (
-                        <div className="text-center text-red-500 p-4 border border-red-200 bg-red-50 rounded-md">
-                            <p>{error}</p>
-                            <Button onClick={handleGeneratePlan} className="mt-4">
-                                Try Again
-                            </Button>
+                {isGenerating && (
+                    <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
+                        <div className="text-center">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
+                            <p className="text-muted-foreground">Our AI is generating your personalized plan...</p>
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    {plan && (
-                        <div className="grid gap-6 md:grid-cols-2">
-                            <div>
-                                <h3 className="font-headline text-lg font-semibold mb-2">Asset Allocation</h3>
-                                <Card>
-                                     <CardContent className="pt-6">
-                                        <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px]">
-                                             <ResponsiveContainer width="100%" height="100%">
-                                                <PieChart>
-                                                    <ChartTooltip content={<ChartTooltipContent nameKey="amount" hideLabel />} />
-                                                    <Pie data={chartData} dataKey="amount" nameKey="asset" innerRadius={60} strokeWidth={5}>
-                                                    </Pie>
-                                                </PieChart>
-                                            </ResponsiveContainer>
-                                        </ChartContainer>
-                                    </CardContent>
-                                </Card>
-                                <h3 className="font-headline text-lg font-semibold mt-6 mb-2">Reasoning</h3>
-                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{plan.reasoning}</p>
-                            </div>
-                            <div>
-                                <h3 className="font-headline text-lg font-semibold mb-2">Investment Suggestions</h3>
-                                <div className="space-y-4">
-                                    {plan.suggestions.map((suggestion, index) => (
-                                        <Card key={index}>
-                                            <CardHeader>
-                                                <CardTitle className="text-base">{suggestion.category}</CardTitle>
-                                                <CardDescription>Recommended monthly investment: <span className="font-bold text-primary">{suggestion.suggestedAmount}</span></CardDescription>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <p className="text-sm text-muted-foreground">{suggestion.description}</p>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
-                                </div>
-                                 <Button onClick={handleGeneratePlan} className="mt-6">
-                                    <Sparkles className="mr-2 h-4 w-4" />
-                                    Re-generate Plan
-                                 </Button>
-                            </div>
+                 {error && (
+                    <div className="text-center text-red-500 p-4 border border-red-200 bg-red-50 rounded-md">
+                        <p>{error}</p>
+                        <Button onClick={handleGeneratePlan} className="mt-4">
+                            Try Again
+                        </Button>
+                    </div>
+                )}
+
+                {plan && (
+                    <div className="grid gap-6 md:grid-cols-2">
+                        <div>
+                            <h3 className="font-headline text-lg font-semibold mb-2">Asset Allocation</h3>
+                            <Card>
+                                 <CardContent className="pt-6">
+                                    <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px]">
+                                         <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart>
+                                                <ChartTooltip content={<ChartTooltipContent nameKey="amount" hideLabel />} />
+                                                <Pie data={chartData} dataKey="amount" nameKey="asset" innerRadius={60} strokeWidth={5}>
+                                                </Pie>
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    </ChartContainer>
+                                </CardContent>
+                            </Card>
+                            <h3 className="font-headline text-lg font-semibold mt-6 mb-2">Reasoning</h3>
+                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{plan.reasoning}</p>
                         </div>
-                    )}
-                </div>
-            )}
+                        <div>
+                            <h3 className="font-headline text-lg font-semibold mb-2">Investment Suggestions</h3>
+                            <div className="space-y-4">
+                                {plan.suggestions.map((suggestion, index) => (
+                                    <Card key={index}>
+                                        <CardHeader>
+                                            <CardTitle className="text-base">{suggestion.category}</CardTitle>
+                                            <CardDescription>Recommended monthly investment: <span className="font-bold text-primary">{suggestion.suggestedAmount}</span></CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-sm text-muted-foreground">{suggestion.description}</p>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                             <Button onClick={handleGeneratePlan} className="mt-6">
+                                <Sparkles className="mr-2 h-4 w-4" />
+                                Re-generate Plan
+                             </Button>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
