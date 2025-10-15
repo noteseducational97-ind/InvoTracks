@@ -20,7 +20,7 @@ type Loan = {
   tenure: string;
 };
 
-type InvestmentCategory = 'stocks' | 'mutualFunds' | 'bonds' | 'realEstate' | 'commodities' | 'other';
+type InvestmentCategory = 'stocks' | 'mutualFunds' | 'bonds' | 'realEstate' | 'commodities' | 'other' | 'termInsurance' | 'healthInsurance';
 
 type InvestmentsState = {
   [key in InvestmentCategory]: {
@@ -47,6 +47,8 @@ export default function AddDetailsPage() {
     realEstate: { invested: 'no', amount: '' },
     commodities: { invested: 'no', amount: '' },
     other: { invested: 'no', amount: '' },
+    termInsurance: { invested: 'no', amount: '' },
+    healthInsurance: { invested: 'no', amount: '' },
   });
 
 
@@ -83,7 +85,7 @@ export default function AddDetailsPage() {
   const handleInvestmentToggle = (category: InvestmentCategory, value: 'yes' | 'no') => {
     setInvestments(prev => ({
       ...prev,
-      [category]: { ...prev[category], invested: value }
+      [category]: { ...prev[category], invested: value, amount: value === 'no' ? '' : prev[category].amount }
     }));
   };
 
@@ -252,9 +254,9 @@ export default function AddDetailsPage() {
             <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-primary" />
-                    Existing Investments
+                    Existing Investments & Insurance
                 </CardTitle>
-                <CardDescription>Enter the current value of your existing investments.</CardDescription>
+                <CardDescription>Enter the current value of your existing investments and insurance policies.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  <div className="grid gap-6 md:grid-cols-2">
@@ -266,13 +268,32 @@ export default function AddDetailsPage() {
                         bonds: "Bonds",
                         realEstate: "Real Estate",
                         commodities: "Commodities",
-                        other: "Other Investments"
+                        other: "Other Investments",
+                        termInsurance: "Term Insurance",
+                        healthInsurance: "Health Insurance"
                       }[category];
+                      
+                      const question = {
+                        stocks: "Do you invest in Stocks?",
+                        mutualFunds: "Do you invest in Mutual Funds?",
+                        bonds: "Do you invest in Bonds?",
+                        realEstate: "Do you invest in Real Estate?",
+                        commodities: "Do you invest in Commodities?",
+                        other: "Do you have Other Investments?",
+                        termInsurance: "Do you have any Term Insurance?",
+                        healthInsurance: "Do you have any Health Insurance?"
+                      }[category];
+
+                      const valueLabel = {
+                        termInsurance: "Premium Amount (₹)",
+                        healthInsurance: "Premium Amount (₹)",
+                      }[category] || `Current Value of ${label} (₹)`;
+
 
                       return (
                         <div key={category} className="p-4 border rounded-lg space-y-3">
                           <div className="space-y-2">
-                            <Label>Do you invest in {label}?</Label>
+                            <Label>{question}</Label>
                             <RadioGroup value={investments[category].invested} onValueChange={(value) => handleInvestmentToggle(category, value as 'yes' | 'no')} className="flex items-center gap-4">
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="yes" id={`${category}-yes`} />
@@ -286,7 +307,7 @@ export default function AddDetailsPage() {
                           </div>
                           {investments[category].invested === 'yes' && (
                             <div className="space-y-2 pt-2 border-t">
-                                <Label htmlFor={`${category}-amount`}>Current Value of {label} (₹)</Label>
+                                <Label htmlFor={`${category}-amount`}>{valueLabel}</Label>
                                 <Input 
                                   id={`${category}-amount`} 
                                   type="number" 
@@ -314,3 +335,5 @@ export default function AddDetailsPage() {
     </div>
   );
 }
+
+    
