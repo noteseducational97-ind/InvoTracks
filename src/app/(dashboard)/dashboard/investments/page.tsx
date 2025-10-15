@@ -456,7 +456,7 @@ export default function InvestmentsPage() {
                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">{isLowRisk ? "Nifty 50/100 Index" : "Large Cap"}</CardTitle>
+                                        <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">{isLowRisk ? "Nifty 50/100 Index" : "Index Fund"}</CardTitle>
                                         <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                                     </CardHeader>
                                     <CardContent>
@@ -572,5 +572,7 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
 
     
