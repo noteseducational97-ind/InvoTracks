@@ -194,7 +194,7 @@ export default function InvestmentsPage() {
 
     }, [financialProfile]);
     
-    const chartConfig = plan ? {
+     const chartConfig = plan ? {
         equity: { label: 'Equity', color: 'hsl(var(--chart-1))' },
         debt: { label: 'Debt', color: 'hsl(var(--chart-5))' },
         emergencyFund: { label: 'Emergency Fund', color: 'hsl(var(--chart-2))' },
@@ -255,7 +255,7 @@ export default function InvestmentsPage() {
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-8">
+                    <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                              <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -297,12 +297,12 @@ export default function InvestmentsPage() {
 
                         <Separator />
 
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             <div className="text-center">
                                 <h3 className="font-headline text-lg flex items-center justify-center gap-2 mb-1"><PieChartIcon className="h-5 w-5 text-primary"/>Allocation Breakdown</h3>
                                 <p className="text-sm text-muted-foreground">A visual breakdown of where your monthly savings are going.</p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                                 <ChartContainer config={chartConfig} className="relative mx-auto aspect-square h-64">
                                      <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
@@ -323,7 +323,7 @@ export default function InvestmentsPage() {
                                 <div className="space-y-4">
                                     {chartData.map((item) => {
                                         const config = chartConfig[item.name as keyof typeof chartConfig];
-                                        return(
+                                        return (
                                             <div key={item.name}>
                                                 <div className="flex items-center gap-4">
                                                     <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
@@ -396,3 +396,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
