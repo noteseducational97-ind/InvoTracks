@@ -2,16 +2,14 @@
 
 import { redirect, usePathname } from 'next/navigation';
 import { useUser } from '@/firebase';
-import { AppLogo } from '@/components/app-logo';
 import { MainNav } from '@/components/main-nav';
 import { UserNav } from '@/components/user-nav';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Search, Briefcase, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({
   children,
@@ -30,7 +28,7 @@ export default function DashboardLayout({
   if (isUserLoading) {
     return (
         <div className="flex min-h-screen w-full items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     );
   }
@@ -52,13 +50,13 @@ export default function DashboardLayout({
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-sidebar text-sidebar-foreground md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
-          <div className="flex h-16 items-center border-b border-sidebar-border px-4 lg:px-6">
+          <div className="flex h-16 items-center border-b border-sidebar-border px-6">
             <Link href="/dashboard/overview" className="flex items-center gap-2 font-semibold">
                 <Briefcase className="h-6 w-6 text-primary" />
-                <span className="font-headline text-lg text-primary">InvoTrack</span>
+                <span className="font-headline text-lg text-sidebar-primary-foreground">InvoTrack</span>
             </Link>
           </div>
-          <div className="flex-1 py-2">
+          <div className="flex-1 py-4">
             <MainNav user={appUser} />
           </div>
         </div>
@@ -73,15 +71,13 @@ export default function DashboardLayout({
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col bg-sidebar text-sidebar-foreground p-0">
-               <SheetHeader className="p-4 border-b border-sidebar-border">
-                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                  <SheetDescription className="sr-only">Main navigation links for the dashboard.</SheetDescription>
+               <div className="flex h-16 items-center border-b border-sidebar-border px-6">
                   <Link href="/dashboard/overview" className="flex items-center gap-2 font-semibold">
                       <Briefcase className="h-6 w-6 text-primary" />
-                      <span className="font-headline text-lg text-primary">InvoTrack</span>
+                      <span className="font-headline text-lg text-sidebar-primary-foreground">InvoTrack</span>
                   </Link>
-              </SheetHeader>
-              <div className="py-2">
+              </div>
+              <div className="flex-1 py-4">
                  <MainNav user={appUser} isMobile={true} />
               </div>
             </SheetContent>
@@ -100,7 +96,7 @@ export default function DashboardLayout({
           </div>
           <UserNav user={appUser} />
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/30">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">
           {children}
         </main>
       </div>

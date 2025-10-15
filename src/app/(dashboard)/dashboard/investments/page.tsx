@@ -1,4 +1,3 @@
-
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Pie, PieChart, ResponsiveContainer, Cell } from "recharts";
+import { Pie, PieChart, ResponsiveContainer, Cell, Legend } from "recharts";
 
 // Define simpler, local types for the plan
 type AssetAllocation = {
@@ -116,7 +115,7 @@ export default function InvestmentsPage() {
     const { data: financialProfile, isLoading: isProfileLoading } = useDoc<FinancialProfile>(financialProfileRef);
 
     const formatCurrency = (value: number) => {
-        return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
     const calculateMonthlyInsurancePremium = (insurance: InsuranceCategory | undefined): number => {
@@ -283,7 +282,7 @@ export default function InvestmentsPage() {
     const renderContent = () => {
         if (isUserLoading || isProfileLoading) {
             return (
-                <div className="flex min-h-[400px] w-full items-center justify-center">
+                <div className="flex min-h-[400px] w-full items-center justify-center rounded-lg border border-dashed">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             );
@@ -296,7 +295,7 @@ export default function InvestmentsPage() {
                         <CardTitle className="font-headline">Create Your Personalized Investment Plan</CardTitle>
                         <CardDescription>To create your personalized investment plan, please add your financial details first.</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex flex-col items-center gap-4">
+                    <CardContent className="flex flex-col items-center gap-4 pt-6">
                         <Button asChild>
                             <Link href="/dashboard/manage/add-details">
                                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -310,9 +309,9 @@ export default function InvestmentsPage() {
 
         if (error) {
             return (
-                <div className="text-center text-red-500 p-4 border border-red-200 bg-red-50 rounded-md mt-6">
-                    <p className="font-semibold">Could not generate plan</p>
-                    <p className="text-sm">{error}</p>
+                <div className="mt-6 flex flex-col items-center justify-center rounded-lg border border-destructive/50 bg-destructive/10 p-8 text-center">
+                    <p className="font-semibold text-destructive">Could Not Generate Plan</p>
+                    <p className="text-sm text-destructive/80">{error}</p>
                      <Button asChild className="mt-4" variant="outline">
                         <Link href="/dashboard/manage/edit">Review Your Details</Link>
                      </Button>
@@ -322,34 +321,40 @@ export default function InvestmentsPage() {
         
         if (plan) {
             return (
-                <div className="flex flex-col gap-6 mt-6">
+                <div className="mt-6 grid gap-6">
                     <Card>
                          <CardHeader>
-                            <CardTitle className="font-headline text-lg">Remaining Amount</CardTitle>
-                            <CardDescription>Suggested mutual fund SIP breakdown.</CardDescription>
+                            <CardTitle className="font-headline text-lg">Asset Allocation</CardTitle>
+                            <CardDescription>Suggested mutual fund SIP breakdown for your investable amount.</CardDescription>
                         </CardHeader>
-                         <CardContent className="pt-0">
-                            <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px] max-w-[300px]">
-                                 <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <ChartTooltip content={<ChartTooltipContent nameKey="amount" formatter={(value) => `${value}%`} hideLabel />} />
-                                        <Pie data={chartData} dataKey="amount" nameKey="asset" innerRadius={60} strokeWidth={5}>
-                                             {chartData.map((entry) => (
-                                                <Cell key={`cell-${entry.asset}`} fill={entry.fill} />
-                                            ))}
-                                        </Pie>
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </ChartContainer>
-                             <p className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap">{plan.reasoning}</p>
+                         <CardContent className="grid gap-6 lg:grid-cols-2">
+                             <div className="flex items-center justify-center">
+                                <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px] max-w-[250px]">
+                                     <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <ChartTooltip content={<ChartTooltipContent nameKey="amount" formatter={(value) => `${value}%`} hideLabel />} />
+                                            <Pie data={chartData} dataKey="amount" nameKey="asset" innerRadius={60} strokeWidth={5}>
+                                                 {chartData.map((entry) => (
+                                                    <Cell key={`cell-${entry.asset}`} fill={entry.fill} />
+                                                ))}
+                                            </Pie>
+                                             <Legend content={<ChartTooltipContent hideIndicator />} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </ChartContainer>
+                             </div>
+                             <div className="flex flex-col justify-center">
+                                <h3 className="font-headline font-semibold">Plan Reasoning</h3>
+                                <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{plan.reasoning}</p>
+                             </div>
                         </CardContent>
                     </Card>
 
                     <div>
-                        <h3 className="font-headline text-lg font-semibold mb-2">Investment Suggestions</h3>
-                        <div className="space-y-4">
+                        <h3 className="font-headline text-xl font-semibold mb-4">Actionable Suggestions</h3>
+                        <div className="grid gap-4 md:grid-cols-2">
                             {plan.suggestions.map((suggestion, index) => (
-                                <Card key={index}>
+                                <Card key={index} className="flex flex-col">
                                     <CardHeader>
                                         <CardTitle className="text-base flex items-center gap-2">
                                             <suggestion.icon className="h-5 w-5 text-primary" />
@@ -359,7 +364,7 @@ export default function InvestmentsPage() {
                                             <CardDescription>Overall investable amount: <span className="font-bold text-primary">{suggestion.suggestedAmount}</span></CardDescription>
                                         )}
                                     </CardHeader>
-                                    <CardContent>
+                                    <CardContent className="flex-grow">
                                         <p className="text-sm text-muted-foreground">{suggestion.description}</p>
                                     </CardContent>
                                 </Card>
@@ -372,16 +377,16 @@ export default function InvestmentsPage() {
 
         // Default fallback, could be a loading state for plan generation itself
         return (
-             <div className="flex min-h-[400px] w-full items-center justify-center">
+             <div className="flex min-h-[400px] w-full items-center justify-center rounded-lg border border-dashed">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         );
     }
     
     return (
-        <div>
+        <div className="space-y-2">
             <h1 className="font-headline text-3xl font-bold tracking-tight">Investment Plan</h1>
-            <p className="text-muted-foreground">A personalized plan based on your financial profile.</p>
+            <p className="text-muted-foreground">A personalized plan based on your financial profile and goals.</p>
 
             {renderContent()}
         </div>
