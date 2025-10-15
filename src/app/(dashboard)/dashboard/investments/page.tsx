@@ -1,23 +1,29 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Sparkles } from "lucide-react";
+import { Loader2, PlusCircle, Sparkles, Shield, Banknote, Landmark, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { useState } from "react";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Pie, PieChart, ResponsiveContainer, Cell } from "recharts";
 
 // Define simpler, local types for the plan
+type AssetAllocation = {
+  largeCap?: { percentage: number };
+  midCap?: { percentage: number };
+  smallCap?: { percentage: number };
+  emergencyFund?: { percentage: number };
+};
+
 type InvestmentPlan = {
-  assetAllocation: {
-    [key: string]: { percentage: number };
-  };
+  assetAllocation: AssetAllocation;
   suggestions: {
+    icon: React.ElementType;
     category: string;
     description: string;
-    suggestedAmount: string;
+    suggestedAmount?: string;
   }[];
   reasoning: string;
 };
@@ -71,23 +77,35 @@ interface FinancialProfile {
     };
 }
 
-
 const chartConfig = {
   amount: {
     label: "Amount",
   },
-  mutualFunds: {
-    label: "Mutual Funds",
+  largeCap: {
+    label: "Large Cap",
+    color: "hsl(var(--chart-1))",
+  },
+  midCap: {
+    label: "Mid Cap",
+    color: "hsl(var(--chart-2))",
+  },
+  smallCap: {
+    label: "Small Cap",
     color: "hsl(var(--chart-3))",
   },
+  emergencyFund: {
+      label: "Emergency Fund",
+      color: "hsl(var(--chart-4))",
+  }
 } satisfies ChartConfig
+
 
 export default function InvestmentsPage() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
 
     const [plan, setPlan] = useState<InvestmentPlan | null>(null);
-    const [isGenerating, setIsGenerating] = useState(false); // Kept for UI feedback, though generation is instant
+    const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const financialProfileRef = useMemoFirebase(() => {
@@ -121,6 +139,18 @@ export default function InvestmentsPage() {
                 return 0;
         }
     };
+    
+    const calculateAge = (dobString: string) => {
+        if (!dobString) return 35; // Default age if not provided
+        const dob = new Date(dobString);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        return age;
+    };
 
     const handleGeneratePlan = () => {
         if (!financialProfile) {
@@ -129,47 +159,119 @@ export default function InvestmentsPage() {
         }
         setIsGenerating(true);
         setError(null);
+        setPlan(null);
         
-        // --- Start of local calculation ---
-        const totalMonthlyExpenses = Object.values(financialProfile.expenses).reduce((acc, val) => acc + (Number(val) || 0), 0);
-        const totalMonthlyEmi = financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0);
-        const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
-        const monthlyHealthInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.healthInsurance);
-        const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.termInsurance);
-        const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
-        const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
+        try {
+            // --- Start of local calculation ---
+            const totalMonthlyExpenses = Object.values(financialProfile.expenses).reduce((acc, val) => acc + (Number(val) || 0), 0);
+            const totalMonthlyEmi = financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0);
+            const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
+            const monthlyHealthInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.healthInsurance);
+            const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.termInsurance);
+            const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
+            const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
 
-        if (netMonthlyCashflow <= 0) {
-            setError("Your net monthly cashflow is not positive. Adjust your expenses or income to generate an investment plan.");
+            if (netMonthlyCashflow <= 0) {
+                setError("Your net monthly cashflow is not positive. Adjust your expenses or income to generate an investment plan.");
+                setIsGenerating(false);
+                return;
+            }
+
+            const age = calculateAge(financialProfile.dob);
+            const risk = Number(financialProfile.riskPercentage) || 50;
+
+            const suggestions: InvestmentPlan['suggestions'] = [];
+            
+            // Insurance suggestions
+            if (financialProfile.investments.healthInsurance.invested === 'no') {
+                suggestions.push({
+                    icon: Shield,
+                    category: "Health Insurance",
+                    description: "Crucial for protecting against medical emergencies without draining your savings. It's recommended to get a family floater plan of at least ₹10 Lakhs.",
+                });
+            }
+            if (financialProfile.investments.termInsurance.invested === 'no') {
+                 suggestions.push({
+                    icon: Shield,
+                    category: "Term Insurance",
+                    description: "Essential for securing your family's financial future. Aim for a cover of at least 10-15 times your annual income.",
+                });
+            }
+            
+            // Emergency Fund
+            const emergencyFundTarget = totalMonthlyExpenses * 6;
+             suggestions.push({
+                icon: Banknote,
+                category: "Emergency Fund",
+                description: `Build a fund to cover 6 months of your expenses (${formatCurrency(totalMonthlyExpenses)}/month). Your target should be ${formatCurrency(emergencyFundTarget)}. Allocate a portion of your monthly savings here until the target is met.`,
+            });
+            
+            // Loan Repayment
+            if(financialProfile.loans.some(loan => Number(loan.amount) > 0)){
+                suggestions.push({
+                    icon: Landmark,
+                    category: "Loan Repayment",
+                    description: "Consider making prepayments on high-interest loans (like personal loans or credit cards) to save on interest and become debt-free faster."
+                })
+            }
+            
+            // Mutual Fund allocation
+            let largeCap = 0, midCap = 0, smallCap = 0;
+            if (age < 30) {
+                largeCap = 100 - risk;
+                smallCap = risk * 0.7;
+                midCap = risk * 0.3;
+            } else if (age >= 30 && age < 45) {
+                largeCap = 110 - risk;
+                smallCap = risk * 0.5;
+                midCap = risk * 0.5;
+            } else {
+                largeCap = 120 - risk;
+                smallCap = risk * 0.3;
+                midCap = risk * 0.7;
+            }
+
+            const total = largeCap + midCap + smallCap;
+            const allocation: AssetAllocation = {
+                largeCap: { percentage: Math.round((largeCap/total) * 100) },
+                midCap: { percentage: Math.round((midCap/total) * 100) },
+                smallCap: { percentage: Math.round((smallCap/total) * 100) },
+            };
+            
+            const totalAllocation = Object.values(allocation).reduce((sum, p) => sum + (p?.percentage || 0), 0);
+            if(totalAllocation !== 100 && allocation.largeCap) {
+                allocation.largeCap.percentage += (100 - totalAllocation);
+            }
+
+            suggestions.push({
+                icon: TrendingUp,
+                category: "Mutual Fund SIP",
+                description: `Invest your net monthly savings via SIP for long-term growth. Based on your profile, a suggested breakdown is provided in the asset allocation chart.`,
+                suggestedAmount: formatCurrency(netMonthlyCashflow)
+            });
+
+
+            const generatedPlan: InvestmentPlan = {
+                assetAllocation: allocation,
+                suggestions: suggestions,
+                reasoning: `This plan is tailored for a ${age}-year-old with a ${risk}% risk tolerance. It prioritizes foundational security with insurance and an emergency fund. The mutual fund allocation is designed to balance growth and risk according to your age and profile, while also suggesting efficient loan repayment.`
+            };
+            // --- End of local calculation ---
+
+            setPlan(generatedPlan);
+        } catch (e) {
+            setError("An unexpected error occurred while generating the plan.");
+            console.error(e);
+        } finally {
             setIsGenerating(false);
-            setPlan(null);
-            return;
         }
-
-        const generatedPlan: InvestmentPlan = {
-            assetAllocation: {
-                mutualFunds: { percentage: 100 },
-            },
-            suggestions: [
-                {
-                    category: "Equity Mutual Funds",
-                    description: "Investing your entire net monthly cashflow in equity mutual funds via a Systematic Investment Plan (SIP) is a great strategy for long-term wealth creation, leveraging the power of compounding.",
-                    suggestedAmount: formatCurrency(netMonthlyCashflow),
-                }
-            ],
-            reasoning: `Based on your profile, you have a net monthly cashflow of ${formatCurrency(netMonthlyCashflow)}. This plan allocates 100% of this amount to mutual funds, which is a suitable starting point for disciplined, long-term growth.`
-        };
-        // --- End of local calculation ---
-
-        setPlan(generatedPlan);
-        setIsGenerating(false);
     };
     
-    const chartData = plan ? Object.entries(plan.assetAllocation).map(([key, value]) => ({
-        asset: key,
-        amount: value.percentage,
-        fill: `var(--color-${key})`
-    })) : [];
+    const chartData = plan?.assetAllocation ? Object.entries(plan.assetAllocation).map(([key, value]) => ({
+        asset: chartConfig[key as keyof typeof chartConfig]?.label || key,
+        amount: value?.percentage || 0,
+        fill: chartConfig[key as keyof typeof chartConfig]?.color || "hsl(var(--muted))"
+    })).filter(d => d.amount > 0) : [];
 
     if (isUserLoading || isProfileLoading) {
         return (
@@ -227,40 +329,53 @@ export default function InvestmentsPage() {
                  {error && (
                     <div className="text-center text-red-500 p-4 border border-red-200 bg-red-50 rounded-md">
                         <p>{error}</p>
-                        <Button onClick={handleGeneratePlan} className="mt-4">
+                         <Button asChild className="mt-4" variant="outline">
+                            <Link href="/dashboard/manage">Review Your Details</Link>
+                         </Button>
+                         <Button onClick={handleGeneratePlan} className="mt-4 ml-2">
                             Try Again
                         </Button>
                     </div>
                 )}
 
                 {plan && (
-                    <div className="grid gap-6 md:grid-cols-2">
-                        <div>
-                            <h3 className="font-headline text-lg font-semibold mb-2">Asset Allocation</h3>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="lg:col-span-1">
                             <Card>
-                                 <CardContent className="pt-6">
+                                 <CardHeader>
+                                    <CardTitle className="font-headline text-lg">Asset Allocation</CardTitle>
+                                    <CardDescription>Suggested mutual fund SIP breakdown.</CardDescription>
+                                </CardHeader>
+                                 <CardContent className="pt-0">
                                     <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px]">
                                          <ResponsiveContainer width="100%" height="100%">
                                             <PieChart>
-                                                <ChartTooltip content={<ChartTooltipContent nameKey="amount" hideLabel />} />
+                                                <ChartTooltip content={<ChartTooltipContent nameKey="amount" formatter={(value) => `${value}%`} hideLabel />} />
                                                 <Pie data={chartData} dataKey="amount" nameKey="asset" innerRadius={60} strokeWidth={5}>
+                                                     {chartData.map((entry) => (
+                                                        <Cell key={`cell-${entry.asset}`} fill={entry.fill} />
+                                                    ))}
                                                 </Pie>
                                             </PieChart>
                                         </ResponsiveContainer>
                                     </ChartContainer>
+                                     <p className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap">{plan.reasoning}</p>
                                 </CardContent>
                             </Card>
-                            <h3 className="font-headline text-lg font-semibold mt-6 mb-2">Reasoning</h3>
-                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{plan.reasoning}</p>
                         </div>
-                        <div>
+                        <div className="lg:col-span-2">
                             <h3 className="font-headline text-lg font-semibold mb-2">Investment Suggestions</h3>
                             <div className="space-y-4">
                                 {plan.suggestions.map((suggestion, index) => (
                                     <Card key={index}>
                                         <CardHeader>
-                                            <CardTitle className="text-base">{suggestion.category}</CardTitle>
-                                            <CardDescription>Recommended monthly investment: <span className="font-bold text-primary">{suggestion.suggestedAmount}</span></CardDescription>
+                                            <CardTitle className="text-base flex items-center gap-2">
+                                                <suggestion.icon className="h-5 w-5 text-primary" />
+                                                {suggestion.category}
+                                            </CardTitle>
+                                            {suggestion.suggestedAmount && (
+                                                <CardDescription>Recommended monthly investment: <span className="font-bold text-primary">{suggestion.suggestedAmount}</span></CardDescription>
+                                            )}
                                         </CardHeader>
                                         <CardContent>
                                             <p className="text-sm text-muted-foreground">{suggestion.description}</p>

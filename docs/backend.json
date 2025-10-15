@@ -188,6 +188,47 @@
           }
         }
       }
+    },
+    "InvestmentPlan": {
+        "title": "Investment Plan",
+        "description": "A personalized investment plan generated for the user.",
+        "type": "object",
+        "properties": {
+            "assetAllocation": {
+                "type": "object",
+                "description": "The suggested asset allocation percentages.",
+                "properties": {
+                    "largeCap": { "$ref": "#/entities/InvestmentPlan/definitions/allocation" },
+                    "midCap": { "$ref": "#/entities/InvestmentPlan/definitions/allocation" },
+                    "smallCap": { "$ref": "#/entities/InvestmentPlan/definitions/allocation" },
+                    "emergencyFund": { "$ref": "#/entities/InvestmentPlan/definitions/allocation" }
+                }
+            },
+            "suggestions": {
+                "type": "array",
+                "description": "A list of actionable investment suggestions.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "category": { "type": "string" },
+                        "description": { "type": "string" },
+                        "suggestedAmount": { "type": "string" }
+                    }
+                }
+            },
+            "reasoning": {
+                "type": "string",
+                "description": "The overall reasoning behind the generated plan."
+            }
+        },
+        "definitions": {
+            "allocation": {
+                "type": "object",
+                "properties": {
+                    "percentage": { "type": "number" }
+                }
+            }
+        }
     }
   },
   "auth": {
@@ -295,5 +336,3 @@
     "reasoning": "The Firestore structure is designed to support the InvoTrack application, focusing on user data isolation, secure access control, and scalability. The design emphasizes authorization independence by avoiding hierarchical `get()` calls in security rules and denormalizing authorization data where necessary. The structure uses path-based ownership for user-related data and a dedicated collection for admin roles to simplify security rules.\n\nAuthorization Independence is achieved by storing all access-related information within each document or utilizing path-based ownership. For example, invoices and investments are stored under `/users/{userId}`, ensuring that access control can be determined solely based on the path and the current user's authentication status without needing to read parent documents. For the admin role, existence in the `/roles_admin/{uid}` collection grants administrative privileges.\n\nThe design supports the required QAPs (Queries are not Filters) by structuring data to allow secure list operations. User-specific data (invoices, investments) is segregated under the user's path, enabling direct and secure queries for a user's resources. The separation of admin roles into a dedicated collection ensures that listing operations on user data do not require filtering based on admin status; the admin status is checked separately before granting access to sensitive operations."
   }
 }
-
-    
