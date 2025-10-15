@@ -55,13 +55,15 @@ export default function AddDetailsPage() {
                 <Label htmlFor="monthly-income">Monthly Income (₹)</Label>
                 <Input id="monthly-income" type="number" value={monthlyIncome} onChange={(e) => setMonthlyIncome(Number(e.target.value))} />
             </div>
-             <div className="space-y-2">
-                <Label htmlFor="annual-income">Annual Income (₹)</Label>
-                <Input id="annual-income" type="number" value={annualIncome} onChange={(e) => setAnnualIncome(Number(e.target.value))} />
-            </div>
-             <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="overall-monthly-income">Overall Monthly Income (Calculated)</Label>
-                <Input id="overall-monthly-income" type="text" value={formatCurrency(overallMonthlyIncome)} disabled readOnly />
+            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="annual-income">Annual Income (₹)</Label>
+                    <Input id="annual-income" type="number" value={annualIncome} onChange={(e) => setAnnualIncome(Number(e.target.value))} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="overall-monthly-income">Overall Monthly Income</Label>
+                    <Input id="overall-monthly-income" type="text" value={formatCurrency(overallMonthlyIncome)} disabled readOnly />
+                </div>
             </div>
           </CardContent>
         </Card>
