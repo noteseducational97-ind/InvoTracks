@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Target, Sprout, Building, Factory, Briefcase, PiggyBank, Droplets } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
@@ -308,7 +308,7 @@ export default function InvestmentsPage() {
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
+                    <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                              <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -409,7 +409,7 @@ export default function InvestmentsPage() {
                             Allocation based on your age ({plan.age}) and risk profile ({financialProfile.riskPercentage}%).
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <CardContent className="grid grid-cols-1 gap-6">
                         <div className="border rounded-lg p-4">
                             <h4 className="font-semibold mb-4 text-center">Equity Allocation</h4>
                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
