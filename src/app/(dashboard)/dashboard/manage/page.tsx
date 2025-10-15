@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2 } from "lucide-react";
+import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
@@ -83,6 +83,10 @@ export default function ManagePage() {
   const totalOutstandingLoan = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.amount) || 0), 0) : 0;
   const totalMonthlyEmi = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0) : 0;
 
+  const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
+  const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi;
+
+
   if (isUserLoading || isProfileLoading) {
     return (
       <div className="flex min-h-[400px] w-full items-center justify-center">
@@ -162,6 +166,7 @@ export default function ManagePage() {
             <div><span className="text-muted-foreground block">Risk Profile</span> <span className="font-medium">{financialProfile.riskPercentage}%</span></div>
             <div><span className="text-muted-foreground block">Monthly Income</span> <span className="font-medium">{formatCurrency(financialProfile.monthlyIncome)}</span></div>
             <div><span className="text-muted-foreground block">Annual Income</span> <span className="font-medium">{formatCurrency(financialProfile.annualIncome)}</span></div>
+            <div><span className="text-muted-foreground block">Overall Monthly Income</span> <span className="font-medium">{formatCurrency(totalMonthlyIncome)}</span></div>
           </CardContent>
         </Card>
         
@@ -237,6 +242,38 @@ export default function ManagePage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Financial Summary Card */}
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-primary" />
+                    Financial Summary
+                </CardTitle>
+                 <CardDescription>A breakdown of your monthly cashflow.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+                <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Monthly Income</span>
+                    <span className="font-medium text-green-600">{formatCurrency(totalMonthlyIncome)}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Monthly Expenses</span>
+                    <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyExpenses)}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Monthly Loan EMI</span>
+                    <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyEmi)}</span>
+                </div>
+                <div className="flex justify-between font-bold pt-4 border-t text-base">
+                    <span className="text-foreground">Net Monthly Cashflow</span>
+                    <span className={netMonthlyCashflow >= 0 ? 'text-green-700' : 'text-red-700'}>
+                        {formatCurrency(netMonthlyCashflow)}
+                    </span>
+                </div>
+            </CardContent>
+        </Card>
+
       </div>
     </div>
   );
