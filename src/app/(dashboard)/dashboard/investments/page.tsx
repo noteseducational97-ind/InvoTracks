@@ -208,7 +208,7 @@ export default function InvestmentsPage() {
                  suggestions.push({
                     icon: Banknote,
                     category: "Emergency Fund",
-                    description: `Build an emergency fund to cover at least 6 months of your salary (${formatCurrency(totalMonthlyIncome)}/month). Your target should be at least ${formatCurrency(emergencyFundTarget)}. This fund provides a safety net for unexpected financial events.`,
+                    description: `Build an emergency fund to cover at least 6 months of your current salary (${formatCurrency(totalMonthlyIncome)}/month). Your target should be at least ${formatCurrency(emergencyFundTarget)}. This fund provides a safety net for unexpected financial events.`,
                 });
                 
                 // Loan Repayment
@@ -356,8 +356,8 @@ export default function InvestmentsPage() {
                                             <suggestion.icon className="h-5 w-5 text-primary" />
                                             {suggestion.category}
                                         </CardTitle>
-                                        {suggestion.suggestedAmount && (
-                                            <CardDescription>Recommended monthly investment: <span className="font-bold text-primary">{suggestion.suggestedAmount}</span></CardDescription>
+                                        {suggestion.category === 'Mutual Fund SIP' && suggestion.suggestedAmount && (
+                                            <CardDescription>Overall investable amount: <span className="font-bold text-primary">{suggestion.suggestedAmount}</span></CardDescription>
                                         )}
                                     </CardHeader>
                                     <CardContent>
