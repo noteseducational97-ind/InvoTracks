@@ -1,11 +1,11 @@
-// This file is temporarily hardcoded for diagnostics.
-// In a production app, you should use environment variables.
+// This file is now configured to use environment variables.
+// Make sure you have a .env file with the correct values.
 export const firebaseConfig = {
-  apiKey: "AIzaSyD0E1pm4LfYU6eMBfOxt1LTlWh08SayE9o",
-  authDomain: "studio-6610342034-61175.firebaseapp.com",
-  projectId: "studio-6610342034-61175",
-  storageBucket: "studio-6610342034-61175.appspot.com",
-  messagingSenderId: "458181401227", // Assuming this is the sender ID.
-  appId: "1:458181401227:web:a99c0f672cbe790220928e",
-  // measurementId is optional for Auth, so we can omit it for this test.
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
