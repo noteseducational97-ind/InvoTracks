@@ -368,9 +368,6 @@ export default function InvestmentsPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-sky-900 dark:text-sky-200">{formatCurrency(plan.debtAmount)}</div>
-                                        <p className="text-xs text-sky-700 dark:text-sky-400/80">
-                                            {plan.age}% of your mutual fund SIP (your age).
-                                        </p>
                                     </CardContent>
                                 </Card>
                             </div>
@@ -399,7 +396,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
-
-    
