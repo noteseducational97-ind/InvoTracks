@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet, Info } from "lucide-react";
+import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet, Info, Shield } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
@@ -127,10 +127,16 @@ export default function ManagePage() {
   const emiPercentage = totalMonthlyIncome > 0 ? (totalMonthlyEmi / totalMonthlyIncome) * 100 : 0;
   const investmentPercentage = totalMonthlyIncome > 0 ? ((monthlySIP + totalMonthlyInsurance) / totalMonthlyIncome) * 100 : 0;
 
-
-  const expenseStatus = expensePercentage <= 50;
-  const emiStatus = emiPercentage <= 30;
-  const investmentStatus = investmentPercentage >= 20;
+  // Emergency Fund Calculations
+  const currentEmergencyFund = Number(financialProfile?.investments.emergencyFund?.amount || 0);
+  const minRecommendedFund = totalMonthlyIncome * 6;
+  const maxRecommendedFund = totalMonthlyIncome * 18;
+  let emergencyFundStatus: 'low' | 'good' | 'high' = 'low';
+  if (currentEmergencyFund >= minRecommendedFund && currentEmergencyFund <= maxRecommendedFund) {
+    emergencyFundStatus = 'good';
+  } else if (currentEmergencyFund > maxRecommendedFund) {
+    emergencyFundStatus = 'high';
+  }
   
 
   if (isUserLoading || isProfileLoading) {
@@ -347,6 +353,53 @@ export default function ManagePage() {
                 </div>
             </CardContent>
         </Card>
+
+        {/* Emergency Fund Plan Card */}
+        {totalMonthlyIncome > 0 && (
+            <Card className={cn(
+                emergencyFundStatus === 'low'
+                ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+            )}>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                        <Shield className="h-5 w-5 text-primary" />
+                        Emergency Fund Plan
+                    </CardTitle>
+                    <CardDescription className={cn(
+                        emergencyFundStatus === 'low' ? 'text-red-900/80 dark:text-red-200/80' : 'text-green-900/80 dark:text-green-200/80'
+                    )}>
+                        An emergency fund should cover 6 to 18 months of your monthly income.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <Card>
+                        <CardHeader className="p-4">
+                            <CardDescription>Current Fund</CardDescription>
+                            <CardTitle className="text-2xl">{formatCurrency(currentEmergencyFund)}</CardTitle>
+                        </CardHeader>
+                    </Card>
+                    <Card>
+                        <CardHeader className="p-4">
+                            <CardDescription>Recommended Range</CardDescription>
+                            <CardTitle className="text-2xl">{formatCurrency(minRecommendedFund)} - {formatCurrency(maxRecommendedFund)}</CardTitle>
+                        </CardHeader>
+                    </Card>
+                    <Card>
+                        <CardHeader className="p-4">
+                            <CardDescription>Status</CardDescription>
+                            <CardTitle className={cn("text-2xl", 
+                                emergencyFundStatus === 'low' ? 'text-red-600' : 'text-green-600'
+                            )}>
+                                {emergencyFundStatus === 'low' && 'Below Recommended'}
+                                {emergencyFundStatus === 'good' && 'Within Range'}
+                                {emergencyFundStatus === 'high' && 'Above Recommended'}
+                            </CardTitle>
+                        </CardHeader>
+                    </Card>
+                </CardContent>
+            </Card>
+        )}
         
         {/* 50-30-20 Rule Suggestion Card */}
         {totalMonthlyIncome > 0 && (
@@ -392,43 +445,43 @@ export default function ManagePage() {
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <Card className={cn(
-                                expenseStatus
+                                expensePercentage <= 50
                                 ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
                                 : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
                             )}>
                                 <CardHeader className="p-4">
                                     <CardDescription>Needs (Expenses)</CardDescription>
                                     <CardTitle className="text-2xl">{expensePercentage.toFixed(1)}%</CardTitle>
-                                    <p className={cn("font-semibold", expenseStatus ? 'text-green-600' : 'text-red-600')}>
-                                        {expenseStatus ? 'On Track (<= 50%)' : 'High (> 50%)'}
+                                    <p className={cn("font-semibold", expensePercentage <= 50 ? 'text-green-600' : 'text-red-600')}>
+                                        {expensePercentage <= 50 ? 'On Track (<= 50%)' : 'High (> 50%)'}
                                     </p>
                                 </CardHeader>
                             </Card>
                              <Card className={cn(
-                                emiStatus
+                                emiPercentage <= 30
                                 ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
                                 : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
                             )}>
                                 <CardHeader className="p-4">
                                     <CardDescription>Wants (EMIs/Debts)</CardDescription>
                                     <CardTitle className="text-2xl">{emiPercentage.toFixed(1)}%</CardTitle>
-                                    <p className={cn("font-semibold", emiStatus ? 'text-green-600' : 'text-red-600')}>
-                                        {emiStatus ? 'On Track (<= 30%)' : 'High (> 30%)'}
+                                    <p className={cn("font-semibold", emiPercentage <= 30 ? 'text-green-600' : 'text-red-600')}>
+                                        {emiPercentage <= 30 ? 'On Track (<= 30%)' : 'High (> 30%)'}
                                     </p>
                                 </CardHeader>
                             </Card>
-                            <Link href="/dashboard/investments" className="group">
+                            <Link href="/dashboard/manage/edit" className="group">
                                 <Card className={cn(
                                     "transition-all group-hover:ring-2 group-hover:ring-primary h-full",
-                                    investmentStatus
+                                    investmentPercentage >= 20
                                     ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
                                     : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
                                 )}>
                                     <CardHeader className="p-4">
                                         <CardDescription>Savings (Investments)</CardDescription>
                                         <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
-                                        <p className={cn("font-semibold", investmentStatus ? 'text-green-600' : 'text-red-600')}>
-                                            {investmentStatus ? 'On Track (>= 20%)' : 'Low (< 20%)'}
+                                        <p className={cn("font-semibold", investmentPercentage >= 20 ? 'text-green-600' : 'text-red-600')}>
+                                            {investmentPercentage >= 20 ? 'On Track (>= 20%)' : 'Low (< 20%)'}
                                         </p>
                                     </CardHeader>
                                 </Card>
@@ -436,10 +489,10 @@ export default function ManagePage() {
                         </CardContent>
                         <CardFooter>
                              <div className="text-center text-muted-foreground text-sm w-full">
-                                {!expenseStatus && <p>Your expenses are higher than the recommended 50%. Consider reviewing your spending on non-essential items.</p>}
-                                {!emiStatus && <p>Your loan EMIs are taking up a significant portion of your income. Focusing on prepayments could be beneficial.</p>}
-                                {!investmentStatus && <p>Your investment rate is below the recommended 20%. Try to increase your savings to build wealth faster.</p>}
-                                {expenseStatus && emiStatus && investmentStatus && <p className="text-green-600 font-medium">Great job! Your budget aligns well with the 50-30-20 rule.</p>}
+                                {expensePercentage > 50 && <p>Your expenses are higher than the recommended 50%. Consider reviewing your spending on non-essential items.</p>}
+                                {emiPercentage > 30 && <p>Your loan EMIs are taking up a significant portion of your income. Focusing on prepayments could be beneficial.</p>}
+                                {investmentPercentage < 20 && <p>Your investment rate is below the recommended 20%. Try to increase your savings to build wealth faster.</p>}
+                                {expensePercentage <= 50 && emiPercentage <= 30 && investmentPercentage >= 20 && <p className="text-green-600 font-medium">Great job! Your budget aligns well with the 50-30-20 rule.</p>}
                             </div>
                         </CardFooter>
                     </Card>
@@ -450,17 +503,5 @@ export default function ManagePage() {
       </div>
     </div>
   );
-
-    
-
-    
-
-    
-
-    
-}
-
-    
-
 
     
