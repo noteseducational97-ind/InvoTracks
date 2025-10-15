@@ -224,7 +224,7 @@ export default function InvestmentsPage() {
                     let baseFlexiCap = 0.15;
 
                     // Adjustments based on risk and age
-                    const midCapAdjustment = (riskFactor - 0.2) * 0.1 + ageFactor * 0.05; // Reduced sensitivity
+                    const midCapAdjustment = (riskFactor - 0.2) * 0.1 - ageFactor * 0.05; // Reduced sensitivity
                     const flexiCapAdjustment = (riskFactor - 0.2) * 0.15 + ageFactor * 0.05;
                     const largeCapAdjustment = -midCapAdjustment - flexiCapAdjustment;
                     
@@ -543,7 +543,7 @@ export default function InvestmentsPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <Card className="bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium text-rose-800 dark:text-rose-300">Multi-Cap Fund</CardTitle>
+                                            <CardTitle className="text-sm font-medium text-rose-800 dark:text-rose-300">Multi Cap / Flexi Cap Fund</CardTitle>
                                             <Scale className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                                         </CardHeader>
                                         <CardContent>
