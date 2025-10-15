@@ -67,6 +67,18 @@ export default function ManagePage() {
     return numValue.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
 
+  const calculateAge = (dobString: string) => {
+    if (!dobString) return null;
+    const dob = new Date(dobString);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    return age;
+  };
+
   const totalMonthlyExpenses = financialProfile ? Object.values(financialProfile.expenses).reduce((acc, val) => acc + (Number(val) || 0), 0) : 0;
   const totalOutstandingLoan = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.amount) || 0), 0) : 0;
   const totalMonthlyEmi = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0) : 0;
@@ -153,7 +165,10 @@ export default function ManagePage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Name:</span> <span className="font-medium">{financialProfile.name}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Date of Birth:</span> <span className="font-medium">{financialProfile.dob}</span></div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Date of Birth:</span> 
+              <span className="font-medium">{financialProfile.dob} {financialProfile.dob && `(Age: ${calculateAge(financialProfile.dob)})`}</span>
+            </div>
             <div className="flex justify-between"><span className="text-muted-foreground">Risk Profile:</span> <span className="font-medium">{financialProfile.riskPercentage}%</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Monthly Income:</span> <span className="font-medium">{formatCurrency(financialProfile.monthlyIncome)}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Annual Income:</span> <span className="font-medium">{formatCurrency(financialProfile.annualIncome)}</span></div>
