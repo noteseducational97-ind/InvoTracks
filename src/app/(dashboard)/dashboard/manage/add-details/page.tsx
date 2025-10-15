@@ -20,6 +20,16 @@ type Loan = {
   tenure: string;
 };
 
+type InvestmentCategory = 'stocks' | 'mutualFunds' | 'bonds' | 'realEstate' | 'commodities' | 'other';
+
+type InvestmentsState = {
+  [key in InvestmentCategory]: {
+    invested: 'yes' | 'no';
+    amount: string;
+  }
+};
+
+
 export default function AddDetailsPage() {
   const { user } = useUser();
   const [name, setName] = useState("");
@@ -29,7 +39,15 @@ export default function AddDetailsPage() {
   const [loans, setLoans] = useState<Loan[]>([
     { id: Date.now(), type: '', amount: '', emi: '', rate: '', tenure: '' }
   ]);
-  const [hasExistingInvestments, setHasExistingInvestments] = useState("no");
+  
+  const [investments, setInvestments] = useState<InvestmentsState>({
+    stocks: { invested: 'no', amount: '' },
+    mutualFunds: { invested: 'no', amount: '' },
+    bonds: { invested: 'no', amount: '' },
+    realEstate: { invested: 'no', amount: '' },
+    commodities: { invested: 'no', amount: '' },
+    other: { invested: 'no', amount: '' },
+  });
 
 
   useEffect(() => {
@@ -60,6 +78,20 @@ export default function AddDetailsPage() {
 
   const removeLoan = (id: number) => {
     setLoans(prevLoans => prevLoans.filter(loan => loan.id !== id));
+  };
+  
+  const handleInvestmentToggle = (category: InvestmentCategory, value: 'yes' | 'no') => {
+    setInvestments(prev => ({
+      ...prev,
+      [category]: { ...prev[category], invested: value }
+    }));
+  };
+
+  const handleInvestmentAmountChange = (category: InvestmentCategory, amount: string) => {
+    setInvestments(prev => ({
+      ...prev,
+      [category]: { ...prev[category], amount }
+    }));
   };
 
 
@@ -225,47 +257,49 @@ export default function AddDetailsPage() {
                 <CardDescription>Enter the current value of your existing investments.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <div className="space-y-2">
-                    <Label>Do you have any existing investments?</Label>
-                    <RadioGroup value={hasExistingInvestments} onValueChange={setHasExistingInvestments} className="flex items-center gap-4">
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="yes" id="invest-yes" />
-                            <Label htmlFor="invest-yes">Yes</Label>
+                 <div className="grid gap-6 md:grid-cols-2">
+                    {Object.keys(investments).map((key) => {
+                      const category = key as InvestmentCategory;
+                      const label = {
+                        stocks: "Stocks",
+                        mutualFunds: "Mutual Funds",
+                        bonds: "Bonds",
+                        realEstate: "Real Estate",
+                        commodities: "Commodities",
+                        other: "Other Investments"
+                      }[category];
+
+                      return (
+                        <div key={category} className="p-4 border rounded-lg space-y-3">
+                          <div className="space-y-2">
+                            <Label>Do you invest in {label}?</Label>
+                            <RadioGroup value={investments[category].invested} onValueChange={(value) => handleInvestmentToggle(category, value as 'yes' | 'no')} className="flex items-center gap-4">
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="yes" id={`${category}-yes`} />
+                                    <Label htmlFor={`${category}-yes`}>Yes</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="no" id={`${category}-no`} />
+                                    <Label htmlFor={`${category}-no`}>No</Label>
+                                </div>
+                            </RadioGroup>
+                          </div>
+                          {investments[category].invested === 'yes' && (
+                            <div className="space-y-2 pt-2 border-t">
+                                <Label htmlFor={`${category}-amount`}>Current Value of {label} (₹)</Label>
+                                <Input 
+                                  id={`${category}-amount`} 
+                                  type="number" 
+                                  placeholder="Enter amount"
+                                  value={investments[category].amount}
+                                  onChange={(e) => handleInvestmentAmountChange(category, e.target.value)}
+                                />
+                            </div>
+                          )}
                         </div>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="no" id="invest-no" />
-                            <Label htmlFor="invest-no">No</Label>
-                        </div>
-                    </RadioGroup>
-                </div>
-                {hasExistingInvestments === 'yes' && (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pt-4 border-t">
-                        <div className="space-y-2">
-                            <Label htmlFor="stocks">Stocks</Label>
-                            <Input id="stocks" type="number" placeholder="" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="bonds">Bonds</Label>
-                            <Input id="bonds" type="number" placeholder="" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="mutual-funds">Mutual Funds</Label>
-                            <Input id="mutual-funds" type="number" placeholder="" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="real-estate">Real Estate</Label>
-                            <Input id="real-estate" type="number" placeholder="" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="commodities">Commodities</Label>
-                            <Input id="commodities" type="number" placeholder="" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="other-investments">Other</Label>
-                            <Input id="other-investments" type="number" placeholder="" />
-                        </div>
-                    </div>
-                )}
+                      )
+                    })}
+                 </div>
             </CardContent>
         </Card>
 
