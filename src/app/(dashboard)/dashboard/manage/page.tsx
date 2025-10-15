@@ -383,7 +383,7 @@ export default function ManagePage() {
                         <CardHeader className="p-4">
                             <CardDescription>Recommended Range</CardDescription>
                             <CardTitle className="text-2xl">{formatCurrency(minRecommendedFund)} - {formatCurrency(maxRecommendedFund)}</CardTitle>
-                             <p className="text-xs text-muted-foreground mt-1">Minimum 6x and maximum 18x of your monthly salary.</p>
+                             <p className="text-xs text-muted-foreground mt-1">Minimum 6x and maximum 18x of your monthly income.</p>
                         </CardHeader>
                     </Card>
                     <Card>
