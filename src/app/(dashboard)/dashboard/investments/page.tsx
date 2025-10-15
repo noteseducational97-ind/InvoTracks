@@ -251,11 +251,12 @@ export default function InvestmentsPage() {
         
         if (plan) {
             return (
+                <>
                 <Card className="mt-6">
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                              <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -297,7 +298,7 @@ export default function InvestmentsPage() {
 
                         <Separator />
 
-                        <div className="space-y-4">
+                        <div className="space-y-2">
                             <div className="text-center">
                                 <h3 className="font-headline text-lg flex items-center justify-center gap-2 mb-1"><PieChartIcon className="h-5 w-5 text-primary"/>Allocation Breakdown</h3>
                                 <p className="text-sm text-muted-foreground">A visual breakdown of where your monthly savings are going.</p>
@@ -343,37 +344,40 @@ export default function InvestmentsPage() {
                                 </div>
                             </div>
                         </div>
-                        
-                        <Separator />
+                    </CardContent>
+                </Card>
 
-                        <div>
-                            <h3 className="font-headline text-lg flex items-center gap-2 mb-4 justify-center">
-                                <TrendingUp className="h-5 w-5 text-primary"/>
-                                Mutual Fund SIP Breakdown
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                               <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Equity Investment</CardTitle>
-                                        <Sprout className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-200">{formatCurrency(plan.equityAmount)}</div>
-                                    </CardContent>
-                                </Card>
-                                 <Card className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-sky-800 dark:text-sky-300">Debt Investment</CardTitle>
-                                        <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold text-sky-900 dark:text-sky-200">{formatCurrency(plan.debtAmount)}</div>
-                                    </CardContent>
-                                </Card>
-                            </div>
+                <Card className="mt-6">
+                    <CardHeader>
+                        <CardTitle className="font-headline text-lg flex items-center gap-2">
+                            <TrendingUp className="h-5 w-5 text-primary"/>
+                            Equity & Debt Breakdown
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Equity Investment</CardTitle>
+                                    <Sprout className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-200">{formatCurrency(plan.equityAmount)}</div>
+                                </CardContent>
+                            </Card>
+                             <Card className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-sky-800 dark:text-sky-300">Debt Investment</CardTitle>
+                                    <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-sky-900 dark:text-sky-200">{formatCurrency(plan.debtAmount)}</div>
+                                </CardContent>
+                            </Card>
                         </div>
                     </CardContent>
                 </Card>
+                </>
             );
         }
 
@@ -396,5 +400,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
