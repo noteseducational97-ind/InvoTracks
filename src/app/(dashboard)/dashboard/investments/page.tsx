@@ -175,13 +175,19 @@ export default function InvestmentsPage() {
                 const equityAmount = mutualFundAmount * equityPercentage;
                 const debtAmount = mutualFundAmount * debtPercentage;
 
-                const riskFactor = (Number(financialProfile.riskPercentage) || 50) / 100; // 0 to 1
+                const riskPercentage = Number(financialProfile.riskPercentage) || 50;
                 
-                // Debt Allocation Logic
-                const baseLiquidAllocation = 0.50; // Start at 50%
-                const riskAdjustment = (0.5 - riskFactor) * 0.3; // -0.15 to +0.15
-                const ageAdjustment = Math.max(0, (age - 35) / 100); // Increases after 35
-                let liquidAllocationPercentage = baseLiquidAllocation + riskAdjustment + ageAdjustment;
+                // Debt Allocation Logic based on risk profile
+                let baseLiquidAllocation;
+                if (riskPercentage > 60) {
+                    // Higher risk profile: prioritize gold/liquid for safety
+                    baseLiquidAllocation = 0.60;
+                } else {
+                    // Lower risk profile: prioritize mid-term debt for returns
+                    baseLiquidAllocation = 0.30;
+                }
+                const ageAdjustment = Math.max(0, (age - 25) / 100) * 0.5; // More liquidity as age increases past 25
+                let liquidAllocationPercentage = baseLiquidAllocation + ageAdjustment;
                 liquidAllocationPercentage = Math.max(0.20, Math.min(0.80, liquidAllocationPercentage)); // Clamp between 20% and 80%
 
                 const liquidGoldFundAmount = debtAmount * liquidAllocationPercentage;
@@ -189,6 +195,7 @@ export default function InvestmentsPage() {
                 
 
                 const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
+                const riskFactor = riskPercentage / 100; // 0 to 1
 
                 let baseLargeCap = 0.50;
                 let baseMidCap = 0.30;
@@ -301,7 +308,7 @@ export default function InvestmentsPage() {
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-2">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                              <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -341,7 +348,7 @@ export default function InvestmentsPage() {
                             </Card>
                         </div>
 
-                        <Separator />
+                        <Separator className="my-4"/>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                             <div className="space-y-2">
@@ -486,5 +493,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
