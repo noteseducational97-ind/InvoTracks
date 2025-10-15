@@ -537,7 +537,7 @@ export default function InvestmentsPage() {
                                     </Card>
                                     <Card className="bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium text-slate-800 dark:text-slate-300">Corporate Bond Fund</CardTitle>
+                                            <CardTitle className="text-sm font-medium text-slate-800 dark:text-slate-300">Corporate Bond/Mid term Debt fund</CardTitle>
                                             <Anchor className="h-4 w-4 text-slate-600 dark:text-slate-400" />
                                         </CardHeader>
                                         <CardContent>
@@ -572,3 +572,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
