@@ -364,9 +364,14 @@ export default function ManagePage() {
             )}>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2">
-                        <Shield className="h-5 w-5 text-primary" />
+                        <Shield className="h-5 w-5" />
                         Emergency Fund Plan
                     </CardTitle>
+                    <CardDescription className={cn(
+                         emergencyFundStatus === 'low'
+                         ? "text-red-900/80 dark:text-red-200/80"
+                         : "text-green-900/80 dark:text-green-200/80"
+                    )}></CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <Card>
@@ -456,8 +461,7 @@ export default function ManagePage() {
                 <CardFooter>
                      <div className="text-center text-muted-foreground text-sm w-full">
                         {expensePercentage > 50 && <p>Your expenses are higher than the recommended 50%. Consider reviewing your spending on non-essential items.</p>}
-                        {emiPercentage > 30 && <p>Your loan EMIs are taking up a significant portion of your income. Focusing on prepayments could be beneficial.</p>}
-                        {investmentPercentage < 20 && <p>Your investment rate is below the recommended 20%. Try to increase your savings to build wealth faster.</p>}
+                        
                         {expensePercentage <= 50 && emiPercentage <= 30 && investmentPercentage >= 20 && <p className="text-green-600 font-medium">Great job! Your budget aligns well with the 50-30-20 rule.</p>}
                     </div>
                 </CardFooter>
