@@ -25,6 +25,8 @@ type InvestmentPlan = {
     description: string;
     suggestedAmount?: string;
   }[];
+  reasoning: string;
+  netMonthlyCashflow: number;
 };
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -80,19 +82,19 @@ const chartConfig = {
   amount: {
     label: "Amount",
   },
-  largeCap: {
-    label: "Large Cap",
+  mutualFunds: {
+    label: "Mutual Funds",
     color: "hsl(var(--chart-1))",
   },
-  midCap: {
-    label: "Mid Cap",
+  emergencyFund: {
+    label: "Emergency Fund",
     color: "hsl(var(--chart-2))",
   },
-  smallCap: {
-    label: "Small Cap",
+  loanRepayment: {
+    label: "Loan Repayment",
     color: "hsl(var(--chart-3))",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 
 export default function InvestmentsPage() {
@@ -214,7 +216,7 @@ export default function InvestmentsPage() {
                     })
                 }
                 
-                // Mutual Fund allocation
+                // Mutual Fund allocation logic
                 let largeCap = 0, midCap = 0, smallCap = 0;
                 if (age < 30) {
                     largeCap = 100 - risk;
@@ -248,11 +250,14 @@ export default function InvestmentsPage() {
                     description: `Invest your net monthly savings via SIP for long-term growth. Based on your profile, a suggested breakdown is provided in the asset allocation chart.`,
                     suggestedAmount: formatCurrency(netMonthlyCashflow)
                 });
-
+                
+                const reasoning = `This plan is tailored for a ${age}-year-old with a ${risk}% risk tolerance. It prioritizes foundational security with insurance and an emergency fund. The mutual fund allocation is designed to balance growth and risk according to your age and profile, while also suggesting efficient loan repayment.`
 
                 const generatedPlan: InvestmentPlan = {
                     assetAllocation: allocation,
                     suggestions: suggestions,
+                    reasoning: reasoning,
+                    netMonthlyCashflow: netMonthlyCashflow,
                 };
 
                 setPlan(generatedPlan);
@@ -309,41 +314,53 @@ export default function InvestmentsPage() {
         }
         
         if (plan) {
-            const chartData = Object.entries(plan.assetAllocation).map(([key, value]) => ({
-                asset: chartConfig[key as keyof typeof chartConfig]?.label || key,
-                amount: value?.percentage || 0,
-                fill: chartConfig[key as keyof typeof chartConfig]?.color || "hsl(var(--muted))"
-            })).filter(d => d.amount > 0);
+            const hasLoans = financialProfile.loans.some(loan => Number(loan.amount) > 0);
+            
+            // Assign percentages for the main chart
+            const loanRepaymentPercentage = hasLoans ? 20 : 0;
+            const emergencyFundPercentage = 20;
+            const mutualFundsPercentage = 100 - loanRepaymentPercentage - emergencyFundPercentage;
+
+            const chartData = [
+                { category: 'mutualFunds', value: mutualFundsPercentage, fill: 'hsl(var(--chart-1))' },
+                { category: 'emergencyFund', value: emergencyFundPercentage, fill: 'hsl(var(--chart-2))' },
+                ...(hasLoans ? [{ category: 'loanRepayment', value: loanRepaymentPercentage, fill: 'hsl(var(--chart-3))' }] : []),
+            ];
 
             return (
                 <div className="mt-6 flex flex-col gap-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">Remaining Amount</CardTitle>
+                            <CardTitle className="font-headline text-lg">Your Monthly Investment Allocation</CardTitle>
                         </CardHeader>
                          <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                                <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                               <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px] w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
-                                            <ChartTooltip content={<ChartTooltipContent nameKey="amount" formatter={(value) => `${value}%`} hideLabel />} />
-                                            <Pie data={chartData} dataKey="amount" nameKey="asset" innerRadius={60} strokeWidth={5}>
+                                            <ChartTooltip content={<ChartTooltipContent nameKey="value" formatter={(value) => `${value}%`} hideLabel />} />
+                                            <Pie data={chartData} dataKey="value" nameKey="category" innerRadius={60} outerRadius={100} strokeWidth={5}>
                                                 {chartData.map((entry) => (
-                                                <Cell key={`cell-${entry.asset}`} fill={entry.fill} />
+                                                    <Cell key={`cell-${entry.category}`} fill={entry.fill} />
                                                 ))}
                                             </Pie>
                                         </PieChart>
                                     </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span className="text-sm text-muted-foreground">Total Investable</span>
+                                        <span className="text-2xl font-bold">{formatCurrency(plan.netMonthlyCashflow)}</span>
+                                    </div>
                                 </ChartContainer>
+
                                 <div className="flex flex-col gap-4 text-sm">
-                                    <p className="text-muted-foreground">Suggested mutual fund SIP breakdown for your investable amount.</p>
+                                    <p className="text-muted-foreground">Suggested breakdown for your net monthly savings.</p>
                                     {chartData.map((entry) => (
-                                        <div key={entry.asset} className="flex items-center justify-between">
+                                        <div key={entry.category} className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <span className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.fill }} />
-                                                <span>{entry.asset}</span>
+                                                <span>{chartConfig[entry.category as keyof typeof chartConfig]?.label}</span>
                                             </div>
-                                            <span className="font-semibold">{entry.amount}%</span>
+                                            <span className="font-semibold">{entry.value}%</span>
                                         </div>
                                     ))}
                                 </div>
@@ -395,3 +412,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
