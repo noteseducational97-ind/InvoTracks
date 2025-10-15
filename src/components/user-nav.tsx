@@ -71,15 +71,15 @@ export function UserNav({ user }: UserNavProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-                <Link href="/dashboard/invoices">
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    <span>Billing</span>
-                </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
                 <Link href="/dashboard/manage">
                     <Tags className="mr-2 h-4 w-4" />
                     <span>Manage</span>
+                </Link>
+            </DropdownMenuItem>
+             <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
                 </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>

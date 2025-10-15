@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -16,7 +17,6 @@ const navItems = [
   { href: '/dashboard/overview', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/investments', label: 'Investment Plan', icon: Briefcase },
   { href: '/dashboard/manage', label: 'Manage Finances', icon: Tags },
-  { href: '/dashboard/invoices', label: 'Invoices', icon: FileText },
   { href: '/dashboard/calculator', label: 'Calculators', icon: Calculator },
 ];
 
