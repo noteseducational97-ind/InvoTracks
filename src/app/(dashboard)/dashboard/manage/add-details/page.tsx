@@ -4,14 +4,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, DollarSign, TrendingUp, Landmark, Receipt } from "lucide-react";
+import { User, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useUser } from "@/firebase";
 
 export default function AddDetailsPage() {
+  const { user } = useUser();
+  const [name, setName] = useState("");
   const [monthlyIncome, setMonthlyIncome] = useState<number | string>("");
   const [annualIncome, setAnnualIncome] = useState<number | string>("");
   const [overallMonthlyIncome, setOverallMonthlyIncome] = useState(0);
+
+  useEffect(() => {
+    if (user?.displayName) {
+      setName(user.displayName);
+    }
+  }, [user]);
 
   useEffect(() => {
     const monthly = Number(monthlyIncome) || 0;
@@ -43,7 +52,7 @@ export default function AddDetailsPage() {
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" placeholder="" />
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="risk-percentage">Risk Percentage (%)</Label>
