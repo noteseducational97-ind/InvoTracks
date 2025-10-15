@@ -403,19 +403,22 @@ export default function ManagePage() {
                                     </p>
                                 </CardHeader>
                             </Card>
-                            <Card className={cn(
-                                investmentStatus
-                                ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
-                                : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
-                            )}>
-                                <CardHeader className="p-4">
-                                    <CardDescription>Savings (Investments)</CardDescription>
-                                    <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
-                                    <p className={cn("font-semibold", investmentStatus ? 'text-green-600' : 'text-red-600')}>
-                                        {investmentStatus ? 'On Track (>= 20%)' : 'Low (< 20%)'}
-                                    </p>
-                                </CardHeader>
-                            </Card>
+                            <Link href="/dashboard/investments" className="group">
+                                <Card className={cn(
+                                    "transition-all group-hover:ring-2 group-hover:ring-primary h-full",
+                                    investmentStatus
+                                    ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+                                    : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                                )}>
+                                    <CardHeader className="p-4">
+                                        <CardDescription>Savings (Investments)</CardDescription>
+                                        <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
+                                        <p className={cn("font-semibold", investmentStatus ? 'text-green-600' : 'text-red-600')}>
+                                            {investmentStatus ? 'On Track (>= 20%)' : 'Low (< 20%)'}
+                                        </p>
+                                    </CardHeader>
+                                </Card>
+                            </Link>
                         </CardContent>
                         <CardFooter>
                              <div className="text-center text-muted-foreground text-sm w-full">
@@ -441,3 +444,4 @@ export default function ManagePage() {
     
 
     
+}
