@@ -1,3 +1,4 @@
+
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -324,7 +325,7 @@ export default function InvestmentsPage() {
                 <div className="mt-6 grid gap-6">
                     <Card>
                          <CardHeader>
-                            <CardTitle className="font-headline text-lg">Asset Allocation</CardTitle>
+                            <CardTitle className="font-headline text-lg">Remaining Amount</CardTitle>
                             <CardDescription>Suggested mutual fund SIP breakdown for your investable amount.</CardDescription>
                         </CardHeader>
                          <CardContent className="grid gap-6 lg:grid-cols-2">
@@ -392,3 +393,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
