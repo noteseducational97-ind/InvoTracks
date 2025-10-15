@@ -307,7 +307,7 @@ export default function EditDetailsPage() {
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
              <div className="space-y-2">
-                <Label htmlFor="rent">Housing (Rent/EMI)</Label>
+                <Label htmlFor="rent">Housing Rent</Label>
                 <Input id="rent" type="number" placeholder="" value={expenses.rent} onChange={e => handleExpenseChange('rent', e.target.value)}/>
             </div>
              <div className="space-y-2">
@@ -491,5 +491,7 @@ export default function EditDetailsPage() {
     </div>
   );
 }
+
+    
 
     
