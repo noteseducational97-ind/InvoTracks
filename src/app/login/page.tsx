@@ -9,20 +9,17 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, AuthError } from 'firebase/auth';
 
-function LoginButton() {
-  const { pending } = useFormStatus();
-  return <Button type="submit" className="w-full" disabled={pending}>{pending ? 'Signing In...' : 'Sign In'}</Button>;
+function LoginButton({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
+  return <Button onClick={onClick} className="w-full" disabled={disabled}>{disabled ? 'Signing In...' : 'Sign In'}</Button>;
 }
 
-function GoogleSignInButton() {
-    const { pending } = useFormStatus();
+function GoogleSignInButton({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
     return (
-        <Button type="button" variant="outline" className="w-full" disabled={pending}>
+        <Button onClick={onClick} variant="outline" className="w-full" disabled={disabled}>
             <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 173.3 54.7l-73.2 67.7C313.6 99.8 283.7 84 248 84c-83.8 0-152.3 68.5-152.3 152S164.2 412 248 412c97.4 0 135.8-62.1 142.9-92.7H248v-83.8h235.2c4.7 25.8 7.2 54.3 7.2 85.8z"></path></svg>
             Sign in with Google
         </Button>
@@ -33,11 +30,12 @@ export default function LoginPage() {
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -53,11 +51,16 @@ export default function LoginPage() {
         variant: 'destructive',
       });
       setError(null); // Clear error after showing toast
+      setIsPending(false);
     }
   }, [error, toast]);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = () => {
+    if (!email || !password) {
+        setError("Please enter both email and password.");
+        return;
+    }
+    setIsPending(true);
     signInWithEmailAndPassword(auth, email, password)
         .catch((e) => {
             const err = e as AuthError;
@@ -66,6 +69,7 @@ export default function LoginPage() {
   };
   
   const handleGoogleSignIn = () => {
+      setIsPending(true);
       const provider = new GoogleAuthProvider();
       signInWithPopup(auth, provider)
           .catch((e) => {
@@ -85,10 +89,10 @@ export default function LoginPage() {
             <CardDescription>Enter your email below to login to your account.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input id="email" name="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} disabled={isPending} />
             </div>
             <div className="space-y-2">
               <div className="flex items-center">
@@ -97,10 +101,10 @@ export default function LoginPage() {
                   Forgot your password?
                 </Link>
               </div>
-              <Input id="password" name="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input id="password" name="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} disabled={isPending} />
             </div>
-            <LoginButton />
-          </form>
+            <LoginButton onClick={handleLogin} disabled={isPending || isUserLoading} />
+          </div>
            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
@@ -109,9 +113,7 @@ export default function LoginPage() {
                   <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
           </div>
-          <div onClick={handleGoogleSignIn}>
-            <GoogleSignInButton />
-          </div>
+          <GoogleSignInButton onClick={handleGoogleSignIn} disabled={isPending || isUserLoading} />
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
             <Link href="/signup" className="underline">
