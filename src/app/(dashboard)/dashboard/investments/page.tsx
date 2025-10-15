@@ -151,6 +151,7 @@ export default function InvestmentsPage() {
                 const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
                 const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
                 const age = calculateAge(financialProfile.dob);
+                const riskPercentage = Number(financialProfile.riskPercentage) || 50;
 
                 if (totalMonthlyIncome <= 0) {
                      setError("Your income details are not provided. Please update your profile to generate a plan.");
@@ -176,7 +177,6 @@ export default function InvestmentsPage() {
                 const equityAmount = mutualFundAmount * equityPercentage;
                 const debtAmount = mutualFundAmount * debtPercentage;
 
-                const riskPercentage = Number(financialProfile.riskPercentage) || 50;
                 
                 // Debt Allocation Logic based on risk profile
                 let baseLiquidAllocation;
@@ -195,32 +195,45 @@ export default function InvestmentsPage() {
                 const midTermDebtAmount = debtAmount * (1 - liquidAllocationPercentage);
                 
 
-                const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
-                const riskFactor = riskPercentage / 100; // 0 to 1
+                let largeCapAmount = 0;
+                let midCapAmount = 0;
+                let smallCapAmount = 0;
+                let flexiCapAmount = 0;
 
-                let baseLargeCap = 0.40; // Base for Large Cap
-                let baseMidCap = 0.30; // Base for Mid Cap
-                let baseSmallCap = 0.30; // Base for Small Cap
+                if (riskPercentage < 60) {
+                    // Lower risk: Nifty 50/100, Mid Cap, Flexi Cap
+                    let largeCapPercentage = 0.50; // Nifty 50/100
+                    let midCapPercentage = 0.30;
+                    let flexiCapPercentage = 0.20;
 
-                // More risk & younger -> more small cap
-                const smallCapAdjustment = (riskFactor - 0.5) * 0.2 + ageFactor * 0.1;
-                // Less risk -> more large cap
-                const largeCapAdjustment = (0.5 - riskFactor) * 0.1;
-                
-                let largeCapPercentage = baseLargeCap + largeCapAdjustment - (smallCapAdjustment/2);
-                let midCapPercentage = baseMidCap - (smallCapAdjustment / 2);
-                let smallCapPercentage = baseSmallCap + smallCapAdjustment;
-                
-                const total = largeCapPercentage + midCapPercentage + smallCapPercentage;
-                largeCapPercentage /= total;
-                midCapPercentage /= total;
-                smallCapPercentage /= total;
+                    largeCapAmount = equityAmount * largeCapPercentage;
+                    midCapAmount = equityAmount * midCapPercentage;
+                    flexiCapAmount = equityAmount * flexiCapPercentage;
+                } else {
+                    // Higher risk: Large, Mid, Small
+                    const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
+                    const riskFactor = riskPercentage / 100; // 0 to 1
 
-                const largeCapAmount = equityAmount * largeCapPercentage;
-                const midCapAmount = equityAmount * midCapPercentage;
-                const smallCapAmount = equityAmount * smallCapPercentage;
-                const flexiCapAmount = loanRepaymentAmount; // Flexi cap is now the loan repayment amount
+                    let baseLargeCap = 0.40;
+                    let baseMidCap = 0.30;
+                    let baseSmallCap = 0.30;
+                    
+                    const smallCapAdjustment = (riskFactor - 0.5) * 0.2 + ageFactor * 0.1;
+                    const largeCapAdjustment = (0.5 - riskFactor) * 0.1;
+                    
+                    let largeCapPercentage = baseLargeCap + largeCapAdjustment - (smallCapAdjustment/2);
+                    let midCapPercentage = baseMidCap - (smallCapAdjustment / 2);
+                    let smallCapPercentage = baseSmallCap + smallCapAdjustment;
+                    
+                    const total = largeCapPercentage + midCapPercentage + smallCapPercentage;
+                    largeCapPercentage /= total;
+                    midCapPercentage /= total;
+                    smallCapPercentage /= total;
 
+                    largeCapAmount = equityAmount * largeCapPercentage;
+                    midCapAmount = equityAmount * midCapPercentage;
+                    smallCapAmount = equityAmount * smallCapPercentage;
+                }
 
                 const generatedPlan: InvestmentPlan = {
                     netMonthlyCashflow,
@@ -306,6 +319,7 @@ export default function InvestmentsPage() {
         }
         
         if (plan) {
+            const isLowRisk = (Number(financialProfile.riskPercentage) || 0) < 60;
             return (
                 <>
                 <Card className="mt-6">
@@ -419,7 +433,7 @@ export default function InvestmentsPage() {
                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Large Cap</CardTitle>
+                                        <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">{isLowRisk ? "Nifty 50/100 Index" : "Large Cap"}</CardTitle>
                                         <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                                     </CardHeader>
                                     <CardContent>
@@ -437,16 +451,29 @@ export default function InvestmentsPage() {
                                         <p className="text-xs text-muted-foreground">{((plan.midCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
                                     </CardContent>
                                 </Card>
-                                 <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Small Cap</CardTitle>
-                                        <Sprout className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-200">{formatCurrency(plan.smallCapAmount)}</div>
-                                        <p className="text-xs text-muted-foreground">{((plan.smallCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
-                                    </CardContent>
-                                </Card>
+                                 { isLowRisk ? (
+                                    <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                            <CardTitle className="text-sm font-medium text-red-800 dark:text-red-300">Flexi Cap</CardTitle>
+                                            <BrainCircuit className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="text-2xl font-bold text-red-900 dark:text-red-200">{formatCurrency(plan.flexiCapAmount)}</div>
+                                            <p className="text-xs text-muted-foreground">{((plan.flexiCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                                        </CardContent>
+                                    </Card>
+                                 ) : (
+                                    <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                            <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Small Cap</CardTitle>
+                                            <Sprout className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-200">{formatCurrency(plan.smallCapAmount)}</div>
+                                            <p className="text-xs text-muted-foreground">{((plan.smallCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                                        </CardContent>
+                                    </Card>
+                                 ) }
                             </div>
                         </div>
                          <div className="border rounded-lg p-4">
@@ -471,20 +498,6 @@ export default function InvestmentsPage() {
                                     </CardContent>
                                 </Card>
                              </div>
-                        </div>
-                         <div className="border rounded-lg p-4">
-                            <h4 className="font-semibold mb-4 text-center">Loan Repayment Fund</h4>
-                             <div className="grid grid-cols-1">
-                                <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-red-800 dark:text-red-300">Flexi Cap</CardTitle>
-                                        <BrainCircuit className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold text-red-900 dark:text-red-200">{formatCurrency(plan.flexiCapAmount)}</div>
-                                    </CardContent>
-                                </Card>
-                            </div>
                         </div>
                     </CardContent>
                 </Card>
