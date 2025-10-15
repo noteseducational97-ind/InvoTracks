@@ -343,10 +343,6 @@ export default function InvestmentsPage() {
                                     </ResponsiveContainer>
                                 </ChartContainer>
                              </div>
-                             <div className="flex flex-col justify-center">
-                                <h3 className="font-headline font-semibold">Plan Reasoning</h3>
-                                <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{plan.reasoning}</p>
-                             </div>
                         </CardContent>
                     </Card>
 
