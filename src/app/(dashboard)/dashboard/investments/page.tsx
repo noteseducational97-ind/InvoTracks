@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Sparkles, Shield, Banknote, Landmark, TrendingUp } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Banknote, Landmark, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
@@ -326,7 +326,7 @@ export default function InvestmentsPage() {
                     <div className="lg:col-span-1">
                         <Card>
                              <CardHeader>
-                                <CardTitle className="font-headline text-lg">Asset Allocation</CardTitle>
+                                <CardTitle className="font-headline text-lg">Remaining Amount</CardTitle>
                                 <CardDescription>Suggested mutual fund SIP breakdown.</CardDescription>
                             </CardHeader>
                              <CardContent className="pt-0">
@@ -388,3 +388,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
