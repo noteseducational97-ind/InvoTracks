@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, DollarSign, Landmark, TrendingUp } from "lucide-react";
+import { User, DollarSign, Landmark, TrendingUp, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser } from "@/firebase";
@@ -120,12 +120,12 @@ export default function AddDetailsPage() {
           </CardContent>
         </Card>
 
-        {/* Debt Card */}
+        {/* Loan Card */}
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
                     <Landmark className="h-5 w-5 text-primary" />
-                    Debt
+                    Loans
                 </CardTitle>
                 <CardDescription>Enter the outstanding balance for any active loans.</CardDescription>
             </CardHeader>
@@ -143,15 +143,29 @@ export default function AddDetailsPage() {
                     <Input id="personal-loan" type="number" />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="credit-card-debt">Credit Card Debt</Label>
-                    <Input id="credit-card-debt" type="number" />
-                </div>
-                 <div className="space-y-2">
                     <Label htmlFor="other-debt">Other Loan</Label>
                     <Input id="other-debt" type="number" />
                 </div>
             </CardContent>
         </Card>
+
+        {/* Credit Card Debt Card */}
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    Credit Card Debt
+                </CardTitle>
+                <CardDescription>Enter the outstanding balance for your credit cards.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-2">
+                    <Label htmlFor="credit-card-debt">Total Credit Card Debt</Label>
+                    <Input id="credit-card-debt" type="number" />
+                </div>
+            </CardContent>
+        </Card>
+
 
         {/* Existing Investment Card */}
         <Card>
