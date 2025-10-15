@@ -25,7 +25,6 @@ type InvestmentPlan = {
     description: string;
     suggestedAmount?: string;
   }[];
-  reasoning: string;
 };
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -254,7 +253,6 @@ export default function InvestmentsPage() {
                 const generatedPlan: InvestmentPlan = {
                     assetAllocation: allocation,
                     suggestions: suggestions,
-                    reasoning: `This plan is tailored for a ${age}-year-old with a ${risk}% risk tolerance. It prioritizes foundational security with insurance and an emergency fund. The mutual fund allocation is designed to balance growth and risk according to your age and profile, while also suggesting efficient loan repayment.`
                 };
 
                 setPlan(generatedPlan);
@@ -269,12 +267,7 @@ export default function InvestmentsPage() {
 
     }, [financialProfile]);
     
-    const chartData = plan?.assetAllocation ? Object.entries(plan.assetAllocation).map(([key, value]) => ({
-        asset: chartConfig[key as keyof typeof chartConfig]?.label || key,
-        amount: value?.percentage || 0,
-        fill: chartConfig[key as keyof typeof chartConfig]?.color || "hsl(var(--muted))"
-    })).filter(d => d.amount > 0) : [];
-
+    
     const renderContent = () => {
         if (isUserLoading || isProfileLoading) {
             return (
@@ -316,15 +309,21 @@ export default function InvestmentsPage() {
         }
         
         if (plan) {
+            const chartData = Object.entries(plan.assetAllocation).map(([key, value]) => ({
+                asset: chartConfig[key as keyof typeof chartConfig]?.label || key,
+                amount: value?.percentage || 0,
+                fill: chartConfig[key as keyof typeof chartConfig]?.color || "hsl(var(--muted))"
+            })).filter(d => d.amount > 0);
+
             return (
-                <div className="mt-6 grid gap-6">
+                <div className="mt-6 flex flex-col gap-6">
                     <Card>
-                         <CardHeader>
-                            <CardTitle className="font-headline text-lg">Asset Allocation</CardTitle>
+                        <CardHeader>
+                            <CardTitle className="font-headline">Remaining Amount</CardTitle>
                         </CardHeader>
                          <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                                <div className="h-[250px] w-full">
+                                <ChartContainer config={chartConfig} className="h-[250px] w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <ChartTooltip content={<ChartTooltipContent nameKey="amount" formatter={(value) => `${value}%`} hideLabel />} />
@@ -335,7 +334,7 @@ export default function InvestmentsPage() {
                                             </Pie>
                                         </PieChart>
                                     </ResponsiveContainer>
-                                </div>
+                                </ChartContainer>
                                 <div className="flex flex-col gap-4 text-sm">
                                     <p className="text-muted-foreground">Suggested mutual fund SIP breakdown for your investable amount.</p>
                                     {chartData.map((entry) => (
@@ -386,9 +385,11 @@ export default function InvestmentsPage() {
     }
     
     return (
-        <div className="space-y-2">
-            <h1 className="font-headline text-3xl font-bold tracking-tight">Investment Plan</h1>
-            <p className="text-muted-foreground">A personalized plan based on your financial profile and goals.</p>
+        <div className="space-y-4">
+            <div>
+                <h1 className="font-headline text-3xl font-bold tracking-tight">Investment Plan</h1>
+                <p className="text-muted-foreground">A personalized plan based on your financial profile and goals.</p>
+            </div>
 
             {renderContent()}
         </div>
