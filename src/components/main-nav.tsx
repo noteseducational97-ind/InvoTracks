@@ -8,8 +8,7 @@ import {
   Briefcase,
   Calculator,
   ShieldCheck,
-  Settings,
-  User,
+  Sparkles,
   Tags,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -20,6 +19,7 @@ const navItems = [
   { href: '/dashboard/investments', label: 'Investments', icon: Briefcase },
   { href: '/dashboard/manage', label: 'Manage', icon: Tags },
   { href: '/dashboard/calculator', label: 'Calculator', icon: Calculator },
+  { href: '/dashboard/ai-plan', label: 'AI Plan', icon: Sparkles },
 ];
 
 const adminNavItem = {
