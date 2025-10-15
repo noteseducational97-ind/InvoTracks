@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Target, Sprout } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Target, Sprout, Building, Factory, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
@@ -25,6 +25,9 @@ type InvestmentPlan = {
   equityAmount: number;
   debtAmount: number;
   age: number;
+  largeCapAmount: number;
+  midCapAmount: number;
+  smallCapAmount: number;
 };
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -171,6 +174,32 @@ export default function InvestmentsPage() {
                 const equityAmount = mutualFundAmount * equityPercentage;
                 const debtAmount = mutualFundAmount * debtPercentage;
 
+                // Market Cap Breakdown Logic
+                const riskFactor = (Number(financialProfile.riskPercentage) || 50) / 100; // 0 to 1
+                const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
+
+                // Base allocation
+                let baseLargeCap = 0.50;
+                let baseMidCap = 0.30;
+                let baseSmallCap = 0.20;
+
+                // Adjust for risk and age
+                const smallCapAdjustment = (riskFactor - 0.5) * 0.2 + ageFactor * 0.1;
+                const largeCapAdjustment = -smallCapAdjustment;
+                
+                let largeCapPercentage = baseLargeCap + largeCapAdjustment;
+                let midCapPercentage = baseMidCap;
+                let smallCapPercentage = baseSmallCap + smallCapAdjustment;
+                
+                // Normalize percentages
+                const total = largeCapPercentage + midCapPercentage + smallCapPercentage;
+                largeCapPercentage /= total;
+                midCapPercentage /= total;
+                smallCapPercentage /= total;
+                
+                const largeCapAmount = equityAmount * largeCapPercentage;
+                const midCapAmount = equityAmount * midCapPercentage;
+                const smallCapAmount = equityAmount * smallCapPercentage;
 
                 const generatedPlan: InvestmentPlan = {
                     netMonthlyCashflow,
@@ -180,6 +209,9 @@ export default function InvestmentsPage() {
                     equityAmount,
                     debtAmount,
                     age,
+                    largeCapAmount,
+                    midCapAmount,
+                    smallCapAmount,
                 };
 
                 setPlan(generatedPlan);
@@ -256,7 +288,7 @@ export default function InvestmentsPage() {
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                              <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -350,31 +382,73 @@ export default function InvestmentsPage() {
                 <Card className="mt-6">
                     <CardHeader>
                         <CardTitle className="font-headline text-lg flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-primary"/>
-                            Equity & Debt Breakdown
+                            <Briefcase className="h-5 w-5 text-primary"/>
+                            Mutual Fund SIP Allocation
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Equity Investment</CardTitle>
-                                    <Sprout className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-200">{formatCurrency(plan.equityAmount)}</div>
-                                </CardContent>
-                            </Card>
-                             <Card className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-sky-800 dark:text-sky-300">Debt Investment</CardTitle>
-                                    <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-sky-900 dark:text-sky-200">{formatCurrency(plan.debtAmount)}</div>
-                                </CardContent>
-                            </Card>
-                        </div>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Equity Investment</CardTitle>
+                                <Sprout className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-200">{formatCurrency(plan.equityAmount)}</div>
+                            </CardContent>
+                        </Card>
+                         <Card className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-sky-800 dark:text-sky-300">Debt Investment</CardTitle>
+                                <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-sky-900 dark:text-sky-200">{formatCurrency(plan.debtAmount)}</div>
+                            </CardContent>
+                        </Card>
+                    </CardContent>
+                </Card>
+
+                <Card className="mt-6">
+                    <CardHeader>
+                        <CardTitle className="font-headline text-lg flex items-center gap-2">
+                            <PieChartIcon className="h-5 w-5 text-primary" />
+                            Mutual Fund Equity Breakdown
+                        </CardTitle>
+                        <CardDescription>
+                            Allocation based on your age ({plan.age}) and risk profile ({financialProfile.riskPercentage}%).
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Large Cap</CardTitle>
+                                <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.largeCapAmount)}</div>
+                                <p className="text-xs text-muted-foreground">{((plan.largeCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Mid Cap</CardTitle>
+                                <Factory className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.midCapAmount)}</div>
+                                <p className="text-xs text-muted-foreground">{((plan.midCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                            </CardContent>
+                        </Card>
+                         <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Small Cap</CardTitle>
+                                <Sprout className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-200">{formatCurrency(plan.smallCapAmount)}</div>
+                                <p className="text-xs text-muted-foreground">{((plan.smallCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                            </CardContent>
+                        </Card>
                     </CardContent>
                 </Card>
                 </>
@@ -400,3 +474,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
