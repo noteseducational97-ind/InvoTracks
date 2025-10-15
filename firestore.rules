@@ -1,123 +1,161 @@
 /**
- * @fileoverview Firestore Security Rules for InvoTrack.
+ * @file Firebase Security Rules for InvoTrack
  *
- * Core Philosophy:
- * This ruleset enforces a strict user-ownership model for user profiles, invoices, and investments.
- * Users can only access their own data. Administrative privileges are granted based on the existence
- * of a document in the `roles_admin` collection.
+ * @core_philosophy This ruleset enforces a strict user-ownership model for most data,
+ * ensuring users can only access their own information. Admin privileges are granted
+ * based on the existence of a document in the `/roles_admin/{userId}` collection.
  *
- * Data Structure:
- * - /users/{userId}: Stores user profile information.
- * - /users/{userId}/invoices/{invoiceId}: Stores invoice data for each user.
- * - /users/{userId}/investments/{investmentId}: Stores investment data for each user.
- * - /roles_admin/{userId}: Existence of a document indicates admin role.
+ * @data_structure
+ * - `/users/{userId}`: Stores user profile information, accessible only by the user.
+ * - `/users/{userId}/invoices/{invoiceId}`: Stores invoices for each user, accessible only by the user.
+ * - `/users/{userId}/investments/{investmentId}`: Stores investments for each user, accessible only by the user.
+ * - `/users/{userId}/financial_profile/{profileId}`: Stores financial profile for each user, accessible only by the user.
+ * - `/roles_admin/{userId}`: Indicates admin privileges. Existence of a document grants admin rights.
  *
- * Key Security Decisions:
- * - User data is isolated using path-based ownership.
- * - Listing of all users is disallowed.
- * - Admin privileges are determined by document existence in the `roles_admin` collection.
- * - Data validation is minimal to allow for prototyping flexibility.
+ * @key_security_decisions
+ * - User listing is implicitly denied by not providing list access on the `/users` collection.
+ * - Admin privileges are determined by document existence in `/roles_admin/{userId}`, not by content within user documents.
+ * - All write operations are strictly controlled based on ownership or admin status.
+ *
+ * @denormalization_for_authorization The `userId` is part of the path for user-owned data,
+ * eliminating the need to read the document content for authorization in most cases.
+ *
+ * @structural_segregation Private user data is stored under the `/users/{userId}` path,
+ * ensuring that it is not publicly accessible. The `/roles_admin` collection is separate
+ * to clearly define admin privileges.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Checks if the request is made by an authenticated user.
+     * @description Grants or denies access to determine if the user is an admin.
+     * @path /roles_admin/{userId}
+     * @allow (get, create, update, delete) if isSignedIn() && request.auth.uid == userId
+     * @deny (get, create, update, delete) if !isSignedIn() || request.auth.uid != userId
+     * @principle Existence over content, authenticated user's uid must match the document id.
+     */
+    match /roles_admin/{userId} {
+        allow get: if isSignedIn() && request.auth.uid == userId;
+        allow list: if false; // No need to list admins
+
+        allow create: if isSignedIn() && request.auth.uid == userId;
+        allow update: if false;
+        allow delete: if isSignedIn() && request.auth.uid == userId && resource != null;
+    }
+
+    /**
+     * @description Grants or denies access to user profiles.
+     * @path /users/{userId}
+     * @allow (get, list) if isOwner(userId)
+     * @allow (create) if isSelfCreating(userId)
+     * @allow (update, delete) if isExistingOwner(userId)
+     * @deny (create) if !isSelfCreating(userId)
+     * @deny (update, delete) if !isExistingOwner(userId)
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+
+      allow create: if isSelfCreating(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Grants or denies access to invoices.
+     * @path /users/{userId}/invoices/{invoiceId}
+     * @allow (get, list) if isOwner(userId)
+     * @allow (create) if isOwner(userId)
+     * @allow (update, delete) if isExistingOwner(userId)
+     * @deny (create) if !isOwner(userId)
+     * @deny (update, delete) if !isExistingOwner(userId)
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/invoices/{invoiceId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Grants or denies access to investments.
+     * @path /users/{userId}/investments/{investmentId}
+     * @allow (get, list) if isOwner(userId)
+     * @allow (create) if isOwner(userId)
+     * @allow (update, delete) if isExistingOwner(userId)
+     * @deny (create) if !isOwner(userId)
+     * @deny (update, delete) if !isExistingOwner(userId)
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/investments/{investmentId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+
+     /**
+      * @description Grants or denies access to financial profiles.
+      * @path /users/{userId}/financial_profile/{profileId}
+      * @allow (get, list) if isOwner(userId)
+      * @allow (create) if isOwner(userId)
+      * @allow (update, delete) if isExistingOwner(userId)
+      * @deny (create) if !isOwner(userId)
+      * @deny (update, delete) if !isExistingOwner(userId)
+      * @principle Enforces document ownership for writes.
+      */
+    match /users/{userId}/financial_profile/{profileId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId);
+        allow update: if isExistingOwner(userId);
+        allow delete: if isExistingOwner(userId);
+    }
+
+
+    // ---- Helper functions ----
+
+    /**
+     * @description Checks if the user is signed in.
+     * @return {boolean} True if the user is signed in, false otherwise.
      */
     function isSignedIn() {
       return request.auth != null;
     }
 
     /**
-     * @description Checks if the request is made by the owner of the resource.
-     * @param {string} userId The user ID to compare against the request's auth UID.
+     * @description Checks if the user ID matches the authenticated user's ID.
+     * @param {string} userId The user ID to check.
+     * @return {boolean} True if the user ID matches the authenticated user's ID, false otherwise.
      */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
     /**
-     * @description Checks if the user is an existing owner of the resource.
-     * @param {string} userId The user ID to compare against the request's auth UID.
+     * @description Checks if the request is creating a document for their own user ID.
+     * @param {string} userId The user ID to check.
+     * @return {boolean} True if the user is creating a document for themselves, false otherwise.
+     */
+    function isSelfCreating(userId) {
+        return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Combines ownership and existence check.
+     * @param {string} userId The user ID to check.
+     * @return {boolean} True if the user owns the document and it exists.
      */
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
-    }
-
-    /**
-     * @description Checks if the user is an admin based on the existence of a document in the /roles_admin/{userId} collection.
-     */
-    function isAdmin() {
-      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-
-    /**
-     * @description Rules for the /users/{userId} collection.
-     * @path /users/{userId}
-     * @allow (create) User with ID 'user123' creates their profile: request.auth.uid == 'user123'
-     * @allow (get) User with ID 'user123' reads their profile: request.auth.uid == 'user123'
-     * @deny (create) User with ID 'user123' tries to create a profile with a different ID: request.auth.uid == 'user456'
-     * @deny (update) User with ID 'user123' tries to update another user's profile: request.auth.uid == 'user456'
-     * @principle Enforces document ownership for writes.
-     */
-    match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId) && request.resource.data.id == request.auth.uid;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description Rules for the /users/{userId}/invoices/{invoiceId} collection.
-     * @path /users/{userId}/invoices/{invoiceId}
-     * @allow (create) User with ID 'user123' creates an invoice: request.auth.uid == 'user123'
-     * @allow (get) User with ID 'user123' reads their invoice: request.auth.uid == 'user123'
-     * @deny (create) User with ID 'user123' tries to create an invoice for another user: request.auth.uid == 'user456'
-     * @deny (update) User with ID 'user123' tries to update another user's invoice: request.auth.uid == 'user456'
-     * @principle Enforces document ownership for writes.
-     */
-    match /users/{userId}/invoices/{invoiceId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == userId;
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description Rules for the /users/{userId}/investments/{investmentId} collection.
-     * @path /users/{userId}/investments/{investmentId}
-     * @allow (create) User with ID 'user123' creates an investment: request.auth.uid == 'user123'
-     * @allow (get) User with ID 'user123' reads their investment: request.auth.uid == 'user123'
-     * @deny (create) User with ID 'user123' tries to create an investment for another user: request.auth.uid == 'user456'
-     * @deny (update) User with ID 'user123' tries to update another user's investment: request.auth.uid == 'user456'
-     * @principle Enforces document ownership for writes.
-     */
-    match /users/{userId}/investments/{investmentId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == userId;
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description Rules for the /roles_admin/{userId} collection.
-     * @path /roles_admin/{userId}
-     * @allow (create) Only an admin can grant admin role: isAdmin()
-     * @allow (get) Anyone can check if an admin role exists.
-     * @deny (create) Non-admins cannot grant admin role.
-     * @deny (update) No one can update an admin role document.
-     * @principle Existence over Content.
-     */
-    match /roles_admin/{userId} {
-      allow get: if true;
-      allow list: if false;
-      allow create: if isAdmin();
-      allow update: if false;
-      allow delete: if isAdmin();
     }
   }
 }
