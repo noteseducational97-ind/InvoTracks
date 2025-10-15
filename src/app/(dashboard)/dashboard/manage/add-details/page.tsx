@@ -23,7 +23,7 @@ type Loan = {
   tenure: string;
 };
 
-type InvestmentCategory = 'stocks' | 'bonds' | 'realEstate' | 'commodities' | 'other';
+type InvestmentCategory = 'stocks' | 'bonds' | 'realEstate' | 'commodities' | 'other' | 'emergencyFund';
 type MonthlyInvestmentCategory = 'mutualFunds';
 type InsuranceCategory = 'termInsurance' | 'healthInsurance';
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -81,6 +81,7 @@ export default function AddDetailsPage() {
     realEstate: { invested: 'no', amount: '' },
     commodities: { invested: 'no', amount: '' },
     other: { invested: 'no', amount: '' },
+    emergencyFund: { invested: 'no', amount: '' },
     termInsurance: { invested: 'no', amount: '', frequency: 'yearly' },
     healthInsurance: { invested: 'no', amount: '', frequency: 'yearly' },
   });
@@ -199,7 +200,7 @@ export default function AddDetailsPage() {
     return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
 
-  const existingAssetCategories: InvestmentCategory[] = ['stocks', 'bonds', 'realEstate', 'commodities', 'other'];
+  const existingAssetCategories: InvestmentCategory[] = ['stocks', 'bonds', 'realEstate', 'commodities', 'other', 'emergencyFund'];
   const monthlyInvestmentCategories: (MonthlyInvestmentCategory | InsuranceCategory)[] = ['mutualFunds', 'termInsurance', 'healthInsurance'];
 
   return (
@@ -368,6 +369,7 @@ export default function AddDetailsPage() {
                         realEstate: "Real Estate",
                         commodities: "Commodities",
                         other: "Other Investments",
+                        emergencyFund: "Emergency Fund"
                       }[key];
                       
                       const question = `Do you have any ${label}?`;
@@ -496,5 +498,7 @@ export default function AddDetailsPage() {
     </div>
   );
 }
+
+    
 
     

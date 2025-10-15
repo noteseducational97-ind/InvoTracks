@@ -53,6 +53,7 @@ interface FinancialProfile {
         realEstate: InvestmentCategory;
         commodities: InvestmentCategory;
         other: InvestmentCategory;
+        emergencyFund: InvestmentCategory;
         termInsurance: InsuranceCategory;
         healthInsurance: InsuranceCategory;
     };
@@ -122,7 +123,7 @@ export default function ManagePage() {
   const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance - monthlySIP;
 
   // 50-30-20 Rule Calculations
-  const expensePercentage = totalMonthlyIncome > 0 ? (totalMonthlyExpenses / totalMonthlyIncome) * 100 : 0;
+  const expensePercentage = totalMonthlyIncome > 0 ? ((totalMonthlyExpenses) / totalMonthlyIncome) * 100 : 0;
   const emiPercentage = totalMonthlyIncome > 0 ? (totalMonthlyEmi / totalMonthlyIncome) * 100 : 0;
   const investmentPercentage = totalMonthlyIncome > 0 ? ((monthlySIP + totalMonthlyInsurance) / totalMonthlyIncome) * 100 : 0;
 
@@ -175,6 +176,7 @@ export default function ManagePage() {
             realEstate: "Real Estate",
             commodities: "Commodities",
             other: "Other Investments",
+            emergencyFund: "Emergency Fund",
             termInsurance: "Term Insurance Premium",
             healthInsurance: "Health Insurance Premium"
         }[key as keyof FinancialProfile['investments']] || "Investment";
@@ -415,7 +417,7 @@ export default function ManagePage() {
                                     </p>
                                 </CardHeader>
                             </Card>
-                            <Link href="/dashboard/manage/edit" className="group">
+                            <Link href="/dashboard/investments" className="group">
                                 <Card className={cn(
                                     "transition-all group-hover:ring-2 group-hover:ring-primary h-full",
                                     investmentStatus
@@ -457,5 +459,8 @@ export default function ManagePage() {
 
     
 }
+
+    
+
 
     
