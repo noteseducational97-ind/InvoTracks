@@ -123,21 +123,33 @@ export default function ManagePage() {
       <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
       <p className="text-muted-foreground">A centralized view of your financial details and commitments.</p>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      <div className="mt-6 grid gap-6">
+
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+                <div className="space-y-1.5">
+                <CardTitle className="font-headline flex items-center gap-2">
+                    <User className="h-5 w-5 text-primary" />
+                    Financial Profile
+                </CardTitle>
+                <CardDescription>Your personal, income, expenses and loan details.</CardDescription>
+                </div>
+                <Button variant="outline" size="sm" asChild>
+                    <Link href="/dashboard/manage/edit"><Pencil className="h-4 w-4 mr-2" />Edit</Link>
+                </Button>
+            </CardHeader>
+        </Card>
+
 
         {/* Personal & Income Details Card */}
         <Card className="lg:col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <div className="space-y-1.5">
               <CardTitle className="font-headline flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
                 Your Details
               </CardTitle>
-              <CardDescription>Personal and income information.</CardDescription>
             </div>
-            <Button variant="ghost" size="icon" asChild>
-                <Link href="/dashboard/manage/add-details"><Pencil className="h-4 w-4" /></Link>
-            </Button>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Name:</span> <span className="font-medium">{financialProfile.name}</span></div>
@@ -150,17 +162,13 @@ export default function ManagePage() {
 
         {/* Expenses Card */}
         <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <div className="space-y-1.5">
                 <CardTitle className="font-headline flex items-center gap-2">
                     <DollarSign className="h-5 w-5 text-primary" />
                     Monthly Expenses
                 </CardTitle>
-                <CardDescription>A summary of your recurring monthly costs.</CardDescription>
             </div>
-             <Button variant="ghost" size="icon" asChild>
-                <Link href="/dashboard/manage/add-details"><Pencil className="h-4 w-4" /></Link>
-            </Button>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).map(([key, value]) => (
@@ -180,7 +188,6 @@ export default function ManagePage() {
               <TrendingUp className="h-5 w-5 text-primary" />
               Current Investments & Insurance
             </CardTitle>
-            <CardDescription>A snapshot of your portfolio and policies.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 text-sm">
              {existingInvestments.length > 0 ? existingInvestments.map(investment => (
@@ -199,7 +206,6 @@ export default function ManagePage() {
               <Landmark className="h-5 w-5 text-primary" />
               Active Loans
             </CardTitle>
-            <CardDescription>Details of your outstanding loans.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {financialProfile.loans.map(loan => (
@@ -216,7 +222,6 @@ export default function ManagePage() {
               <Receipt className="h-5 w-5 text-primary" />
               Monthly EMIs
             </CardTitle>
-            <CardDescription>Your equated monthly installments.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {financialProfile.loans.map(loan => (
