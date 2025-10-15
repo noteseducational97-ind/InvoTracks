@@ -84,8 +84,10 @@ export default function ManagePage() {
   const totalMonthlyEmi = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0) : 0;
 
   const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
-  const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi;
-
+  const monthlyHealthInsurance = Number(financialProfile?.investments?.healthInsurance?.amount || 0) / 12;
+  const monthlyTermInsurance = Number(financialProfile?.investments?.termInsurance?.amount || 0) / 12;
+  
+  const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - monthlyHealthInsurance - monthlyTermInsurance;
 
   if (isUserLoading || isProfileLoading) {
     return (
@@ -261,6 +263,12 @@ export default function ManagePage() {
                     <span className="text-muted-foreground">Total Monthly Expenses</span>
                     <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyExpenses)}</span>
                 </div>
+                 {(monthlyHealthInsurance > 0 || monthlyTermInsurance > 0) && (
+                   <div className="flex justify-between">
+                        <span className="text-muted-foreground">Monthly Insurance Premiums</span>
+                        <span className="font-medium text-red-600">-{formatCurrency(monthlyHealthInsurance + monthlyTermInsurance)}</span>
+                    </div>
+                )}
                 <div className="flex justify-between">
                     <span className="text-muted-foreground">Total Monthly Loan EMI</span>
                     <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyEmi)}</span>
@@ -278,3 +286,5 @@ export default function ManagePage() {
     </div>
   );
 }
+
+    
