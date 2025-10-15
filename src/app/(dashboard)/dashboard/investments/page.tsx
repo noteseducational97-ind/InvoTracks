@@ -26,7 +26,6 @@ type InvestmentPlan = {
     description: string;
     suggestedAmount?: string;
   }[];
-  reasoning: string;
 };
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -258,8 +257,7 @@ export default function InvestmentsPage() {
 
                 const generatedPlan: InvestmentPlan = {
                     assetAllocation: allocation,
-                    suggestions: suggestions,
-                    reasoning: `This plan is tailored for a ${age}-year-old with a ${risk}% risk tolerance. It prioritizes foundational security with insurance and an emergency fund. The mutual fund allocation is designed to balance growth and risk according to your age and profile, while also suggesting efficient loan repayment.`
+                    suggestions: suggestions
                 };
 
                 setPlan(generatedPlan);
@@ -327,22 +325,33 @@ export default function InvestmentsPage() {
                          <CardHeader>
                             <CardTitle className="font-headline text-lg">Remaining Amount</CardTitle>
                         </CardHeader>
-                         <CardContent className="grid gap-6 lg:grid-cols-2">
-                             <div className="flex items-center justify-center">
-                                <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px] max-w-[250px]">
-                                     <ResponsiveContainer width="100%" height="100%">
+                         <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                <ChartContainer config={chartConfig} className="mx-auto aspect-square h-full max-h-[300px]">
+                                    <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <ChartTooltip content={<ChartTooltipContent nameKey="amount" formatter={(value) => `${value}%`} hideLabel />} />
                                             <Pie data={chartData} dataKey="amount" nameKey="asset" innerRadius={60} strokeWidth={5}>
-                                                 {chartData.map((entry) => (
-                                                    <Cell key={`cell-${entry.asset}`} fill={entry.fill} />
+                                                {chartData.map((entry) => (
+                                                <Cell key={`cell-${entry.asset}`} fill={entry.fill} />
                                                 ))}
                                             </Pie>
-                                             <Legend content={<ChartTooltipContent hideIndicator />} />
                                         </PieChart>
                                     </ResponsiveContainer>
                                 </ChartContainer>
-                             </div>
+                                <div className="flex flex-col gap-4 text-sm">
+                                    <p className="text-muted-foreground">Suggested mutual fund SIP breakdown for your investable amount.</p>
+                                    {chartData.map((entry) => (
+                                        <div key={entry.asset} className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.fill }} />
+                                                <span>{entry.asset}</span>
+                                            </div>
+                                            <span className="font-semibold">{entry.amount}%</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
 
@@ -388,3 +397,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
