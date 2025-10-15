@@ -6,8 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, DollarSign, TrendingUp, Landmark, Receipt } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function AddDetailsPage() {
+  const [monthlyIncome, setMonthlyIncome] = useState(150000);
+  const [annualIncome, setAnnualIncome] = useState(200000);
+  const [overallMonthlyIncome, setOverallMonthlyIncome] = useState(0);
+
+  useEffect(() => {
+    const calculatedOverall = monthlyIncome + (annualIncome / 12);
+    setOverallMonthlyIncome(calculatedOverall);
+  }, [monthlyIncome, annualIncome]);
+
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
 
   return (
     <div>
@@ -36,11 +49,15 @@ export default function AddDetailsPage() {
             </div>
             <div className="space-y-2">
                 <Label htmlFor="monthly-income">Monthly Income (₹)</Label>
-                <Input id="monthly-income" type="number" placeholder="150000" />
+                <Input id="monthly-income" type="number" value={monthlyIncome} onChange={(e) => setMonthlyIncome(Number(e.target.value))} />
             </div>
              <div className="space-y-2">
-                <Label htmlFor="annual-bonus">Estimated Annual Bonus (₹)</Label>
-                <Input id="annual-bonus" type="number" placeholder="200000" />
+                <Label htmlFor="annual-income">Annual Income (₹)</Label>
+                <Input id="annual-income" type="number" value={annualIncome} onChange={(e) => setAnnualIncome(Number(e.target.value))} />
+            </div>
+             <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="overall-monthly-income">Overall Monthly Income (Calculated)</Label>
+                <Input id="overall-monthly-income" type="text" value={formatCurrency(overallMonthlyIncome)} disabled readOnly />
             </div>
           </CardContent>
         </Card>
@@ -88,4 +105,3 @@ export default function AddDetailsPage() {
     </div>
   );
 }
-
