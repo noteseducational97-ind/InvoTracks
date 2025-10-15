@@ -353,21 +353,21 @@ export default function ManagePage() {
                                 <CardHeader className="p-4">
                                     <CardDescription>Expenses</CardDescription>
                                     <p className="text-2xl font-bold">{expensePercentage.toFixed(1)}%</p>
-                                    <p className="text-xs text-muted-foreground">Ideal: 50%</p>
+                                    <p className="text-sm text-muted-foreground">Ideal: 50%</p>
                                 </CardHeader>
                             </Card>
                              <Card className="text-center">
                                 <CardHeader className="p-4">
                                     <CardDescription>EMI</CardDescription>
                                     <p className="text-2xl font-bold">{emiPercentage.toFixed(1)}%</p>
-                                    <p className="text-xs text-muted-foreground">Ideal: 30%</p>
+                                    <p className="text-sm text-muted-foreground">Ideal: 30%</p>
                                 </CardHeader>
                             </Card>
                              <Card className="text-center">
                                 <CardHeader className="p-4">
                                     <CardDescription>Investment</CardDescription>
                                     <p className="text-2xl font-bold">{investmentPercentage.toFixed(1)}%</p>
-                                    <p className="text-xs text-muted-foreground">Ideal: 20%</p>
+                                    <p className="text-sm text-muted-foreground">Ideal: 20%</p>
                                 </CardHeader>
                             </Card>
                         </div>
