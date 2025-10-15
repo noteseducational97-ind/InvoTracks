@@ -335,7 +335,7 @@ export default function InvestmentsPage() {
                         </CardHeader>
                          <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                               <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px] w-full">
+                               <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px] w-full relative">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <ChartTooltip content={<ChartTooltipContent nameKey="value" formatter={(value) => `${value}%`} hideLabel />} />
@@ -412,5 +412,7 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
 
     
