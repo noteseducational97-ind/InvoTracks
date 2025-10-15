@@ -114,25 +114,22 @@ export default function AddDetailsPage() {
     setLoans(prevLoans => prevLoans.filter(loan => loan.id !== id));
   };
   
-  const handleInvestmentToggle = (category: keyof InvestmentsState, value: 'yes' | 'no') => {
+ const handleInvestmentToggle = (category: keyof InvestmentsState, value: 'yes' | 'no') => {
     setInvestments(prev => {
-      const isInsurance = category === 'termInsurance' || category === 'healthInsurance';
-      const currentCategoryState = prev[category];
+      const currentCategoryState = { ...prev[category] };
+      currentCategoryState.invested = value;
+      if (value === 'no') {
+        currentCategoryState.amount = '';
+      }
       
-      const newCategoryState = {
-        ...currentCategoryState,
-        invested: value,
-        amount: value === 'no' ? '' : currentCategoryState.amount,
-      };
-
-      // Ensure frequency is preserved for insurance categories
-      if (isInsurance) {
-        (newCategoryState as any).frequency = (currentCategoryState as any).frequency || 'yearly';
+      // Ensure frequency is always present for insurance categories
+      if (category === 'termInsurance' || category === 'healthInsurance') {
+        (currentCategoryState as any).frequency = (currentCategoryState as any).frequency || 'yearly';
       }
 
       return {
         ...prev,
-        [category]: newCategoryState,
+        [category]: currentCategoryState,
       };
     });
   };
