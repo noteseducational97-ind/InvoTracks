@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Generates a personalized investment plan using AI.
@@ -28,7 +29,8 @@ const investmentPrompt = ai.definePrompt({
     - Risk Tolerance (riskPercentage)
 
     First, calculate the user's net monthly disposable income (cashflow) available for investment.
-    Net Monthly Cashflow = (monthlyIncome + (annualIncome / 12)) - (all monthly expenses) - (all monthly loan EMIs) - (all monthly insurance premiums).
+    To calculate insurance premiums, if the frequency is 'yearly', divide by 12. If 'half-yearly', divide by 6. If 'quarterly', divide by 3.
+    Net Monthly Cashflow = (monthlyIncome + (annualIncome / 12)) - (all monthly expenses) - (all monthly loan EMIs) - (all converted monthly insurance premiums).
 
     Based on the net monthly cashflow, risk tolerance, and age, provide a detailed investment plan.
 

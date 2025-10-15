@@ -120,7 +120,17 @@ export default function EditDetailsPage() {
         setAnnualIncome(financialProfile.annualIncome || "");
         setExpenses(financialProfile.expenses || defaultExpenses);
         setLoans(financialProfile.loans && financialProfile.loans.length > 0 ? financialProfile.loans : defaultLoans);
-        setInvestments(financialProfile.investments || defaultInvestments);
+
+        const loadedInvestments = { ...defaultInvestments, ...financialProfile.investments };
+        if (!loadedInvestments.termInsurance.frequency) {
+            loadedInvestments.termInsurance.frequency = 'yearly';
+        }
+        if (!loadedInvestments.healthInsurance.frequency) {
+            loadedInvestments.healthInsurance.frequency = 'yearly';
+        }
+
+        setInvestments(loadedInvestments);
+
     } else if (user) {
       setName(user.displayName || "");
     }
@@ -190,8 +200,8 @@ export default function EditDetailsPage() {
         name,
         dob,
         riskPercentage,
-        monthlyIncome,
-        annualIncome,
+        monthlyIncome: String(monthlyIncome),
+        annualIncome: String(annualIncome),
         expenses,
         loans,
         investments,
@@ -468,5 +478,3 @@ export default function EditDetailsPage() {
     </div>
   );
 }
-
-    

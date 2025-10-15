@@ -151,8 +151,8 @@ export default function AddDetailsPage() {
         name,
         dob,
         riskPercentage,
-        monthlyIncome,
-        annualIncome,
+        monthlyIncome: String(monthlyIncome),
+        annualIncome: String(annualIncome),
         expenses,
         loans,
         investments,
@@ -421,5 +421,3 @@ export default function AddDetailsPage() {
     </div>
   );
 }
-
-    
