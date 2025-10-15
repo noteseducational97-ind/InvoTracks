@@ -6,11 +6,12 @@ import { AppLogo } from '@/components/app-logo';
 import { MainNav } from '@/components/main-nav';
 import { UserNav } from '@/components/user-nav';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Search, Briefcase, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({
   children,
@@ -72,12 +73,14 @@ export default function DashboardLayout({
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col bg-sidebar text-sidebar-foreground p-0">
-              <div className="flex h-16 items-center border-b border-sidebar-border px-6">
+               <SheetHeader className="p-4 border-b border-sidebar-border">
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                  <SheetDescription className="sr-only">Main navigation links for the dashboard.</SheetDescription>
                   <Link href="/dashboard/overview" className="flex items-center gap-2 font-semibold">
                       <Briefcase className="h-6 w-6 text-primary" />
                       <span className="font-headline text-lg text-primary">InvoTrack</span>
                   </Link>
-              </div>
+              </SheetHeader>
               <div className="py-2">
                  <MainNav user={appUser} isMobile={true} />
               </div>
