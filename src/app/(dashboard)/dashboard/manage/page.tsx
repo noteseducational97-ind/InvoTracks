@@ -3,12 +3,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function ManagePage() {
   const [hasDetails, setHasDetails] = useState(false);
 
-  if (!hasDetails) {
+  // In a real app, you would fetch user data to determine this.
+  // For now, we use a state to simulate a new vs. existing user.
+  // We'll toggle it to "true" to simulate an existing user with details.
+  const [isNewUser, setIsNewUser] = useState(true);
+
+  if (isNewUser) {
     return (
       <div>
         <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
@@ -19,9 +25,11 @@ export default function ManagePage() {
                 <CardDescription>Get started by adding your financial details.</CardDescription>
             </CardHeader>
             <CardContent>
-                <Button onClick={() => setHasDetails(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Details
+                <Button asChild>
+                    <Link href="/dashboard/manage/add-details">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Details
+                    </Link>
                 </Button>
             </CardContent>
         </Card>
@@ -46,8 +54,8 @@ export default function ManagePage() {
               </CardTitle>
               <CardDescription>Personal and income information.</CardDescription>
             </div>
-            <Button variant="ghost" size="icon">
-                <Pencil className="h-4 w-4" />
+            <Button variant="ghost" size="icon" asChild>
+                <Link href="/dashboard/manage/add-details"><Pencil className="h-4 w-4" /></Link>
             </Button>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
@@ -70,8 +78,8 @@ export default function ManagePage() {
                 </CardTitle>
                 <CardDescription>A summary of your recurring monthly costs.</CardDescription>
             </div>
-            <Button variant="ghost" size="icon">
-                <Pencil className="h-4 w-4" />
+             <Button variant="ghost" size="icon" asChild>
+                <Link href="/dashboard/manage/add-details"><Pencil className="h-4 w-4" /></Link>
             </Button>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
