@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -119,6 +120,66 @@
         "quantity",
         "purchasePrice"
       ]
+    },
+    "FinancialProfile": {
+      "title": "Financial Profile",
+      "type": "object",
+      "description": "Stores a user's comprehensive financial details.",
+      "properties": {
+        "name": { "type": "string" },
+        "dob": { "type": "string", "format": "date" },
+        "riskPercentage": { "type": "string" },
+        "monthlyIncome": { "type": "string" },
+        "annualIncome": { "type": "string" },
+        "expenses": {
+          "type": "object",
+          "properties": {
+            "rent": { "type": "string" },
+            "utilities": { "type": "string" },
+            "transport": { "type": "string" },
+            "food": { "type": "string" },
+            "entertainment": { "type": "string" },
+            "healthcare": { "type": "string" },
+            "other": { "type": "string" }
+          }
+        },
+        "loans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "number" },
+              "type": { "type": "string" },
+              "amount": { "type": "string" },
+              "emi": { "type": "string" },
+              "rate": { "type": "string" },
+              "tenure": { "type": "string" }
+            }
+          }
+        },
+        "investments": {
+          "type": "object",
+          "properties": {
+            "stocks": { "$ref": "#/entities/FinancialProfile/properties/investments/definitions/investmentCategory" },
+            "mutualFunds": { "$ref": "#/entities/FinancialProfile/properties/investments/definitions/investmentCategory" },
+            "bonds": { "$ref": "#/entities/FinancialProfile/properties/investments/definitions/investmentCategory" },
+            "realEstate": { "$ref": "#/entities/FinancialProfile/properties/investments/definitions/investmentCategory" },
+            "commodities": { "$ref": "#/entities/FinancialProfile/properties/investments/definitions/investmentCategory" },
+            "other": { "$ref": "#/entities/FinancialProfile/properties/investments/definitions/investmentCategory" },
+            "termInsurance": { "$ref": "#/entities/FinancialProfile/properties/investments/definitions/investmentCategory" },
+            "healthInsurance": { "$ref": "#/entities/FinancialProfile/properties/investments/definitions/investmentCategory" }
+          },
+          "definitions": {
+            "investmentCategory": {
+              "type": "object",
+              "properties": {
+                "invested": { "type": "string", "enum": ["yes", "no"] },
+                "amount": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "auth": {
@@ -182,6 +243,26 @@
             {
               "name": "investmentId",
               "description": "The unique identifier for the investment."
+            }
+          ]
+        }
+      },
+       {
+        "path": "/users/{userId}/financial_profile/{profileId}",
+        "definition": {
+          "entityName": "FinancialProfile",
+          "schema": {
+            "$ref": "#/entities/FinancialProfile"
+          },
+          "description": "Stores the user's detailed financial profile. Only the owner can read/write.",
+           "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+                "name": "profileId",
+                "description": "The unique identifier for the financial profile, typically 'default'."
             }
           ]
         }

@@ -7,9 +7,12 @@ import { Label } from "@/components/ui/label";
 import { User, DollarSign, Landmark, TrendingUp, PlusCircle, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useUser } from "@/firebase";
+import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { doc, setDoc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 type Loan = {
   id: number;
@@ -32,10 +35,27 @@ type InvestmentsState = {
 
 export default function AddDetailsPage() {
   const { user } = useUser();
+  const firestore = useFirestore();
+  const router = useRouter();
+  const { toast } = useToast();
+
   const [name, setName] = useState("");
+  const [dob, setDob] = useState("");
+  const [riskPercentage, setRiskPercentage] = useState("");
   const [monthlyIncome, setMonthlyIncome] = useState<number | string>("");
   const [annualIncome, setAnnualIncome] = useState<number | string>("");
   const [overallMonthlyIncome, setOverallMonthlyIncome] = useState(0);
+
+  const [expenses, setExpenses] = useState({
+    rent: '',
+    utilities: '',
+    transport: '',
+    food: '',
+    entertainment: '',
+    healthcare: '',
+    other: ''
+  });
+
   const [loans, setLoans] = useState<Loan[]>([
     { id: Date.now(), type: '', amount: '', emi: '', rate: '', tenure: '' }
   ]);
@@ -64,6 +84,10 @@ export default function AddDetailsPage() {
     const calculatedOverall = monthly + (annual / 12);
     setOverallMonthlyIncome(calculatedOverall);
   }, [monthlyIncome, annualIncome]);
+
+  const handleExpenseChange = (field: keyof typeof expenses, value: string) => {
+    setExpenses(prev => ({...prev, [field]: value}));
+  }
   
   const handleLoanChange = (id: number, field: keyof Omit<Loan, 'id'>, value: string) => {
     setLoans(prevLoans => 
@@ -96,6 +120,46 @@ export default function AddDetailsPage() {
     }));
   };
 
+  const handleSaveDetails = async () => {
+    if (!user || !firestore) {
+        toast({
+            title: "Error",
+            description: "You must be logged in to save details.",
+            variant: "destructive",
+        });
+        return;
+    }
+
+    const financialProfileRef = doc(firestore, 'users', user.uid, 'financial_profile', 'default');
+    
+    const profileData = {
+        name,
+        dob,
+        riskPercentage,
+        monthlyIncome,
+        annualIncome,
+        expenses,
+        loans,
+        investments,
+    };
+    
+    try {
+        await setDoc(financialProfileRef, profileData);
+        toast({
+            title: "Success",
+            description: "Your financial details have been saved.",
+        });
+        router.push('/dashboard/manage');
+    } catch (error) {
+        console.error("Error saving details: ", error);
+        toast({
+            title: "Save Failed",
+            description: "Could not save your details. Please try again.",
+            variant: "destructive",
+        });
+    }
+  };
+
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -124,11 +188,11 @@ export default function AddDetailsPage() {
             </div>
             <div className="space-y-2">
                 <Label htmlFor="risk-percentage">Risk Percentage (%)</Label>
-                <Input id="risk-percentage" type="number" placeholder="" />
+                <Input id="risk-percentage" type="number" placeholder="" value={riskPercentage} onChange={e => setRiskPercentage(e.target.value)} />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="dob">Date of Birth</Label>
-                <Input id="dob" type="date" />
+                <Input id="dob" type="date" value={dob} onChange={e => setDob(e.target.value)} />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="monthly-income">Monthly Income (₹)</Label>
@@ -159,31 +223,31 @@ export default function AddDetailsPage() {
           <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
              <div className="space-y-2">
                 <Label htmlFor="rent">Housing (Rent/EMI)</Label>
-                <Input id="rent" type="number" placeholder="" />
+                <Input id="rent" type="number" placeholder="" value={expenses.rent} onChange={e => handleExpenseChange('rent', e.target.value)}/>
             </div>
              <div className="space-y-2">
                 <Label htmlFor="utilities">Utilities</Label>
-                <Input id="utilities" type="number" placeholder="" />
+                <Input id="utilities" type="number" placeholder="" value={expenses.utilities} onChange={e => handleExpenseChange('utilities', e.target.value)} />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="transport">Transportation</Label>
-                <Input id="transport" type="number" placeholder="" />
+                <Input id="transport" type="number" placeholder="" value={expenses.transport} onChange={e => handleExpenseChange('transport', e.target.value)} />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="food">Groceries & Food</Label>
-                <Input id="food" type="number" placeholder="" />
+                <Input id="food" type="number" placeholder="" value={expenses.food} onChange={e => handleExpenseChange('food', e.target.value)} />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="entertainment">Entertainment</Label>
-                <Input id="entertainment" type="number" placeholder="" />
+                <Input id="entertainment" type="number" placeholder="" value={expenses.entertainment} onChange={e => handleExpenseChange('entertainment', e.target.value)} />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="healthcare">Healthcare</Label>
-                <Input id="healthcare" type="number" placeholder="" />
+                <Input id="healthcare" type="number" placeholder="" value={expenses.healthcare} onChange={e => handleExpenseChange('healthcare', e.target.value)} />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="other-expenses">Other</Label>
-                <Input id="other-expenses" type="number" placeholder="" />
+                <Input id="other-expenses" type="number" placeholder="" value={expenses.other} onChange={e => handleExpenseChange('other', e.target.value)} />
             </div>
           </CardContent>
         </Card>
@@ -223,19 +287,19 @@ export default function AddDetailsPage() {
                       </div>
                       <div className="space-y-2">
                           <Label htmlFor={`loan-amount-${loan.id}`}>Loan Amount (₹)</Label>
-                          <Input id={`loan-amount-${loan.id}`} type="number" placeholder="e.g., 500000" value={loan.amount} onChange={e => handleLoanChange(loan.id, 'amount', e.target.value)} />
+                          <Input id={`loan-amount-${loan.id}`} type="number" placeholder="" value={loan.amount} onChange={e => handleLoanChange(loan.id, 'amount', e.target.value)} />
                       </div>
                       <div className="space-y-2">
                           <Label htmlFor={`monthly-emi-${loan.id}`}>Monthly EMI (₹)</Label>
-                          <Input id={`monthly-emi-${loan.id}`} type="number" placeholder="e.g., 12000" value={loan.emi} onChange={e => handleLoanChange(loan.id, 'emi', e.target.value)} />
+                          <Input id={`monthly-emi-${loan.id}`} type="number" placeholder="" value={loan.emi} onChange={e => handleLoanChange(loan.id, 'emi', e.target.value)} />
                       </div>
                       <div className="space-y-2">
                           <Label htmlFor={`interest-rate-${loan.id}`}>Interest Rate (%)</Label>
-                          <Input id={`interest-rate-${loan.id}`} type="number" placeholder="e.g., 8.5" value={loan.rate} onChange={e => handleLoanChange(loan.id, 'rate', e.target.value)} />
+                          <Input id={`interest-rate-${loan.id}`} type="number" placeholder="" value={loan.rate} onChange={e => handleLoanChange(loan.id, 'rate', e.target.value)} />
                       </div>
                       <div className="space-y-2">
                           <Label htmlFor={`tenure-${loan.id}`}>Tenure (Years)</Label>
-                          <Input id={`tenure-${loan.id}`} type="number" placeholder="e.g., 5" value={loan.tenure} onChange={e => handleLoanChange(loan.id, 'tenure', e.target.value)} />
+                          <Input id={`tenure-${loan.id}`} type="number" placeholder="" value={loan.tenure} onChange={e => handleLoanChange(loan.id, 'tenure', e.target.value)} />
                       </div>
                     </div>
                 </div>
@@ -329,11 +393,9 @@ export default function AddDetailsPage() {
             <Button variant="outline" asChild>
                 <Link href="/dashboard/manage">Cancel</Link>
             </Button>
-            <Button>Save Details</Button>
+            <Button onClick={handleSaveDetails}>Save Details</Button>
         </div>
       </div>
     </div>
   );
 }
-
-    
