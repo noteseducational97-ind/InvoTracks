@@ -204,11 +204,11 @@ export default function InvestmentsPage() {
                 }
                 
                 // Emergency Fund
-                const emergencyFundTarget = totalMonthlyExpenses * 6;
+                const emergencyFundTarget = totalMonthlyIncome * 6;
                  suggestions.push({
                     icon: Banknote,
                     category: "Emergency Fund",
-                    description: `Build a fund to cover 6 months of your expenses (${formatCurrency(totalMonthlyExpenses)}/month). Your target should be ${formatCurrency(emergencyFundTarget)}. Allocate a portion of your monthly savings here until the target is met.`,
+                    description: `Build an emergency fund to cover at least 6 months of your salary (${formatCurrency(totalMonthlyIncome)}/month). Your target should be at least ${formatCurrency(emergencyFundTarget)}. This fund provides a safety net for unexpected financial events.`,
                 });
                 
                 // Loan Repayment
