@@ -346,7 +346,29 @@ export default function ManagePage() {
                         A popular guideline for budgeting: allocate 50% of your income to needs, 30% to wants/loans, and 20% to savings.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-6">
+                    {totalMonthlyIncome > 50000 && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <Card className="text-center">
+                                <CardHeader className="pb-2">
+                                    <CardDescription>Expenses %</CardDescription>
+                                    <CardTitle className="text-3xl">{expensePercentage.toFixed(1)}%</CardTitle>
+                                </CardHeader>
+                            </Card>
+                             <Card className="text-center">
+                                <CardHeader className="pb-2">
+                                    <CardDescription>EMI %</CardDescription>
+                                    <CardTitle className="text-3xl">{emiPercentage.toFixed(1)}%</CardTitle>
+                                </CardHeader>
+                            </Card>
+                             <Card className="text-center">
+                                <CardHeader className="pb-2">
+                                    <CardDescription>Investment %</CardDescription>
+                                    <CardTitle className="text-3xl">{investmentPercentage.toFixed(1)}%</CardTitle>
+                                </CardHeader>
+                            </Card>
+                        </div>
+                    )}
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline text-lg">Your Comparison</CardTitle>
