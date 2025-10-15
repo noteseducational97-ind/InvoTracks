@@ -367,11 +367,6 @@ export default function ManagePage() {
                         <Shield className="h-5 w-5 text-primary" />
                         Emergency Fund Plan
                     </CardTitle>
-                    <CardDescription className={cn(
-                        emergencyFundStatus === 'low' ? 'text-red-900/80 dark:text-red-200/80' : 'text-green-900/80 dark:text-green-200/80'
-                    )}>
-                        An emergency fund should cover 6 to 18 months of your monthly income.
-                    </CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <Card>
