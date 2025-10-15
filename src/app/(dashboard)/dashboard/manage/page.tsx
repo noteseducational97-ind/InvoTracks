@@ -6,7 +6,6 @@ import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Lo
 import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 
@@ -114,17 +113,19 @@ export default function ManagePage() {
   const totalOutstandingLoan = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.amount) || 0), 0) : 0;
   const totalMonthlyEmi = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0) : 0;
 
+  const monthlySIP = (financialProfile?.investments.mutualFunds.invested === 'yes' ? Number(financialProfile.investments.mutualFunds.amount) : 0) || 0;
   const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
   const monthlyHealthInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.healthInsurance);
   const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.termInsurance);
   
   const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
-  const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
+  const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance - monthlySIP;
 
   // 50-30-20 Rule Calculations
-  const expensePercentage = totalMonthlyIncome > 0 ? ((totalMonthlyExpenses) / totalMonthlyIncome) * 100 : 0;
+  const expensePercentage = totalMonthlyIncome > 0 ? ((totalMonthlyExpenses + totalMonthlyInsurance) / totalMonthlyIncome) * 100 : 0;
   const emiPercentage = totalMonthlyIncome > 0 ? (totalMonthlyEmi / totalMonthlyIncome) * 100 : 0;
-  const investmentPercentage = totalMonthlyIncome > 0 ? (totalMonthlyInsurance / totalMonthlyIncome) * 100 : 0;
+  const investmentPercentage = totalMonthlyIncome > 0 ? ((monthlySIP) / totalMonthlyIncome) * 100 : 0;
+
 
   const expenseStatus = expensePercentage <= 50;
   const emiStatus = emiPercentage <= 30;
@@ -169,7 +170,7 @@ export default function ManagePage() {
          const insuranceValue = value as InsuranceCategory;
          const label = {
             stocks: "Stocks",
-            mutualFunds: "Mutual Funds",
+            mutualFunds: "Mutual Funds (SIP)",
             bonds: "Bonds",
             realEstate: "Real Estate",
             commodities: "Commodities",
@@ -177,10 +178,15 @@ export default function ManagePage() {
             termInsurance: "Term Insurance Premium",
             healthInsurance: "Health Insurance Premium"
         }[key as keyof FinancialProfile['investments']] || "Investment";
-
-        const displayValue = isInsurance 
-            ? `${formatCurrency(value.amount)} (${insuranceValue.frequency})`
-            : formatCurrency(value.amount);
+        
+        let displayValue;
+        if (key === 'mutualFunds') {
+            displayValue = `${formatCurrency(value.amount)} (monthly)`;
+        } else if (isInsurance) {
+             displayValue = `${formatCurrency(value.amount)} (${insuranceValue.frequency})`;
+        } else {
+            displayValue = formatCurrency(value.amount);
+        }
 
         return { name: label, value: displayValue };
     });
@@ -321,6 +327,12 @@ export default function ManagePage() {
                         <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyInsurance)}</span>
                     </div>
                 )}
+                 {monthlySIP > 0 && (
+                   <div className="flex justify-between">
+                        <span className="text-muted-foreground">Monthly SIP Investment</span>
+                        <span className="font-medium text-red-600">-{formatCurrency(monthlySIP)}</span>
+                    </div>
+                )}
                 <div className="flex justify-between">
                     <span className="text-muted-foreground">Total Monthly Loan EMI</span>
                     <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyEmi)}</span>
@@ -445,7 +457,5 @@ export default function ManagePage() {
 
     
 }
-
-    
 
     
