@@ -1,3 +1,4 @@
+
 'use client';
 
 import { AppLogo } from '@/components/app-logo';
@@ -10,7 +11,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, AuthError } from 'firebase/auth';
 
 function LoginButton() {
@@ -32,9 +33,17 @@ export default function LoginPage() {
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useUser();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard/overview');
+    }
+  }, [user, router]);
 
   useEffect(() => {
     if (error) {
@@ -47,26 +56,22 @@ export default function LoginPage() {
     }
   }, [error, toast]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard/overview');
-    } catch (e) {
-      const err = e as AuthError;
-      setError(err.message);
-    }
+    signInWithEmailAndPassword(auth, email, password)
+        .catch((e) => {
+            const err = e as AuthError;
+            setError(err.message);
+        });
   };
   
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
       const provider = new GoogleAuthProvider();
-      try {
-          await signInWithPopup(auth, provider);
-          router.push('/dashboard/overview');
-      } catch (e) {
-          const err = e as AuthError;
-          setError(err.message);
-      }
+      signInWithPopup(auth, provider)
+          .catch((e) => {
+              const err = e as AuthError;
+              setError(err.message);
+          });
   }
 
   return (

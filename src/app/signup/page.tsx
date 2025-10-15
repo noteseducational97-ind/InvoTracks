@@ -1,3 +1,4 @@
+
 'use client';
 
 import { AppLogo } from '@/components/app-logo';
@@ -10,7 +11,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, AuthError } from 'firebase/auth';
 
 function SignupButton() {
@@ -32,10 +33,18 @@ export default function SignupPage() {
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useUser();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard/overview');
+    }
+  }, [user, router]);
 
   useEffect(() => {
     if (error) {
@@ -48,29 +57,27 @@ export default function SignupPage() {
     }
   }, [error, toast]);
   
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = (e: React.FormEvent) => {
       e.preventDefault();
-      try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          if (userCredential.user) {
-              await updateProfile(userCredential.user, { displayName: name });
-          }
-          router.push('/dashboard/overview');
-      } catch (e) {
-          const err = e as AuthError;
-          setError(err.message);
-      }
+      createUserWithEmailAndPassword(auth, email, password)
+          .then(userCredential => {
+              if (userCredential.user) {
+                  return updateProfile(userCredential.user, { displayName: name });
+              }
+          })
+          .catch((e) => {
+              const err = e as AuthError;
+              setError(err.message);
+          });
   }
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
       const provider = new GoogleAuthProvider();
-      try {
-          await signInWithPopup(auth, provider);
-          router.push('/dashboard/overview');
-      } catch (e) {
-          const err = e as AuthError;
-          setError(err.message);
-      }
+      signInWithPopup(auth, provider)
+          .catch((e) => {
+              const err = e as AuthError;
+              setError(err.message);
+          });
   }
 
   return (
