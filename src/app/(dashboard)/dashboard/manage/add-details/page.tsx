@@ -43,11 +43,11 @@ export default function AddDetailsPage() {
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" placeholder="Prasanna Warade" />
+                <Input id="name" placeholder="" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="risk-percentage">Risk Percentage (%)</Label>
-                <Input id="risk-percentage" type="number" placeholder="e.g., 85" />
+                <Input id="risk-percentage" type="number" placeholder="" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="dob">Date of Birth</Label>
@@ -55,12 +55,12 @@ export default function AddDetailsPage() {
             </div>
             <div className="space-y-2">
                 <Label htmlFor="monthly-income">Monthly Income (₹)</Label>
-                <Input id="monthly-income" type="number" placeholder="150000" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} />
+                <Input id="monthly-income" type="number" placeholder="" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} />
             </div>
             <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="annual-income">Annual Income (₹)</Label>
-                    <Input id="annual-income" type="number" placeholder="200000" value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} />
+                    <Input id="annual-income" type="number" placeholder="" value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="overall-monthly-income">Overall Monthly Income</Label>
@@ -82,23 +82,23 @@ export default function AddDetailsPage() {
           <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
              <div className="space-y-2">
                 <Label htmlFor="rent">Housing (Rent/EMI)</Label>
-                <Input id="rent" type="number" placeholder="40000" />
+                <Input id="rent" type="number" placeholder="" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="utilities">Utilities</Label>
-                <Input id="utilities" type="number" placeholder="5500" />
+                <Input id="utilities" type="number" placeholder="" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="transport">Transportation</Label>
-                <Input id="transport" type="number" placeholder="7000" />
+                <Input id="transport" type="number" placeholder="" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="food">Groceries & Food</Label>
-                <Input id="food" type="number" placeholder="15000" />
+                <Input id="food" type="number" placeholder="" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="insurance">Insurance Premiums</Label>
-                <Input id="insurance" type="number" placeholder="8000" />
+                <Input id="insurance" type="number" placeholder="" />
             </div>
           </CardContent>
         </Card>
