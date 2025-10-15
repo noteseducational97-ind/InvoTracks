@@ -376,37 +376,34 @@ export default function ManagePage() {
                         <CardHeader>
                             <CardTitle className="font-headline text-lg">Your Comparison</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-6 text-sm">
-                            {/* Expenses */}
-                            <div>
-                                <div className="flex justify-between mb-1">
-                                    <span className="font-medium">Needs (Expenses): {expensePercentage.toFixed(1)}%</span>
-                                    <span className={cn("font-semibold", expenseStatus ? 'text-green-600' : 'text-red-600')}>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <Card className={cn(!expenseStatus && "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700")}>
+                                <CardHeader className="p-4">
+                                    <CardDescription>Needs (Expenses)</CardDescription>
+                                    <CardTitle className="text-2xl">{expensePercentage.toFixed(1)}%</CardTitle>
+                                    <p className={cn("font-semibold", expenseStatus ? 'text-green-600' : 'text-red-600')}>
                                         {expenseStatus ? 'On Track (<= 50%)' : 'High (> 50%)'}
-                                    </span>
-                                </div>
-                                <Progress value={expensePercentage} className={cn(expenseStatus ? '[&>div]:bg-green-500' : '[&>div]:bg-red-500')} />
-                            </div>
-                            {/* EMIs */}
-                            <div>
-                                <div className="flex justify-between mb-1">
-                                    <span className="font-medium">Wants (EMIs/Debts): {emiPercentage.toFixed(1)}%</span>
-                                    <span className={cn("font-semibold", emiStatus ? 'text-green-600' : 'text-red-600')}>
+                                    </p>
+                                </CardHeader>
+                            </Card>
+                             <Card className={cn(!emiStatus && "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700")}>
+                                <CardHeader className="p-4">
+                                    <CardDescription>Wants (EMIs/Debts)</CardDescription>
+                                    <CardTitle className="text-2xl">{emiPercentage.toFixed(1)}%</CardTitle>
+                                    <p className={cn("font-semibold", emiStatus ? 'text-green-600' : 'text-red-600')}>
                                         {emiStatus ? 'On Track (<= 30%)' : 'High (> 30%)'}
-                                    </span>
-                                </div>
-                                <Progress value={emiPercentage} className={cn(emiStatus ? '[&>div]:bg-green-500' : '[&>div]:bg-red-500')} />
-                            </div>
-                            {/* Investments */}
-                            <div>
-                                <div className="flex justify-between mb-1">
-                                    <span className="font-medium">Savings (Investments): {investmentPercentage.toFixed(1)}%</span>
-                                     <span className={cn("font-semibold", investmentStatus ? 'text-green-600' : 'text-red-600')}>
+                                    </p>
+                                </CardHeader>
+                            </Card>
+                            <Card className={cn(!investmentStatus && "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700")}>
+                                <CardHeader className="p-4">
+                                    <CardDescription>Savings (Investments)</CardDescription>
+                                    <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
+                                    <p className={cn("font-semibold", investmentStatus ? 'text-green-600' : 'text-red-600')}>
                                         {investmentStatus ? 'On Track (>= 20%)' : 'Low (< 20%)'}
-                                    </span>
-                                </div>
-                                 <Progress value={investmentPercentage} className={cn(investmentStatus ? '[&>div]:bg-green-500' : '[&>div]:bg-red-500')} />
-                            </div>
+                                    </p>
+                                </CardHeader>
+                            </Card>
                         </CardContent>
                         <CardFooter>
                              <div className="text-center text-muted-foreground text-sm w-full">
@@ -424,4 +421,5 @@ export default function ManagePage() {
       </div>
     </div>
   );
-}
+
+    
