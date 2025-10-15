@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, DollarSign } from "lucide-react";
+import { User, DollarSign, Landmark, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser } from "@/firebase";
@@ -64,12 +64,12 @@ export default function AddDetailsPage() {
             </div>
             <div className="space-y-2">
                 <Label htmlFor="monthly-income">Monthly Income (₹)</Label>
-                <Input id="monthly-income" type="number" placeholder="" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} />
+                <Input id="monthly-income" type="number" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} />
             </div>
             <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="annual-income">Annual Income (₹)</Label>
-                    <Input id="annual-income" type="number" placeholder="" value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} />
+                    <Input id="annual-income" type="number" value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="overall-monthly-income">Overall Monthly Income</Label>
@@ -91,34 +91,105 @@ export default function AddDetailsPage() {
           <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
              <div className="space-y-2">
                 <Label htmlFor="rent">Housing (Rent/EMI)</Label>
-                <Input id="rent" type="number" placeholder="" />
+                <Input id="rent" type="number" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="utilities">Utilities</Label>
-                <Input id="utilities" type="number" placeholder="" />
+                <Input id="utilities" type="number" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="transport">Transportation</Label>
-                <Input id="transport" type="number" placeholder="" />
+                <Input id="transport" type="number" />
             </div>
              <div className="space-y-2">
                 <Label htmlFor="food">Groceries & Food</Label>
-                <Input id="food" type="number" placeholder="" />
+                <Input id="food" type="number" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="entertainment">Entertainment</Label>
-                <Input id="entertainment" type="number" placeholder="" />
+                <Input id="entertainment" type="number" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="healthcare">Healthcare</Label>
-                <Input id="healthcare" type="number" placeholder="" />
+                <Input id="healthcare" type="number" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="other-expenses">Other</Label>
-                <Input id="other-expenses" type="number" placeholder="" />
+                <Input id="other-expenses" type="number" />
             </div>
           </CardContent>
         </Card>
+
+        {/* Debt Card */}
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2">
+                    <Landmark className="h-5 w-5 text-primary" />
+                    Debt
+                </CardTitle>
+                <CardDescription>Enter the outstanding balance for any active loans.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-2">
+                    <Label htmlFor="home-loan">Home Loan</Label>
+                    <Input id="home-loan" type="number" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="car-loan">Car Loan</Label>
+                    <Input id="car-loan" type="number" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="personal-loan">Personal Loan</Label>
+                    <Input id="personal-loan" type="number" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="credit-card-debt">Credit Card Debt</Label>
+                    <Input id="credit-card-debt" type="number" />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="other-debt">Other Loan</Label>
+                    <Input id="other-debt" type="number" />
+                </div>
+            </CardContent>
+        </Card>
+
+        {/* Existing Investment Card */}
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    Existing Investments
+                </CardTitle>
+                <CardDescription>Enter the current value of your existing investments.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-2">
+                    <Label htmlFor="stocks">Stocks</Label>
+                    <Input id="stocks" type="number" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="bonds">Bonds</Label>
+                    <Input id="bonds" type="number" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="mutual-funds">Mutual Funds</Label>
+                    <Input id="mutual-funds" type="number" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="real-estate">Real Estate</Label>
+                    <Input id="real-estate" type="number" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="commodities">Commodities</Label>
+                    <Input id="commodities" type="number" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="other-investments">Other</Label>
+                    <Input id="other-investments" type="number" />
+                </div>
+            </CardContent>
+        </Card>
+
 
         <div className="flex justify-end gap-2">
             <Button variant="outline" asChild>
