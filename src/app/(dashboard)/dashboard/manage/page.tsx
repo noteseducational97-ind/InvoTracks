@@ -132,117 +132,109 @@ export default function ManagePage() {
 
   return (
     <div>
-      <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
-      <p className="text-muted-foreground">A centralized view of your financial details and commitments.</p>
+      <div className="flex items-center justify-between">
+        <div>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
+            <p className="text-muted-foreground">A centralized view of your financial details and commitments.</p>
+        </div>
+        <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard/manage/edit"><Pencil className="h-4 w-4 mr-2" />Edit Details</Link>
+        </Button>
+      </div>
+
 
       <div className="mt-6 grid gap-6">
 
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <div className="space-y-1.5">
-                <CardTitle className="font-headline flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" />
-                    Financial Profile
-                </CardTitle>
-                <CardDescription>Your personal, income, expenses and loan details.</CardDescription>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                    <Link href="/dashboard/manage/edit"><Pencil className="h-4 w-4 mr-2" />Edit</Link>
-                </Button>
-            </CardHeader>
-        </Card>
-
-
         {/* Personal & Income Details Card */}
-        <Card className="lg:col-span-1">
+        <Card>
           <CardHeader>
-            <div className="space-y-1.5">
               <CardTitle className="font-headline flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
-                Your Details
+                Personal & Income Details
               </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Name:</span> <span className="font-medium">{financialProfile.name}</span></div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Date of Birth:</span> 
-              <span className="font-medium">{financialProfile.dob} {financialProfile.dob && `(Age: ${calculateAge(financialProfile.dob)})`}</span>
-            </div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Risk Profile:</span> <span className="font-medium">{financialProfile.riskPercentage}%</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Monthly Income:</span> <span className="font-medium">{formatCurrency(financialProfile.monthlyIncome)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Annual Income:</span> <span className="font-medium">{formatCurrency(financialProfile.annualIncome)}</span></div>
-          </CardContent>
-        </Card>
-
-        {/* Expenses Card */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <div className="space-y-1.5">
-                <CardTitle className="font-headline flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-primary" />
-                    Monthly Expenses
-                </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).map(([key, value]) => (
-                <div key={key} className="flex justify-between">
-                  <span className="text-muted-foreground capitalize">{key}:</span> 
-                  <span className="font-medium">{formatCurrency(value)}</span>
-                </div>
-            ))}
-            <div className="flex justify-between font-semibold pt-2 border-t"><span className="text-foreground">Total Monthly Expenses:</span> <span>{formatCurrency(totalMonthlyExpenses)}</span></div>
-          </CardContent>
-        </Card>
-
-        {/* Current Investments Card */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Current Investments & Insurance
-            </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 text-sm">
-             {existingInvestments.length > 0 ? existingInvestments.map(investment => (
-                <div key={investment.name} className="rounded-md border p-4">
-                    <p className="text-muted-foreground">{investment.name}</p>
-                    <p className="text-xl font-bold">{formatCurrency(investment.value)}</p>
-                </div>
-             )) : <p className="text-muted-foreground md:col-span-3">No investments or insurance details provided.</p>}
+            <div><span className="text-muted-foreground block">Name</span> <span className="font-medium">{financialProfile.name}</span></div>
+            <div>
+              <span className="text-muted-foreground block">Date of Birth</span> 
+              <span className="font-medium">{financialProfile.dob} {financialProfile.dob && `(Age: ${calculateAge(financialProfile.dob)})`}</span>
+            </div>
+            <div><span className="text-muted-foreground block">Risk Profile</span> <span className="font-medium">{financialProfile.riskPercentage}%</span></div>
+            <div><span className="text-muted-foreground block">Monthly Income</span> <span className="font-medium">{formatCurrency(financialProfile.monthlyIncome)}</span></div>
+            <div><span className="text-muted-foreground block">Annual Income</span> <span className="font-medium">{formatCurrency(financialProfile.annualIncome)}</span></div>
           </CardContent>
         </Card>
+        
+        <div className="grid gap-6 lg:grid-cols-2">
+            {/* Expenses Card */}
+            <Card>
+              <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                        <DollarSign className="h-5 w-5 text-primary" />
+                        Monthly Expenses
+                    </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                {Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).map(([key, value]) => (
+                    <div key={key} className="flex justify-between">
+                      <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> 
+                      <span className="font-medium">{formatCurrency(value)}</span>
+                    </div>
+                ))}
+                <div className="flex justify-between font-semibold pt-2 border-t"><span className="text-foreground">Total Monthly Expenses:</span> <span>{formatCurrency(totalMonthlyExpenses)}</span></div>
+              </CardContent>
+            </Card>
+
+            {/* Current Investments Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Investments & Insurance
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                 {existingInvestments.length > 0 ? existingInvestments.map(investment => (
+                    <div key={investment.name} className="flex justify-between">
+                        <p className="text-muted-foreground">{investment.name}</p>
+                        <p className="font-medium">{formatCurrency(investment.value)}</p>
+                    </div>
+                 )) : <p className="text-muted-foreground">No investments or insurance details provided.</p>}
+              </CardContent>
+            </Card>
+        </div>
+
 
         {/* Loan Card */}
         <Card>
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
               <Landmark className="h-5 w-5 text-primary" />
-              Active Loans
+              Active Loans & EMIs
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {financialProfile.loans.map(loan => (
-                 <div key={loan.id} className="flex justify-between"><span className="text-muted-foreground capitalize">{loan.type} Loan:</span> <span className="font-medium">{formatCurrency(loan.amount)}</span></div>
-            ))}
-             <div className="flex justify-between font-semibold pt-2 border-t"><span className="text-foreground">Total Outstanding:</span> <span>{formatCurrency(totalOutstandingLoan)}</span></div>
-          </CardContent>
-        </Card>
-
-        {/* EMI Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-primary" />
-              Monthly EMIs
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {financialProfile.loans.map(loan => (
-                 <div key={loan.id} className="flex justify-between"><span className="text-muted-foreground capitalize">{loan.type} Loan EMI:</span> <span className="font-medium">{formatCurrency(loan.emi)}</span></div>
-            ))}
-             <div className="flex justify-between font-semibold pt-2 border-t"><span className="text-foreground">Total Monthly EMI:</span> <span>{formatCurrency(totalMonthlyEmi)}</span></div>
+          <CardContent className="space-y-6 text-sm">
+            {financialProfile.loans.filter(loan => Number(loan.amount) > 0).length > 0 ? (
+                <>
+                {financialProfile.loans.filter(loan => Number(loan.amount) > 0).map(loan => (
+                     <div key={loan.id} className="p-4 rounded-lg border">
+                        <h4 className="font-semibold capitalize mb-2">{loan.type} Loan</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div><span className="text-muted-foreground block">Loan Amount</span> <span className="font-medium">{formatCurrency(loan.amount)}</span></div>
+                            <div><span className="text-muted-foreground block">Monthly EMI</span> <span className="font-medium">{formatCurrency(loan.emi)}</span></div>
+                            <div><span className="text-muted-foreground block">Interest Rate</span> <span className="font-medium">{loan.rate}%</span></div>
+                            <div><span className="text-muted-foreground block">Tenure</span> <span className="font-medium">{loan.tenure} Years</span></div>
+                        </div>
+                     </div>
+                ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-semibold pt-4 border-t">
+                    <div className="flex justify-between"><span className="text-foreground">Total Outstanding Loan:</span> <span>{formatCurrency(totalOutstandingLoan)}</span></div>
+                    <div className="flex justify-between"><span className="text-foreground">Total Monthly EMI:</span> <span>{formatCurrency(totalMonthlyEmi)}</span></div>
+                </div>
+                </>
+            ): (
+                 <p className="text-muted-foreground">No active loan details provided.</p>
+            )}
           </CardContent>
         </Card>
       </div>
