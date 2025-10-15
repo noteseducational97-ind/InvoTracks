@@ -122,9 +122,9 @@ export default function ManagePage() {
   const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance - monthlySIP;
 
   // 50-30-20 Rule Calculations
-  const expensePercentage = totalMonthlyIncome > 0 ? ((totalMonthlyExpenses + totalMonthlyInsurance) / totalMonthlyIncome) * 100 : 0;
+  const expensePercentage = totalMonthlyIncome > 0 ? (totalMonthlyExpenses / totalMonthlyIncome) * 100 : 0;
   const emiPercentage = totalMonthlyIncome > 0 ? (totalMonthlyEmi / totalMonthlyIncome) * 100 : 0;
-  const investmentPercentage = totalMonthlyIncome > 0 ? ((monthlySIP) / totalMonthlyIncome) * 100 : 0;
+  const investmentPercentage = totalMonthlyIncome > 0 ? ((monthlySIP + totalMonthlyInsurance) / totalMonthlyIncome) * 100 : 0;
 
 
   const expenseStatus = expensePercentage <= 50;
@@ -415,7 +415,7 @@ export default function ManagePage() {
                                     </p>
                                 </CardHeader>
                             </Card>
-                            <Link href="/dashboard/investments" className="group">
+                            <Link href="/dashboard/manage/edit" className="group">
                                 <Card className={cn(
                                     "transition-all group-hover:ring-2 group-hover:ring-primary h-full",
                                     investmentStatus
