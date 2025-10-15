@@ -285,7 +285,7 @@ export default function InvestmentsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-200">{formatCurrency(plan.emergencyFundAmount)}</div>
-                                    <p className="text-xs text-indigo-700 dark:text-indigo-400/80">30% of remaining amount.</p>
+                                    <p className="text-xs text-indigo-700 dark:text-indigo-400/80"></p>
                                 </CardContent>
                             </Card>
                             <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
@@ -308,7 +308,7 @@ export default function InvestmentsPage() {
                                 <p className="text-sm text-muted-foreground">A visual breakdown of where your monthly savings are going.</p>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                                 <ChartContainer config={chartConfig} className="relative mx-auto aspect-square h-64">
+                                <ChartContainer config={chartConfig} className="relative mx-auto aspect-square h-64">
                                      <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <ChartTooltip content={<ChartTooltipContent nameKey="label" hideLabel />} />
