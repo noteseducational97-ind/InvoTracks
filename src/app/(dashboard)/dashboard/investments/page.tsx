@@ -322,31 +322,30 @@ export default function InvestmentsPage() {
         
         if (plan) {
             return (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
-                    <div className="lg:col-span-1">
-                        <Card>
-                             <CardHeader>
-                                <CardTitle className="font-headline text-lg">Remaining Amount</CardTitle>
-                                <CardDescription>Suggested mutual fund SIP breakdown.</CardDescription>
-                            </CardHeader>
-                             <CardContent className="pt-0">
-                                <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px]">
-                                     <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <ChartTooltip content={<ChartTooltipContent nameKey="amount" formatter={(value) => `${value}%`} hideLabel />} />
-                                            <Pie data={chartData} dataKey="amount" nameKey="asset" innerRadius={60} strokeWidth={5}>
-                                                 {chartData.map((entry) => (
-                                                    <Cell key={`cell-${entry.asset}`} fill={entry.fill} />
-                                                ))}
-                                            </Pie>
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                </ChartContainer>
-                                 <p className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap">{plan.reasoning}</p>
-                            </CardContent>
-                        </Card>
-                    </div>
-                    <div className="lg:col-span-2">
+                <div className="flex flex-col gap-6 mt-6">
+                    <Card>
+                         <CardHeader>
+                            <CardTitle className="font-headline text-lg">Remaining Amount</CardTitle>
+                            <CardDescription>Suggested mutual fund SIP breakdown.</CardDescription>
+                        </CardHeader>
+                         <CardContent className="pt-0">
+                            <ChartContainer config={chartConfig} className="mx-auto aspect-square h-[250px] max-w-[300px]">
+                                 <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <ChartTooltip content={<ChartTooltipContent nameKey="amount" formatter={(value) => `${value}%`} hideLabel />} />
+                                        <Pie data={chartData} dataKey="amount" nameKey="asset" innerRadius={60} strokeWidth={5}>
+                                             {chartData.map((entry) => (
+                                                <Cell key={`cell-${entry.asset}`} fill={entry.fill} />
+                                            ))}
+                                        </Pie>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </ChartContainer>
+                             <p className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap">{plan.reasoning}</p>
+                        </CardContent>
+                    </Card>
+
+                    <div>
                         <h3 className="font-headline text-lg font-semibold mb-2">Investment Suggestions</h3>
                         <div className="space-y-4">
                             {plan.suggestions.map((suggestion, index) => (
@@ -388,5 +387,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
