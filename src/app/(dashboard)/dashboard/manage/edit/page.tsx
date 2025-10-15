@@ -23,12 +23,20 @@ type Loan = {
   tenure: string;
 };
 
-type InvestmentCategory = 'stocks' | 'mutualFunds' | 'bonds' | 'realEstate' | 'commodities' | 'other' | 'termInsurance' | 'healthInsurance';
+type InvestmentCategory = 'stocks' | 'mutualFunds' | 'bonds' | 'realEstate' | 'commodities' | 'other';
+type InsuranceCategory = 'termInsurance' | 'healthInsurance';
+type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
 
 type InvestmentsState = {
   [key in InvestmentCategory]: {
     invested: 'yes' | 'no';
     amount: string;
+  }
+} & {
+  [key in InsuranceCategory]: {
+    invested: 'yes' | 'no';
+    amount: string;
+    frequency: Frequency;
   }
 };
 
@@ -73,8 +81,8 @@ const defaultInvestments: InvestmentsState = {
     realEstate: { invested: 'no', amount: '' },
     commodities: { invested: 'no', amount: '' },
     other: { invested: 'no', amount: '' },
-    termInsurance: { invested: 'no', amount: '' },
-    healthInsurance: { invested: 'no', amount: '' },
+    termInsurance: { invested: 'no', amount: '', frequency: 'yearly' },
+    healthInsurance: { invested: 'no', amount: '', frequency: 'yearly' },
 };
 
 
@@ -147,17 +155,24 @@ export default function EditDetailsPage() {
     setLoans(prevLoans => prevLoans.filter(loan => loan.id !== id));
   };
   
-  const handleInvestmentToggle = (category: InvestmentCategory, value: 'yes' | 'no') => {
+  const handleInvestmentToggle = (category: keyof InvestmentsState, value: 'yes' | 'no') => {
     setInvestments(prev => ({
       ...prev,
       [category]: { ...prev[category], invested: value, amount: value === 'no' ? '' : prev[category].amount }
     }));
   };
 
-  const handleInvestmentAmountChange = (category: InvestmentCategory, amount: string) => {
+  const handleInvestmentAmountChange = (category: keyof InvestmentsState, amount: string) => {
     setInvestments(prev => ({
       ...prev,
       [category]: { ...prev[category], amount }
+    }));
+  };
+
+  const handleInsuranceFrequencyChange = (category: InsuranceCategory, frequency: Frequency) => {
+    setInvestments(prev => ({
+      ...prev,
+      [category]: { ...prev[category], frequency }
     }));
   };
 
@@ -371,8 +386,8 @@ export default function EditDetailsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                  <div className="grid gap-6 md:grid-cols-2">
-                    {Object.keys(investments).map((key) => {
-                      const category = key as InvestmentCategory;
+                    {(Object.keys(investments) as Array<keyof InvestmentsState>).map((key) => {
+                      const isInsurance = key === 'termInsurance' || key === 'healthInsurance';
                       const label = {
                         stocks: "Stocks",
                         mutualFunds: "Mutual Funds",
@@ -382,50 +397,57 @@ export default function EditDetailsPage() {
                         other: "Other Investments",
                         termInsurance: "Term Insurance",
                         healthInsurance: "Health Insurance"
-                      }[category];
+                      }[key];
                       
-                      const question = {
-                        stocks: "Do you invest in Stocks?",
-                        mutualFunds: "Do you invest in Mutual Funds?",
-                        bonds: "Do you invest in Bonds?",
-                        realEstate: "Do you invest in Real Estate?",
-                        commodities: "Do you invest in Commodities?",
-                        other: "Do you have Other Investments?",
-                        termInsurance: "Do you have any Term Insurance?",
-                        healthInsurance: "Do you have any Health Insurance?"
-                      }[category];
-
-                      const valueLabel = {
-                        termInsurance: "Premium Amount (₹)",
-                        healthInsurance: "Premium Amount (₹)",
-                      }[category] || `Current Value of ${label} (₹)`;
-
+                      const question = `Do you have any ${label}?`;
+                      const valueLabel = isInsurance ? "Premium Amount (₹)" : `Current Value of ${label} (₹)`;
 
                       return (
-                        <div key={category} className="p-4 border rounded-lg space-y-3">
+                        <div key={key} className="p-4 border rounded-lg space-y-3">
                           <div className="space-y-2">
                             <Label>{question}</Label>
-                            <RadioGroup value={investments[category].invested} onValueChange={(value) => handleInvestmentToggle(category, value as 'yes' | 'no')} className="flex items-center gap-4">
+                            <RadioGroup value={investments[key].invested} onValueChange={(value) => handleInvestmentToggle(key, value as 'yes' | 'no')} className="flex items-center gap-4">
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="yes" id={`${category}-yes`} />
-                                    <Label htmlFor={`${category}-yes`}>Yes</Label>
+                                    <RadioGroupItem value="yes" id={`${key}-yes`} />
+                                    <Label htmlFor={`${key}-yes`}>Yes</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="no" id={`${category}-no`} />
-                                    <Label htmlFor={`${category}-no`}>No</Label>
+                                    <RadioGroupItem value="no" id={`${key}-no`} />
+                                    <Label htmlFor={`${key}-no`}>No</Label>
                                 </div>
                             </RadioGroup>
                           </div>
-                          {investments[category].invested === 'yes' && (
-                            <div className="space-y-2 pt-2 border-t">
-                                <Label htmlFor={`${category}-amount`}>{valueLabel}</Label>
-                                <Input 
-                                  id={`${category}-amount`} 
-                                  type="number" 
-                                  placeholder="Enter amount"
-                                  value={investments[category].amount}
-                                  onChange={(e) => handleInvestmentAmountChange(category, e.target.value)}
-                                />
+                          {investments[key].invested === 'yes' && (
+                            <div className="space-y-4 pt-4 border-t">
+                                <div className="space-y-2">
+                                    <Label htmlFor={`${key}-amount`}>{valueLabel}</Label>
+                                    <Input 
+                                      id={`${key}-amount`} 
+                                      type="number" 
+                                      placeholder="Enter amount"
+                                      value={investments[key].amount}
+                                      onChange={(e) => handleInvestmentAmountChange(key, e.target.value)}
+                                    />
+                                </div>
+                                {isInsurance && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor={`${key}-frequency`}>Premium Frequency</Label>
+                                        <Select 
+                                            value={(investments[key as InsuranceCategory])?.frequency || 'yearly'} 
+                                            onValueChange={(value) => handleInsuranceFrequencyChange(key as InsuranceCategory, value as Frequency)}
+                                        >
+                                            <SelectTrigger id={`${key}-frequency`}>
+                                                <SelectValue placeholder="Select frequency" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="monthly">Monthly</SelectItem>
+                                                <SelectItem value="quarterly">Quarterly</SelectItem>
+                                                <SelectItem value="half-yearly">Half-Yearly</SelectItem>
+                                                <SelectItem value="yearly">Yearly</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
                             </div>
                           )}
                         </div>
@@ -446,3 +468,5 @@ export default function EditDetailsPage() {
     </div>
   );
 }
+
+    

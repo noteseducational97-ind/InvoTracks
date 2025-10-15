@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 
+type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
+
 interface Loan {
   id: number;
   type: string;
@@ -19,6 +21,10 @@ interface Loan {
 interface InvestmentCategory {
   invested: 'yes' | 'no';
   amount: string;
+}
+
+interface InsuranceCategory extends InvestmentCategory {
+    frequency: Frequency;
 }
 
 interface FinancialProfile {
@@ -45,8 +51,8 @@ interface FinancialProfile {
         realEstate: InvestmentCategory;
         commodities: InvestmentCategory;
         other: InvestmentCategory;
-        termInsurance: InvestmentCategory;
-        healthInsurance: InvestmentCategory;
+        termInsurance: InsuranceCategory;
+        healthInsurance: InsuranceCategory;
     };
 }
 
@@ -79,15 +85,38 @@ export default function ManagePage() {
     return age;
   };
 
+  const calculateMonthlyInsurancePremium = (insurance: InsuranceCategory | undefined): number => {
+    if (!insurance || insurance.invested !== 'yes' || !insurance.amount) {
+        return 0;
+    }
+    const amount = Number(insurance.amount) || 0;
+    const frequency = insurance.frequency || 'yearly';
+
+    switch (frequency) {
+        case 'monthly':
+            return amount;
+        case 'quarterly':
+            return amount / 3;
+        case 'half-yearly':
+            return amount / 6;
+        case 'yearly':
+            return amount / 12;
+        default:
+            return 0;
+    }
+  };
+  
+
   const totalMonthlyExpenses = financialProfile ? Object.values(financialProfile.expenses).reduce((acc, val) => acc + (Number(val) || 0), 0) : 0;
   const totalOutstandingLoan = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.amount) || 0), 0) : 0;
   const totalMonthlyEmi = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0) : 0;
 
   const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
-  const monthlyHealthInsurance = Number(financialProfile?.investments?.healthInsurance?.invested === 'yes' ? financialProfile.investments.healthInsurance.amount : 0) / 12;
-  const monthlyTermInsurance = Number(financialProfile?.investments?.termInsurance?.invested === 'yes' ? financialProfile.investments.termInsurance.amount : 0) / 12;
+  const monthlyHealthInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.healthInsurance);
+  const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.termInsurance);
   
-  const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - monthlyHealthInsurance - monthlyTermInsurance;
+  const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
+  const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
 
   if (isUserLoading || isProfileLoading) {
     return (
@@ -123,6 +152,8 @@ export default function ManagePage() {
   const existingInvestments = Object.entries(financialProfile.investments)
     .filter(([, value]) => value.invested === 'yes' && Number(value.amount) > 0)
     .map(([key, value]) => {
+         const isInsurance = key === 'termInsurance' || key === 'healthInsurance';
+         const insuranceValue = value as InsuranceCategory;
          const label = {
             stocks: "Stocks",
             mutualFunds: "Mutual Funds",
@@ -130,10 +161,15 @@ export default function ManagePage() {
             realEstate: "Real Estate",
             commodities: "Commodities",
             other: "Other Investments",
-            termInsurance: "Term Insurance (Annual)",
-            healthInsurance: "Health Insurance (Annual)"
+            termInsurance: "Term Insurance Premium",
+            healthInsurance: "Health Insurance Premium"
         }[key as keyof FinancialProfile['investments']] || "Investment";
-        return { name: label, value: value.amount };
+
+        const displayValue = isInsurance 
+            ? `${formatCurrency(value.amount)} (${insuranceValue.frequency})`
+            : formatCurrency(value.amount);
+
+        return { name: label, value: displayValue };
     });
 
   return (
@@ -207,7 +243,7 @@ export default function ManagePage() {
                  {existingInvestments.length > 0 ? existingInvestments.map(investment => (
                     <div key={investment.name} className="flex justify-between">
                         <p className="text-muted-foreground">{investment.name}</p>
-                        <p className="font-medium">{formatCurrency(investment.value)}</p>
+                        <p className="font-medium">{investment.value}</p>
                     </div>
                  )) : <p className="text-muted-foreground">No investments or insurance details provided.</p>}
               </CardContent>
@@ -266,10 +302,10 @@ export default function ManagePage() {
                     <span className="text-muted-foreground">Total Monthly Expenses</span>
                     <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyExpenses)}</span>
                 </div>
-                 {(monthlyHealthInsurance > 0 || monthlyTermInsurance > 0) && (
+                 {totalMonthlyInsurance > 0 && (
                    <div className="flex justify-between">
                         <span className="text-muted-foreground">Monthly Insurance Premiums</span>
-                        <span className="font-medium text-red-600">-{formatCurrency(monthlyHealthInsurance + monthlyTermInsurance)}</span>
+                        <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyInsurance)}</span>
                     </div>
                 )}
                 <div className="flex justify-between">
