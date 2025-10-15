@@ -105,10 +105,6 @@ export default function AddDetailsPage() {
                 <Label htmlFor="food">Groceries & Food</Label>
                 <Input id="food" type="number" placeholder="" />
             </div>
-             <div className="space-y-2">
-                <Label htmlFor="insurance">Insurance Premiums</Label>
-                <Input id="insurance" type="number" placeholder="" />
-            </div>
             <div className="space-y-2">
                 <Label htmlFor="entertainment">Entertainment</Label>
                 <Input id="entertainment" type="number" placeholder="" />
@@ -116,10 +112,6 @@ export default function AddDetailsPage() {
             <div className="space-y-2">
                 <Label htmlFor="healthcare">Healthcare</Label>
                 <Input id="healthcare" type="number" placeholder="" />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="debt">Debt Payments</Label>
-                <Input id="debt" type="number" placeholder="" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="other-expenses">Other</Label>
