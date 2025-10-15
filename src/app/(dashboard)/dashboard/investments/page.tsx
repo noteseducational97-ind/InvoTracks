@@ -2,11 +2,17 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Shield, Banknote, Landmark, TrendingUp, Wallet } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Target, Sprout } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
-import { useState, useEffect } from "react";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 // Define simpler, local types for the plan
 type InvestmentPlan = {
@@ -14,6 +20,9 @@ type InvestmentPlan = {
   loanRepaymentAmount: number;
   emergencyFundAmount: number;
   mutualFundAmount: number;
+  equityAmount: number;
+  debtAmount: number;
+  age: number;
 };
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -84,6 +93,18 @@ export default function InvestmentsPage() {
         return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
+    const calculateAge = (dobString: string) => {
+      if (!dobString) return 0;
+      const dob = new Date(dobString);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+          age--;
+      }
+      return age;
+    };
+
     const calculateMonthlyInsurancePremium = (insurance: InsuranceCategory | undefined): number => {
         if (!insurance || insurance.invested !== 'yes' || !insurance.amount) {
             return 0;
@@ -121,6 +142,7 @@ export default function InvestmentsPage() {
                 const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.termInsurance);
                 const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
                 const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
+                const age = calculateAge(financialProfile.dob);
 
                 if (totalMonthlyIncome <= 0) {
                      setError("Your income details are not provided. Please update your profile to generate a plan.");
@@ -135,17 +157,27 @@ export default function InvestmentsPage() {
                 }
 
                 // New calculation logic
-                const loanRepaymentAmount = totalMonthlyEmi * 0.10;
+                const loanRepaymentAmount = totalMonthlyEmi > 0 ? totalMonthlyEmi * 0.10 : 0;
                 const amountAfterLoanRepayment = netMonthlyCashflow - loanRepaymentAmount;
                 
                 const emergencyFundAmount = amountAfterLoanRepayment > 0 ? amountAfterLoanRepayment * 0.30 : 0;
                 const mutualFundAmount = amountAfterLoanRepayment > 0 ? amountAfterLoanRepayment - emergencyFundAmount : 0;
+
+                const equityPercentage = (100 - age) / 100;
+                const debtPercentage = age / 100;
+
+                const equityAmount = mutualFundAmount * equityPercentage;
+                const debtAmount = mutualFundAmount * debtPercentage;
+
 
                 const generatedPlan: InvestmentPlan = {
                     netMonthlyCashflow,
                     loanRepaymentAmount,
                     emergencyFundAmount,
                     mutualFundAmount,
+                    equityAmount,
+                    debtAmount,
+                    age,
                 };
 
                 setPlan(generatedPlan);
@@ -160,7 +192,19 @@ export default function InvestmentsPage() {
 
     }, [financialProfile]);
     
+    const chartConfig = plan ? {
+        mutualFunds: { label: 'Mutual Funds', color: 'hsl(var(--chart-1))' },
+        emergencyFund: { label: 'Emergency Fund', color: 'hsl(var(--chart-2))' },
+        loanRepayment: { label: 'Loan Repayment', color: 'hsl(var(--chart-3))' },
+    } : {};
     
+    const chartData = plan ? [
+        { name: 'mutualFunds', value: plan.mutualFundAmount, label: 'Mutual Funds' },
+        { name: 'emergencyFund', value: plan.emergencyFundAmount, label: 'Emergency Fund' },
+        { name: 'loanRepayment', value: plan.loanRepaymentAmount, label: 'Loan Repayment' },
+    ].filter(item => item.value > 0) : [];
+
+
     const renderContent = () => {
         if (isUserLoading || isProfileLoading) {
             return (
@@ -203,7 +247,7 @@ export default function InvestmentsPage() {
         
         if (plan) {
             return (
-                <div className="mt-6 flex flex-col gap-6">
+                <div className="mt-6 flex flex-col gap-8">
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline text-lg">Your Monthly Investment Allocation</CardTitle>
@@ -247,10 +291,95 @@ export default function InvestmentsPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold">{formatCurrency(plan.mutualFundAmount)}</div>
-                                        <p className="text-xs text-muted-foreground">Final remaining amount.</p>
+                                        <p className="text-xs text-muted-foreground">Final remaining amount for investment.</p>
                                     </CardContent>
                                 </Card>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline text-lg flex items-center gap-2"><PieChartIcon className="h-5 w-5 text-primary"/>Allocation Breakdown</CardTitle>
+                            <CardDescription>A visual breakdown of where your monthly savings are going.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                <ChartContainer config={chartConfig} className="relative h-64 w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <ChartTooltip content={<ChartTooltipContent nameKey="label" hideLabel />} />
+                                            <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={60} strokeWidth={5}>
+                                                {chartData.map((entry) => (
+                                                    <Cell key={entry.name} fill={chartConfig[entry.name as keyof typeof chartConfig]?.color} />
+                                                ))}
+                                            </Pie>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span className="text-sm text-muted-foreground">Total Amount</span>
+                                        <span className="text-2xl font-bold">{formatCurrency(plan.netMonthlyCashflow)}</span>
+                                    </div>
+                                </ChartContainer>
+
+                                <div className="space-y-4">
+                                    {chartData.map((item) => {
+                                        const config = chartConfig[item.name as keyof typeof chartConfig];
+                                        return(
+                                            <div key={item.name} className="flex items-center gap-4">
+                                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
+                                                <div className="flex-1">
+                                                    <p className="font-medium">{config?.label}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-semibold">{formatCurrency(item.value)}</p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {((item.value / plan.netMonthlyCashflow) * 100).toFixed(1)}%
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                         <CardHeader>
+                            <CardTitle className="font-headline text-lg flex items-center gap-2">
+                                <TrendingUp className="h-5 w-5 text-primary"/>
+                                Mutual Fund Investment Breakdown
+                            </CardTitle>
+                            <CardDescription>
+                                Based on the 100-minus-age rule for asset allocation.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-green-800 dark:text-green-300">Equity Investment</CardTitle>
+                                    <Sprout className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-green-900 dark:text-green-200">{formatCurrency(plan.equityAmount)}</div>
+                                    <p className="text-xs text-green-700 dark:text-green-400/80">
+                                        {100 - plan.age}% of your mutual fund SIP.
+                                    </p>
+                                </CardContent>
+                            </Card>
+                             <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Debt Investment</CardTitle>
+                                    <Target className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.debtAmount)}</div>
+                                    <p className="text-xs text-blue-700 dark:text-blue-400/80">
+                                        {plan.age}% of your mutual fund SIP (your age).
+                                    </p>
+                                </CardContent>
+                            </Card>
                         </CardContent>
                     </Card>
                 </div>
