@@ -84,8 +84,8 @@ export default function ManagePage() {
   const totalMonthlyEmi = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0) : 0;
 
   const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
-  const monthlyHealthInsurance = Number(financialProfile?.investments?.healthInsurance?.amount || 0) / 12;
-  const monthlyTermInsurance = Number(financialProfile?.investments?.termInsurance?.amount || 0) / 12;
+  const monthlyHealthInsurance = Number(financialProfile?.investments?.healthInsurance?.invested === 'yes' ? financialProfile.investments.healthInsurance.amount : 0) / 12;
+  const monthlyTermInsurance = Number(financialProfile?.investments?.termInsurance?.invested === 'yes' ? financialProfile.investments.termInsurance.amount : 0) / 12;
   
   const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - monthlyHealthInsurance - monthlyTermInsurance;
 
@@ -130,8 +130,8 @@ export default function ManagePage() {
             realEstate: "Real Estate",
             commodities: "Commodities",
             other: "Other Investments",
-            termInsurance: "Term Insurance",
-            healthInsurance: "Health Insurance"
+            termInsurance: "Term Insurance (Annual)",
+            healthInsurance: "Health Insurance (Annual)"
         }[key as keyof FinancialProfile['investments']] || "Investment";
         return { name: label, value: value.amount };
     });
@@ -182,12 +182,15 @@ export default function ManagePage() {
                     </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
-                {Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> 
-                      <span className="font-medium">{formatCurrency(value)}</span>
-                    </div>
-                ))}
+                {Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).length > 0 ?
+                    Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).map(([key, value]) => (
+                        <div key={key} className="flex justify-between">
+                        <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> 
+                        <span className="font-medium">{formatCurrency(value)}</span>
+                        </div>
+                    ))
+                    : <p className="text-muted-foreground text-sm">No expenses provided.</p>
+                }
                 <div className="flex justify-between font-semibold pt-2 border-t"><span className="text-foreground">Total Monthly Expenses:</span> <span>{formatCurrency(totalMonthlyExpenses)}</span></div>
               </CardContent>
             </Card>
