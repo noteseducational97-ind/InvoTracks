@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit, Balance, Anchor } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit, Scale, Anchor } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
@@ -290,8 +290,7 @@ export default function InvestmentsPage() {
     } : {};
 
     const chartData = plan ? [
-        { name: 'equity', value: plan.equityAmount, label: 'Equity' },
-        { name: 'debt', value: plan.debtAmount, label: 'Debt' },
+        { name: 'equity', value: plan.mutualFundAmount, label: 'Mutual Fund SIP' },
         { name: 'emergencyFund', value: plan.emergencyFundAmount, label: 'Emergency Fund' },
         { name: 'loanRepayment', value: plan.loanRepaymentAmount, label: 'Loan Repayment' },
     ].filter(item => item.value > 0) : [];
@@ -339,6 +338,11 @@ export default function InvestmentsPage() {
         
         if (plan) {
             const isLowRisk = (Number(financialProfile.riskPercentage) || 0) < 60;
+            const allocationChartData = [
+                { name: 'equity', value: plan.equityAmount, label: 'Equity' },
+                { name: 'debt', value: plan.debtAmount, label: 'Debt' },
+            ].filter(item => item.value > 0);
+            
             return (
                 <>
                 <Card className="mt-6">
@@ -387,7 +391,7 @@ export default function InvestmentsPage() {
 
                         <Separator className="my-4"/>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                             <div className="space-y-2">
                                 <div className="text-center">
                                     <h3 className="font-headline text-lg flex items-center justify-center gap-2 mb-1"><PieChartIcon className="h-5 w-5 text-primary"/>Allocation Breakdown</h3>
@@ -525,7 +529,7 @@ export default function InvestmentsPage() {
                                     <Card className="bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                             <CardTitle className="text-sm font-medium text-rose-800 dark:text-rose-300">Multi-Cap Fund</CardTitle>
-                                            <Balance className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                                            <Scale className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                                         </CardHeader>
                                         <CardContent>
                                             <div className="text-2xl font-bold text-rose-900 dark:text-rose-200">{formatCurrency(plan.multiCapLoanRepaymentAmount)}</div>
@@ -568,7 +572,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
-
-    
