@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, DollarSign, Landmark, TrendingUp, CreditCard, PlusCircle, Trash2 } from "lucide-react";
+import { User, DollarSign, Landmark, TrendingUp, PlusCircle, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser } from "@/firebase";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type Loan = {
   id: number;
@@ -26,8 +27,10 @@ export default function AddDetailsPage() {
   const [annualIncome, setAnnualIncome] = useState<number | string>("");
   const [overallMonthlyIncome, setOverallMonthlyIncome] = useState(0);
   const [loans, setLoans] = useState<Loan[]>([
-    { id: 1, type: '', amount: '', emi: '', rate: '', tenure: '' }
+    { id: Date.now(), type: '', amount: '', emi: '', rate: '', tenure: '' }
   ]);
+  const [hasExistingInvestments, setHasExistingInvestments] = useState("no");
+
 
   useEffect(() => {
     if (user?.displayName) {
@@ -161,7 +164,7 @@ export default function AddDetailsPage() {
                 <CardDescription>Enter the details for each active loan or credit card debt.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {loans.map((loan, index) => (
+              {loans.map((loan) => (
                 <div key={loan.id} className="p-4 border rounded-lg relative">
                     {loans.length > 1 && (
                       <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeLoan(loan.id)}>
@@ -221,31 +224,48 @@ export default function AddDetailsPage() {
                 </CardTitle>
                 <CardDescription>Enter the current value of your existing investments.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-2">
-                    <Label htmlFor="stocks">Stocks</Label>
-                    <Input id="stocks" type="number" placeholder="" />
+            <CardContent className="space-y-4">
+                 <div className="space-y-2">
+                    <Label>Do you have any existing investments?</Label>
+                    <RadioGroup value={hasExistingInvestments} onValueChange={setHasExistingInvestments} className="flex items-center gap-4">
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="yes" id="invest-yes" />
+                            <Label htmlFor="invest-yes">Yes</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="no" id="invest-no" />
+                            <Label htmlFor="invest-no">No</Label>
+                        </div>
+                    </RadioGroup>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="bonds">Bonds</Label>
-                    <Input id="bonds" type="number" placeholder="" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="mutual-funds">Mutual Funds</Label>
-                    <Input id="mutual-funds" type="number" placeholder="" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="real-estate">Real Estate</Label>
-                    <Input id="real-estate" type="number" placeholder="" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="commodities">Commodities</Label>
-                    <Input id="commodities" type="number" placeholder="" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="other-investments">Other</Label>
-                    <Input id="other-investments" type="number" placeholder="" />
-                </div>
+                {hasExistingInvestments === 'yes' && (
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pt-4 border-t">
+                        <div className="space-y-2">
+                            <Label htmlFor="stocks">Stocks</Label>
+                            <Input id="stocks" type="number" placeholder="" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="bonds">Bonds</Label>
+                            <Input id="bonds" type="number" placeholder="" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="mutual-funds">Mutual Funds</Label>
+                            <Input id="mutual-funds" type="number" placeholder="" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="real-estate">Real Estate</Label>
+                            <Input id="real-estate" type="number" placeholder="" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="commodities">Commodities</Label>
+                            <Input id="commodities" type="number" placeholder="" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="other-investments">Other</Label>
+                            <Input id="other-investments" type="number" placeholder="" />
+                        </div>
+                    </div>
+                )}
             </CardContent>
         </Card>
 
