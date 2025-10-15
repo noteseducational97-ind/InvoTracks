@@ -195,15 +195,15 @@ export default function InvestmentsPage() {
     }, [financialProfile]);
     
     const chartConfig = plan ? {
-        equity: { label: 'Equity', color: 'hsl(var(--chart-1))' },
-        debt: { label: 'Debt', color: 'hsl(var(--chart-2))' },
-        emergencyFund: { label: 'Emergency Fund', color: 'hsl(var(--chart-3))' },
-        loanRepayment: { label: 'Loan Repayment', color: 'hsl(var(--chart-4))' },
+        mutualFunds: { label: 'Mutual Funds', color: 'hsl(var(--chart-1))' },
+        emergencyFund: { label: 'Emergency Fund', color: 'hsl(var(--chart-2))' },
+        loanRepayment: { label: 'Loan Repayment', color: 'hsl(var(--chart-3))' },
+        equity: { label: 'Equity', color: 'hsl(var(--chart-4))' },
+        debt: { label: 'Debt', color: 'hsl(var(--chart-5))' },
     } : {};
-    
+
     const chartData = plan ? [
-        { name: 'equity', value: plan.equityAmount, label: 'Equity' },
-        { name: 'debt', value: plan.debtAmount, label: 'Debt' },
+        { name: 'mutualFunds', value: plan.mutualFundAmount, label: 'Mutual Funds' },
         { name: 'emergencyFund', value: plan.emergencyFundAmount, label: 'Emergency Fund' },
         { name: 'loanRepayment', value: plan.loanRepaymentAmount, label: 'Loan Repayment' },
     ].filter(item => item.value > 0) : [];
@@ -329,17 +329,37 @@ export default function InvestmentsPage() {
                                     {chartData.map((item) => {
                                         const config = chartConfig[item.name as keyof typeof chartConfig];
                                         return(
-                                            <div key={item.name} className="flex items-center gap-4">
-                                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
-                                                <div className="flex-1">
-                                                    <p className="font-medium">{config?.label}</p>
+                                            <div key={item.name}>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
+                                                    <div className="flex-1">
+                                                        <p className="font-medium">{config?.label}</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-semibold">{formatCurrency(item.value)}</p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {((item.value / plan.netMonthlyCashflow) * 100).toFixed(1)}%
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p className="font-semibold">{formatCurrency(item.value)}</p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {((item.value / plan.netMonthlyCashflow) * 100).toFixed(1)}%
-                                                    </p>
-                                                </div>
+                                                {item.name === 'mutualFunds' && (
+                                                    <div className="ml-7 mt-2 space-y-2 border-l pl-4 text-sm">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2 text-muted-foreground">
+                                                                <div className="h-2 w-2 rounded-full" style={{backgroundColor: chartConfig['equity' as keyof typeof chartConfig]?.color}}></div>
+                                                                Equity
+                                                            </div>
+                                                            <p className="font-medium">{formatCurrency(plan.equityAmount)}</p>
+                                                        </div>
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2 text-muted-foreground">
+                                                                <div className="h-2 w-2 rounded-full" style={{backgroundColor: chartConfig['debt' as keyof typeof chartConfig]?.color}}></div>
+                                                                Debt
+                                                            </div>
+                                                            <p className="font-medium">{formatCurrency(plan.debtAmount)}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )
                                     })}
@@ -405,6 +425,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-
-    
