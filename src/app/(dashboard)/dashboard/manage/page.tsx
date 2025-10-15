@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet, Info, Shield } from "lucide-react";
+import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet, Info, Shield, Lightbulb } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
@@ -199,6 +199,12 @@ export default function ManagePage() {
 
         return { name: label, value: displayValue };
     });
+
+  const suggestions = [];
+  if (expensePercentage > 50) suggestions.push("Your expenses are higher than the recommended 50%. Consider reviewing your spending on non-essential items.");
+  if (emiPercentage > 30) suggestions.push("Your loan EMIs are taking up a significant portion of your income. Focusing on prepayments could be beneficial.");
+  if (investmentPercentage < 20) suggestions.push("Your savings rate is below the recommended 20%. Try to increase your monthly investments.");
+  if (emergencyFundStatus === 'low') suggestions.push("Your emergency fund is below the recommended 6-month minimum. Prioritize building this safety net.");
 
   return (
     <div>
@@ -458,16 +464,42 @@ export default function ManagePage() {
                         </Card>
                     </Link>
                 </CardContent>
-                <CardFooter>
-                     <div className="text-center text-muted-foreground text-sm w-full">
-                        {expensePercentage > 50 && <p>Your expenses are higher than the recommended 50%. Consider reviewing your spending on non-essential items.</p>}
-                        
-                        {expensePercentage <= 50 && emiPercentage <= 30 && investmentPercentage >= 20 && <p className="text-green-600 font-medium">Great job! Your budget aligns well with the 50-30-20 rule.</p>}
-                    </div>
-                </CardFooter>
             </Card>
         )}
 
+        {/* Suggestions Card */}
+        {totalMonthlyIncome > 0 && suggestions.length > 0 && (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                        <Lightbulb className="h-5 w-5 text-primary" />
+                        Suggestions
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                    <ul className="list-disc pl-5 space-y-2">
+                        {suggestions.map((suggestion, index) => (
+                            <li key={index}>{suggestion}</li>
+                        ))}
+                    </ul>
+                </CardContent>
+            </Card>
+        )}
+         {totalMonthlyIncome > 0 && suggestions.length === 0 && (
+            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                        <Lightbulb className="h-5 w-5 text-green-600" />
+                        All Clear!
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                     <p className="text-sm text-green-800 dark:text-green-200">
+                        Great job! Your finances are well-balanced according to our guidelines. Keep up the good work.
+                    </p>
+                </CardContent>
+            </Card>
+        )}
       </div>
     </div>
   );
