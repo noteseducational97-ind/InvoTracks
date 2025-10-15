@@ -219,13 +219,13 @@ export default function InvestmentsPage() {
 
                 if (riskPercentage < 60) {
                     // Lower risk: Nifty 50/100, Mid Cap, Flexi Cap
-                    let baseLargeCap = 0.50; // Nifty 50/100
-                    let baseMidCap = 0.30;
-                    let baseFlexiCap = 0.20;
+                    let baseLargeCap = 0.60; // Nifty 50/100, increased base
+                    let baseMidCap = 0.25;
+                    let baseFlexiCap = 0.15;
 
                     // Adjustments based on risk and age
-                    const midCapAdjustment = (riskFactor - 0.3) * 0.1 + ageFactor * 0.05; // Less sensitive than small cap
-                    const flexiCapAdjustment = (riskFactor - 0.3) * 0.15 + ageFactor * 0.05;
+                    const midCapAdjustment = (riskFactor - 0.2) * 0.1 + ageFactor * 0.05; // Reduced sensitivity
+                    const flexiCapAdjustment = (riskFactor - 0.2) * 0.15 + ageFactor * 0.05;
                     const largeCapAdjustment = -midCapAdjustment - flexiCapAdjustment;
                     
                     let largeCapPercentage = baseLargeCap + largeCapAdjustment;
