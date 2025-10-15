@@ -122,9 +122,9 @@ export default function ManagePage() {
   const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
 
   // 50-30-20 Rule Calculations
-  const expensePercentage = totalMonthlyIncome > 0 ? ((totalMonthlyExpenses + totalMonthlyInsurance) / totalMonthlyIncome) * 100 : 0;
+  const expensePercentage = totalMonthlyIncome > 0 ? ((totalMonthlyExpenses) / totalMonthlyIncome) * 100 : 0;
   const emiPercentage = totalMonthlyIncome > 0 ? (totalMonthlyEmi / totalMonthlyIncome) * 100 : 0;
-  const investmentPercentage = totalMonthlyIncome > 0 ? ((netMonthlyCashflow) / totalMonthlyIncome) * 100 : 0;
+  const investmentPercentage = totalMonthlyIncome > 0 ? (totalMonthlyInsurance / totalMonthlyIncome) * 100 : 0;
 
   const expenseStatus = expensePercentage <= 50;
   const emiStatus = emiPercentage <= 30;
@@ -445,5 +445,7 @@ export default function ManagePage() {
 
     
 }
+
+    
 
     
