@@ -195,10 +195,10 @@ export default function InvestmentsPage() {
     }, [financialProfile]);
     
     const chartConfig = plan ? {
-        emergencyFund: { label: 'Emergency Fund', color: 'hsl(var(--chart-2))' },
-        loanRepayment: { label: 'Loan Repayment', color: 'hsl(var(--chart-3))' },
         equity: { label: 'Equity', color: 'hsl(var(--chart-1))' },
         debt: { label: 'Debt', color: 'hsl(var(--chart-5))' },
+        emergencyFund: { label: 'Emergency Fund', color: 'hsl(var(--chart-2))' },
+        loanRepayment: { label: 'Loan Repayment', color: 'hsl(var(--chart-3))' },
     } : {};
 
     const chartData = plan ? [
@@ -359,9 +359,6 @@ export default function InvestmentsPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-200">{formatCurrency(plan.equityAmount)}</div>
-                                        <p className="text-xs text-emerald-700 dark:text-emerald-400/80">
-                                            {100 - plan.age}% of your mutual fund SIP (100-age rule).
-                                        </p>
                                     </CardContent>
                                 </Card>
                                  <Card className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800">
@@ -402,5 +399,7 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
 
     
