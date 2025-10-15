@@ -214,12 +214,29 @@ export default function InvestmentsPage() {
                 let midCapAmount = 0;
                 let smallCapAmount = 0;
                 let flexiCapAmount = 0;
+                const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
+                const riskFactor = riskPercentage / 100; // 0 to 1
 
                 if (riskPercentage < 60) {
                     // Lower risk: Nifty 50/100, Mid Cap, Flexi Cap
-                    let largeCapPercentage = 0.50; // Nifty 50/100
-                    let midCapPercentage = 0.30;
-                    let flexiCapPercentage = 0.20;
+                    let baseLargeCap = 0.50; // Nifty 50/100
+                    let baseMidCap = 0.30;
+                    let baseFlexiCap = 0.20;
+
+                    // Adjustments based on risk and age
+                    const midCapAdjustment = (riskFactor - 0.3) * 0.1 + ageFactor * 0.05; // Less sensitive than small cap
+                    const flexiCapAdjustment = (riskFactor - 0.3) * 0.15 + ageFactor * 0.05;
+                    const largeCapAdjustment = -midCapAdjustment - flexiCapAdjustment;
+                    
+                    let largeCapPercentage = baseLargeCap + largeCapAdjustment;
+                    let midCapPercentage = baseMidCap + midCapAdjustment;
+                    let flexiCapPercentage = baseFlexiCap + flexiCapAdjustment;
+                    
+                    const total = largeCapPercentage + midCapPercentage + flexiCapPercentage;
+                    largeCapPercentage /= total;
+                    midCapPercentage /= total;
+                    flexiCapPercentage /= total;
+
 
                     largeCapAmount = equityAmount * largeCapPercentage;
                     midCapAmount = equityAmount * midCapPercentage;
@@ -227,9 +244,7 @@ export default function InvestmentsPage() {
                     smallCapAmount = 0; // No small cap for lower risk
                 } else {
                     // Higher risk: Large, Mid, Small
-                    const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
-                    const riskFactor = riskPercentage / 100; // 0 to 1
-
+                    
                     let baseLargeCap = 0.40;
                     let baseMidCap = 0.30;
                     let baseSmallCap = 0.30;
