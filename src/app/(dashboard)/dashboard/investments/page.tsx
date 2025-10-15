@@ -324,7 +324,7 @@ export default function InvestmentsPage() {
                         </CardHeader>
                          <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                                <ChartContainer config={chartConfig} className="mx-auto aspect-square h-full max-h-[300px]">
+                                <div className="h-[250px] w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <ChartTooltip content={<ChartTooltipContent nameKey="amount" formatter={(value) => `${value}%`} hideLabel />} />
@@ -335,7 +335,7 @@ export default function InvestmentsPage() {
                                             </Pie>
                                         </PieChart>
                                     </ResponsiveContainer>
-                                </ChartContainer>
+                                </div>
                                 <div className="flex flex-col gap-4 text-sm">
                                     <p className="text-muted-foreground">Suggested mutual fund SIP breakdown for your investable amount.</p>
                                     {chartData.map((entry) => (
@@ -373,15 +373,6 @@ export default function InvestmentsPage() {
                             ))}
                         </div>
                     </div>
-                    
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline text-lg">Plan Reasoning</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                           <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{plan.reasoning}</p>
-                        </CardContent>
-                    </Card>
                 </div>
             );
         }
