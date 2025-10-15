@@ -167,11 +167,21 @@ export default function InvestmentsPage() {
                     return;
                 }
 
-                const loanRepaymentAmount = totalMonthlyEmi > 0 ? netMonthlyCashflow * 0.10 : 0;
-                const amountAfterLoanRepayment = netMonthlyCashflow - loanRepaymentAmount;
-                
-                const emergencyFundAmount = amountAfterLoanRepayment > 0 ? amountAfterLoanRepayment * 0.30 : 0;
-                const mutualFundAmount = amountAfterLoanRepayment > 0 ? amountAfterLoanRepayment - emergencyFundAmount : 0;
+                let loanRepaymentAmount = 0;
+                let emergencyFundAmount = 0;
+                let mutualFundAmount = 0;
+
+                if (totalMonthlyEmi > 0) {
+                    loanRepaymentAmount = netMonthlyCashflow * 0.10;
+                    const amountAfterLoanRepayment = netMonthlyCashflow - loanRepaymentAmount;
+                    emergencyFundAmount = amountAfterLoanRepayment * 0.30;
+                    mutualFundAmount = amountAfterLoanRepayment - emergencyFundAmount;
+                } else {
+                    const redistributionAmount = netMonthlyCashflow * 0.10; // The 10% that would've gone to loans
+                    const remainingCashflow = netMonthlyCashflow * 0.90;
+                    emergencyFundAmount = remainingCashflow * 0.30 + redistributionAmount * 0.30;
+                    mutualFundAmount = remainingCashflow * 0.70 + redistributionAmount * 0.70;
+                }
 
                 const equityPercentage = (100 - age) / 100;
                 const debtPercentage = age / 100;
@@ -224,8 +234,8 @@ export default function InvestmentsPage() {
                     let baseFlexiCap = 0.15;
 
                     // Adjustments based on risk and age
-                    const midCapAdjustment = (riskFactor - 0.2) * 0.1 - ageFactor * 0.05; // Reduced sensitivity
-                    const flexiCapAdjustment = (riskFactor - 0.2) * 0.15 + ageFactor * 0.05;
+                    const midCapAdjustment = (riskFactor - 0.2) * 0.05 - ageFactor * 0.05; // Reduced sensitivity even more
+                    const flexiCapAdjustment = (riskFactor - 0.2) * 0.1 + ageFactor * 0.05;
                     const largeCapAdjustment = -midCapAdjustment - flexiCapAdjustment;
                     
                     let largeCapPercentage = baseLargeCap + largeCapAdjustment;
@@ -375,15 +385,17 @@ export default function InvestmentsPage() {
                                     <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.netMonthlyCashflow)}</div>
                                 </CardContent>
                             </Card>
-                            <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-orange-800 dark:text-orange-300">Loan Prepayment</CardTitle>
-                                    <Landmark className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-orange-900 dark:text-orange-200">{formatCurrency(plan.loanRepaymentAmount)}</div>
-                                </CardContent>
-                            </Card>
+                            {plan.loanRepaymentAmount > 0 && (
+                                <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium text-orange-800 dark:text-orange-300">Loan Prepayment</CardTitle>
+                                        <Landmark className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-orange-900 dark:text-orange-200">{formatCurrency(plan.loanRepaymentAmount)}</div>
+                                    </CardContent>
+                                </Card>
+                            )}
                             <Card className="bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium text-indigo-800 dark:text-indigo-300">Emergency Fund</CardTitle>
