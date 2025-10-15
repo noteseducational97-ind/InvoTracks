@@ -44,6 +44,10 @@ export default function AddDetailsPage() {
                 <Input id="name" placeholder="Prasanna Warade" />
             </div>
             <div className="space-y-2">
+                <Label htmlFor="risk-percentage">Risk Percentage (%)</Label>
+                <Input id="risk-percentage" type="number" placeholder="e.g., 85" />
+            </div>
+            <div className="space-y-2">
                 <Label htmlFor="dob">Date of Birth</Label>
                 <Input id="dob" type="date" />
             </div>
