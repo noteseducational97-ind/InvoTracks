@@ -390,7 +390,7 @@ export default function InvestmentsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
+                        <div className="border rounded-lg p-4">
                             <h4 className="font-semibold mb-4 text-center">Equity Allocation</h4>
                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
