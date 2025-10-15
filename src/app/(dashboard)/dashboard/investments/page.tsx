@@ -256,44 +256,44 @@ export default function InvestmentsPage() {
                     </CardHeader>
                     <CardContent className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <Card>
+                             <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Total Investable Amount</CardTitle>
-                                    <Wallet className="h-4 w-4 text-muted-foreground" />
+                                    <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Total Investable Amount</CardTitle>
+                                    <Wallet className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">{formatCurrency(plan.netMonthlyCashflow)}</div>
-                                    <p className="text-xs text-muted-foreground">Your net monthly savings.</p>
+                                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.netMonthlyCashflow)}</div>
+                                    <p className="text-xs text-blue-700 dark:text-blue-400/80">Your net monthly savings.</p>
                                 </CardContent>
                             </Card>
-                            <Card>
+                            <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Loan Prepayment</CardTitle>
-                                    <Landmark className="h-4 w-4 text-muted-foreground" />
+                                    <CardTitle className="text-sm font-medium text-orange-800 dark:text-orange-300">Loan Prepayment</CardTitle>
+                                    <Landmark className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">{formatCurrency(plan.loanRepaymentAmount)}</div>
-                                     <p className="text-xs text-muted-foreground">10% of your total monthly EMIs.</p>
+                                    <div className="text-2xl font-bold text-orange-900 dark:text-orange-200">{formatCurrency(plan.loanRepaymentAmount)}</div>
+                                     <p className="text-xs text-orange-700 dark:text-orange-400/80">10% of your total monthly EMIs.</p>
                                 </CardContent>
                             </Card>
-                            <Card>
+                            <Card className="bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Emergency Fund</CardTitle>
-                                    <Shield className="h-4 w-4 text-muted-foreground" />
+                                    <CardTitle className="text-sm font-medium text-indigo-800 dark:text-indigo-300">Emergency Fund</CardTitle>
+                                    <Shield className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">{formatCurrency(plan.emergencyFundAmount)}</div>
-                                    <p className="text-xs text-muted-foreground">30% of remaining amount.</p>
+                                    <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-200">{formatCurrency(plan.emergencyFundAmount)}</div>
+                                    <p className="text-xs text-indigo-700 dark:text-indigo-400/80">30% of remaining amount.</p>
                                 </CardContent>
                             </Card>
-                            <Card>
+                            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Mutual Fund SIP</CardTitle>
-                                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                                    <CardTitle className="text-sm font-medium text-green-800 dark:text-green-300">Mutual Fund SIP</CardTitle>
+                                    <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">{formatCurrency(plan.mutualFundAmount)}</div>
-                                    <p className="text-xs text-muted-foreground">Final remaining amount for investment.</p>
+                                    <div className="text-2xl font-bold text-green-900 dark:text-green-200">{formatCurrency(plan.mutualFundAmount)}</div>
+                                    <p className="text-xs text-green-700 dark:text-green-400/80">Final remaining amount for investment.</p>
                                 </CardContent>
                             </Card>
                         </div>
@@ -350,26 +350,26 @@ export default function InvestmentsPage() {
                                 Mutual Fund Investment Breakdown
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                               <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+                               <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-green-800 dark:text-green-300">Equity Investment</CardTitle>
-                                        <Sprout className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                        <CardTitle className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Equity Investment</CardTitle>
+                                        <Sprout className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-green-900 dark:text-green-200">{formatCurrency(plan.equityAmount)}</div>
-                                        <p className="text-xs text-green-700 dark:text-green-400/80">
+                                        <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-200">{formatCurrency(plan.equityAmount)}</div>
+                                        <p className="text-xs text-emerald-700 dark:text-emerald-400/80">
                                             {100 - plan.age}% of your mutual fund SIP (100-age rule).
                                         </p>
                                     </CardContent>
                                 </Card>
-                                 <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                                 <Card className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Debt Investment</CardTitle>
-                                        <Target className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                        <CardTitle className="text-sm font-medium text-sky-800 dark:text-sky-300">Debt Investment</CardTitle>
+                                        <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" />
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.debtAmount)}</div>
-                                        <p className="text-xs text-blue-700 dark:text-blue-400/80">
+                                        <div className="text-2xl font-bold text-sky-900 dark:text-sky-200">{formatCurrency(plan.debtAmount)}</div>
+                                        <p className="text-xs text-sky-700 dark:text-sky-400/80">
                                             {plan.age}% of your mutual fund SIP (your age).
                                         </p>
                                     </CardContent>
