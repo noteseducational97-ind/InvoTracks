@@ -175,21 +175,32 @@ export default function InvestmentsPage() {
                 const equityAmount = mutualFundAmount * equityPercentage;
                 const debtAmount = mutualFundAmount * debtPercentage;
 
-                const midTermDebtAmount = debtAmount * 0.5;
-                const liquidGoldFundAmount = debtAmount * 0.5;
-
                 const riskFactor = (Number(financialProfile.riskPercentage) || 50) / 100; // 0 to 1
+                
+                // Debt Allocation Logic
+                const baseLiquidAllocation = 0.50; // Start at 50%
+                const riskAdjustment = (0.5 - riskFactor) * 0.3; // -0.15 to +0.15
+                const ageAdjustment = Math.max(0, (age - 35) / 100); // Increases after 35
+                let liquidAllocationPercentage = baseLiquidAllocation + riskAdjustment + ageAdjustment;
+                liquidAllocationPercentage = Math.max(0.20, Math.min(0.80, liquidAllocationPercentage)); // Clamp between 20% and 80%
+
+                const liquidGoldFundAmount = debtAmount * liquidAllocationPercentage;
+                const midTermDebtAmount = debtAmount * (1 - liquidAllocationPercentage);
+                
+
                 const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
 
                 let baseLargeCap = 0.50;
                 let baseMidCap = 0.30;
                 let baseSmallCap = 0.20;
 
-                const smallCapAdjustment = (riskFactor - 0.5) * 0.2 + ageFactor * 0.1;
-                const largeCapAdjustment = -smallCapAdjustment;
+                // More risk & younger -> more small cap
+                const smallCapAdjustment = (riskFactor - 0.5) * 0.2 + ageFactor * 0.1; 
+                // Less risk -> more large cap
+                const largeCapAdjustment = (0.5 - riskFactor) * 0.1;
                 
-                let largeCapPercentage = baseLargeCap + largeCapAdjustment;
-                let midCapPercentage = baseMidCap;
+                let largeCapPercentage = baseLargeCap + largeCapAdjustment - (smallCapAdjustment/2);
+                let midCapPercentage = baseMidCap  - (smallCapAdjustment/2);
                 let smallCapPercentage = baseSmallCap + smallCapAdjustment;
                 
                 const total = largeCapPercentage + midCapPercentage + smallCapPercentage;
@@ -290,7 +301,7 @@ export default function InvestmentsPage() {
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
+                    <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                              <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -475,3 +486,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
