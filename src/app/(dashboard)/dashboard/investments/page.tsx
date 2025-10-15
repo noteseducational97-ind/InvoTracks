@@ -195,13 +195,15 @@ export default function InvestmentsPage() {
     }, [financialProfile]);
     
     const chartConfig = plan ? {
-        mutualFunds: { label: 'Mutual Funds', color: 'hsl(var(--chart-1))' },
-        emergencyFund: { label: 'Emergency Fund', color: 'hsl(var(--chart-2))' },
-        loanRepayment: { label: 'Loan Repayment', color: 'hsl(var(--chart-3))' },
+        equity: { label: 'Equity', color: 'hsl(var(--chart-1))' },
+        debt: { label: 'Debt', color: 'hsl(var(--chart-2))' },
+        emergencyFund: { label: 'Emergency Fund', color: 'hsl(var(--chart-3))' },
+        loanRepayment: { label: 'Loan Repayment', color: 'hsl(var(--chart-4))' },
     } : {};
     
     const chartData = plan ? [
-        { name: 'mutualFunds', value: plan.mutualFundAmount, label: 'Mutual Funds' },
+        { name: 'equity', value: plan.equityAmount, label: 'Equity' },
+        { name: 'debt', value: plan.debtAmount, label: 'Debt' },
         { name: 'emergencyFund', value: plan.emergencyFundAmount, label: 'Emergency Fund' },
         { name: 'loanRepayment', value: plan.loanRepaymentAmount, label: 'Loan Repayment' },
     ].filter(item => item.value > 0) : [];
@@ -300,8 +302,11 @@ export default function InvestmentsPage() {
 
                         <Separator />
 
-                        <div>
-                            <h3 className="font-headline text-lg flex items-center gap-2 mb-4"><PieChartIcon className="h-5 w-5 text-primary"/>Allocation Breakdown</h3>
+                        <div className="space-y-6">
+                            <div className="text-center">
+                                <h3 className="font-headline text-lg flex items-center justify-center gap-2 mb-1"><PieChartIcon className="h-5 w-5 text-primary"/>Allocation Breakdown</h3>
+                                <p className="text-sm text-muted-foreground">A visual breakdown of where your monthly savings are going.</p>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                                  <ChartContainer config={chartConfig} className="relative mx-auto aspect-square h-64">
                                      <ResponsiveContainer width="100%" height="100%">
@@ -323,34 +328,6 @@ export default function InvestmentsPage() {
                                 <div className="space-y-4">
                                     {chartData.map((item) => {
                                         const config = chartConfig[item.name as keyof typeof chartConfig];
-                                        if (item.name === 'mutualFunds') {
-                                            return (
-                                                <div key={item.name} className="flex flex-col gap-2">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
-                                                        <div className="flex-1">
-                                                            <p className="font-medium">{config?.label}</p>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="font-semibold">{formatCurrency(item.value)}</p>
-                                                            <p className="text-xs text-muted-foreground">
-                                                                {((item.value / plan.netMonthlyCashflow) * 100).toFixed(1)}%
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="ml-7 border-l pl-4 space-y-2">
-                                                         <div className="flex justify-between text-sm">
-                                                            <span className="text-muted-foreground">Equity</span>
-                                                            <span className="font-medium">{formatCurrency(plan.equityAmount)}</span>
-                                                         </div>
-                                                         <div className="flex justify-between text-sm">
-                                                            <span className="text-muted-foreground">Debt</span>
-                                                            <span className="font-medium">{formatCurrency(plan.debtAmount)}</span>
-                                                         </div>
-                                                    </div>
-                                                </div>
-                                            )
-                                        }
                                         return(
                                             <div key={item.name} className="flex items-center gap-4">
                                                 <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config?.color }} />
@@ -373,9 +350,9 @@ export default function InvestmentsPage() {
                         <Separator />
 
                         <div>
-                            <h3 className="font-headline text-lg flex items-center gap-2 mb-4">
+                            <h3 className="font-headline text-lg flex items-center gap-2 mb-4 justify-center">
                                 <TrendingUp className="h-5 w-5 text-primary"/>
-                                Mutual Fund Investment Breakdown
+                                Mutual Fund SIP Breakdown
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800">
@@ -428,3 +405,6 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+
+    
