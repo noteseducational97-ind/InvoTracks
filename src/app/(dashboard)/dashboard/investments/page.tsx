@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit, Scale, Anchor } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit, Scale, Anchor, Combine } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
@@ -252,8 +252,9 @@ export default function InvestmentsPage() {
 
 
                     largeCapAmount = equityAmount * largeCapPercentage;
-                    midCapAmount = equityAmount * midCapPercentage;
-                    flexiCapAmount = equityAmount * flexiCapPercentage;
+                    // MERGE Mid and Flexi
+                    midCapAmount = equityAmount * (midCapPercentage + flexiCapPercentage);
+                    flexiCapAmount = 0;
                     smallCapAmount = 0; // No small cap for lower risk
                 } else {
                     // Higher risk: Large, Mid, Small
@@ -494,28 +495,29 @@ export default function InvestmentsPage() {
                                         <p className="text-xs text-muted-foreground">{((plan.largeCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
                                     </CardContent>
                                 </Card>
-                                <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Mid Cap</CardTitle>
-                                        <Factory className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.midCapAmount)}</div>
-                                        <p className="text-xs text-muted-foreground">{((plan.midCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
-                                    </CardContent>
-                                </Card>
                                  { isLowRisk ? (
-                                    <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium text-red-800 dark:text-red-300">Flexi Cap</CardTitle>
-                                            <BrainCircuit className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                            <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Mid & Flexi Cap</CardTitle>
+                                            <Combine className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                                         </CardHeader>
                                         <CardContent>
-                                            <div className="text-2xl font-bold text-red-900 dark:text-red-200">{formatCurrency(plan.flexiCapAmount)}</div>
-                                            <p className="text-xs text-muted-foreground">{((plan.flexiCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                                            <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.midCapAmount)}</div>
+                                            <p className="text-xs text-muted-foreground">{((plan.midCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
                                         </CardContent>
                                     </Card>
                                  ) : (
+                                    <>
+                                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                            <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Mid Cap</CardTitle>
+                                            <Factory className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.midCapAmount)}</div>
+                                            <p className="text-xs text-muted-foreground">{((plan.midCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                                        </CardContent>
+                                    </Card>
                                     <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                             <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Small Cap</CardTitle>
@@ -526,6 +528,7 @@ export default function InvestmentsPage() {
                                             <p className="text-xs text-muted-foreground">{((plan.smallCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
                                         </CardContent>
                                     </Card>
+                                    </>
                                  ) }
                             </div>
                         </div>
