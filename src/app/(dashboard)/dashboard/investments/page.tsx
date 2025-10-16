@@ -1,8 +1,7 @@
-
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit, Scale, Anchor, Combine } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit, Scale, Anchor, Combine, Gem } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
@@ -29,6 +28,7 @@ type InvestmentPlan = {
   midCapAmount: number;
   smallCapAmount: number;
   flexiCapAmount: number;
+  goldFundAmount: number;
   midTermDebtAmount: number;
   liquidGoldFundAmount: number;
   multiCapLoanRepaymentAmount: number;
@@ -173,18 +173,16 @@ export default function InvestmentsPage() {
                 let emergencyFundAmount = 0;
                 let mutualFundAmount = 0;
                 
+                let cashflowForDistribution = netMonthlyCashflow;
                 if (totalMonthlyEmi > 0) {
                     loanRepaymentAmount = totalMonthlyEmi * 0.10;
-                    const cashflowForDistribution = netMonthlyCashflow - loanRepaymentAmount;
-                    emergencyFundAmount = cashflowForDistribution * 0.30;
-                    mutualFundAmount = cashflowForDistribution * 0.70;
-                } else {
-                    emergencyFundAmount = netMonthlyCashflow * 0.30;
-                    mutualFundAmount = netMonthlyCashflow * 0.70;
+                    cashflowForDistribution = netMonthlyCashflow - loanRepaymentAmount;
                 }
                 
-                const totalInvestable = emergencyFundAmount + mutualFundAmount + loanRepaymentAmount;
+                emergencyFundAmount = cashflowForDistribution * 0.30;
+                mutualFundAmount = cashflowForDistribution * 0.70;
 
+                const totalInvestable = emergencyFundAmount + mutualFundAmount + loanRepaymentAmount;
 
                 const equityPercentage = (100 - age) / 100;
                 const debtPercentage = age / 100;
@@ -204,20 +202,17 @@ export default function InvestmentsPage() {
                         corporateBondLoanRepaymentAmount = loanRepaymentAmount * 0.30;
                     }
                 }
-
                 
                 // Debt Allocation Logic based on risk profile
                 let baseLiquidAllocation;
                 if (riskPercentage > 60) {
-                    // Higher risk profile: prioritize gold/liquid for safety
                     baseLiquidAllocation = 0.60;
                 } else {
-                    // Lower risk profile: prioritize mid-term debt for returns
                     baseLiquidAllocation = 0.30;
                 }
-                const ageAdjustment = Math.max(0, (age - 25) / 100) * 0.5; // More liquidity as age increases past 25
+                const ageAdjustment = Math.max(0, (age - 25) / 100) * 0.5;
                 let liquidAllocationPercentage = baseLiquidAllocation + ageAdjustment;
-                liquidAllocationPercentage = Math.max(0.20, Math.min(0.80, liquidAllocationPercentage)); // Clamp between 20% and 80%
+                liquidAllocationPercentage = Math.max(0.20, Math.min(0.80, liquidAllocationPercentage)); 
 
                 const liquidGoldFundAmount = debtAmount * liquidAllocationPercentage;
                 const midTermDebtAmount = debtAmount * (1 - liquidAllocationPercentage);
@@ -227,58 +222,43 @@ export default function InvestmentsPage() {
                 let midCapAmount = 0;
                 let smallCapAmount = 0;
                 let flexiCapAmount = 0;
-                const ageFactor = Math.max(0, (50 - age) / 50); // 1 for young, 0 for 50+
-                const riskFactor = riskPercentage / 100; // 0 to 1
+                let goldFundAmount = 0;
+
+                const ageFactor = Math.max(0, (50 - age) / 50); 
+                const riskFactor = riskPercentage / 100;
 
                 if (riskPercentage < 60) {
-                    // Lower risk: Nifty 50/100, Mid Cap, Flexi Cap
-                    let baseLargeCap = 0.60; // Nifty 50/100, increased base
-                    let baseMidCap = 0.25;
-                    let baseFlexiCap = 0.15;
-
-                    // Adjustments based on risk and age
-                    const midCapAdjustment = (riskFactor - 0.2) * 0.05 - ageFactor * 0.05; // Reduced sensitivity even more
-                    const flexiCapAdjustment = (riskFactor - 0.2) * 0.1 + ageFactor * 0.05;
-                    const largeCapAdjustment = -midCapAdjustment - flexiCapAdjustment;
-                    
-                    let largeCapPercentage = baseLargeCap + largeCapAdjustment;
-                    let midCapPercentage = baseMidCap + midCapAdjustment;
-                    let flexiCapPercentage = baseFlexiCap + flexiCapAdjustment;
-                    
-                    const total = largeCapPercentage + midCapPercentage + flexiCapPercentage;
-                    largeCapPercentage /= total;
-                    midCapPercentage /= total;
-                    flexiCapPercentage /= total;
-
-
-                    largeCapAmount = equityAmount * largeCapPercentage;
-                    // MERGE Mid and Flexi
-                    midCapAmount = equityAmount * (midCapPercentage + flexiCapPercentage);
-                    flexiCapAmount = 0;
-                    smallCapAmount = 0; // No small cap for lower risk
+                    if (mutualFundAmount < 3000) {
+                        // Nifty 50/100, Flexi Cap
+                        largeCapAmount = equityAmount * 0.6;
+                        flexiCapAmount = equityAmount * 0.4;
+                    } else {
+                        // Nifty 50/100, Flexi Cap, Gold Fund
+                        largeCapAmount = equityAmount * 0.5;
+                        flexiCapAmount = equityAmount * 0.3;
+                        goldFundAmount = equityAmount * 0.2;
+                    }
                 } else {
-                    // Higher risk: Large, Mid, Small
-                    
+                    // Higher risk: Nifty 50/100, Flexi Cap, Small Cap
                     let baseLargeCap = 0.40;
-                    let baseMidCap = 0.30;
+                    let baseFlexiCap = 0.30;
                     let baseSmallCap = 0.30;
                     
                     const smallCapAdjustment = (riskFactor - 0.5) * 0.2 + ageFactor * 0.1;
                     const largeCapAdjustment = (0.5 - riskFactor) * 0.1;
                     
                     let largeCapPercentage = baseLargeCap + largeCapAdjustment - (smallCapAdjustment/2);
-                    let midCapPercentage = baseMidCap - (smallCapAdjustment / 2);
+                    let flexiCapPercentage = baseFlexiCap - (smallCapAdjustment / 2);
                     let smallCapPercentage = baseSmallCap + smallCapAdjustment;
                     
-                    const total = largeCapPercentage + midCapPercentage + smallCapPercentage;
+                    const total = largeCapPercentage + flexiCapPercentage + smallCapPercentage;
                     largeCapPercentage /= total;
-                    midCapPercentage /= total;
+                    flexiCapPercentage /= total;
                     smallCapPercentage /= total;
 
                     largeCapAmount = equityAmount * largeCapPercentage;
-                    midCapAmount = equityAmount * midCapPercentage;
+                    flexiCapAmount = equityAmount * flexiCapPercentage;
                     smallCapAmount = equityAmount * smallCapPercentage;
-                    flexiCapAmount = 0; // No flexi cap for higher risk
                 }
 
                 const generatedPlan: InvestmentPlan = {
@@ -290,9 +270,10 @@ export default function InvestmentsPage() {
                     debtAmount,
                     age,
                     largeCapAmount,
-                    midCapAmount,
+                    midCapAmount, // Will be zero with new logic but kept for type safety
                     smallCapAmount,
                     flexiCapAmount,
+                    goldFundAmount,
                     midTermDebtAmount,
                     liquidGoldFundAmount,
                     multiCapLoanRepaymentAmount,
@@ -372,6 +353,78 @@ export default function InvestmentsPage() {
                 { name: 'debt', value: plan.debtAmount, label: 'Debt' },
             ].filter(item => item.value > 0);
             
+            const lowRiskEquityCards = (
+                <>
+                    <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Nifty 50/100 Index Fund</CardTitle>
+                            <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.largeCapAmount)}</div>
+                            <p className="text-xs text-muted-foreground">{((plan.largeCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Flexi Cap Fund</CardTitle>
+                            <Combine className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.flexiCapAmount)}</div>
+                            <p className="text-xs text-muted-foreground">{((plan.flexiCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                        </CardContent>
+                    </Card>
+                    {plan.goldFundAmount > 0 && (
+                        <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Gold Fund</CardTitle>
+                                <Gem className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-200">{formatCurrency(plan.goldFundAmount)}</div>
+                                <p className="text-xs text-muted-foreground">{((plan.goldFundAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                            </CardContent>
+                        </Card>
+                    )}
+                </>
+            );
+
+            const highRiskEquityCards = (
+                 <>
+                    <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Nifty 50/100 Index Fund</CardTitle>
+                            <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.largeCapAmount)}</div>
+                            <p className="text-xs text-muted-foreground">{((plan.largeCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Flexi Cap Fund</CardTitle>
+                            <Combine className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.flexiCapAmount)}</div>
+                            <p className="text-xs text-muted-foreground">{((plan.flexiCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Small Cap Fund</CardTitle>
+                            <Sprout className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-200">{formatCurrency(plan.smallCapAmount)}</div>
+                            <p className="text-xs text-muted-foreground">{((plan.smallCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                        </CardContent>
+                    </Card>
+                </>
+            );
+
             return (
                 <>
                 <Card className="mt-6">
@@ -485,51 +538,7 @@ export default function InvestmentsPage() {
                         <div className="border rounded-lg p-4">
                             <h4 className="font-semibold mb-4 text-center">Equity Allocation</h4>
                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Nifty 50/100 Index fund</CardTitle>
-                                        <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.largeCapAmount)}</div>
-                                        <p className="text-xs text-muted-foreground">{((plan.largeCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
-                                    </CardContent>
-                                </Card>
-                                 { isLowRisk ? (
-                                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Mid & Flexi Cap</CardTitle>
-                                            <Combine className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.midCapAmount)}</div>
-                                            <p className="text-xs text-muted-foreground">{((plan.midCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
-                                        </CardContent>
-                                    </Card>
-                                 ) : (
-                                    <>
-                                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Mid Cap</CardTitle>
-                                            <Factory className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.midCapAmount)}</div>
-                                            <p className="text-xs text-muted-foreground">{((plan.midCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
-                                        </CardContent>
-                                    </Card>
-                                    <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Small Cap</CardTitle>
-                                            <Sprout className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-200">{formatCurrency(plan.smallCapAmount)}</div>
-                                            <p className="text-xs text-muted-foreground">{((plan.smallCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
-                                        </CardContent>
-                                    </Card>
-                                    </>
-                                 ) }
+                                {isLowRisk ? lowRiskEquityCards : highRiskEquityCards}
                             </div>
                         </div>
                          <div className="border rounded-lg p-4">
@@ -605,3 +614,5 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
+    
