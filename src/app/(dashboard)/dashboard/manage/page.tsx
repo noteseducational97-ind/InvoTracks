@@ -363,46 +363,33 @@ export default function ManagePage() {
 
         {/* Emergency Fund Plan Card */}
         {monthlyIncome > 0 && (
-            <Card className={cn(
-                emergencyFundStatus === 'low'
-                ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
-                : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
-            )}>
+            <Card>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2">
-                        <Shield className="h-5 w-5" />
+                        <Shield className="h-5 w-5 text-primary" />
                         Emergency Fund Plan
                     </CardTitle>
-                    <CardDescription className={cn(
-                         emergencyFundStatus === 'low'
-                         ? "text-red-900/80 dark:text-red-200/80"
-                         : "text-green-900/80 dark:text-green-200/80"
-                    )}></CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <Card>
-                        <CardHeader className="p-4">
-                            <CardDescription>Current Fund</CardDescription>
-                            <CardTitle className="text-2xl">{formatCurrency(currentEmergencyFund)}</CardTitle>
-                        </CardHeader>
+                     <Card className="bg-muted/50 p-4">
+                        <CardDescription>Current Fund</CardDescription>
+                        <CardTitle className="text-2xl">{formatCurrency(currentEmergencyFund)}</CardTitle>
                     </Card>
-                    <Card>
-                        <CardHeader className="p-4">
-                            <CardDescription>Recommended Range</CardDescription>
-                            <CardTitle className="text-2xl">{formatCurrency(minRecommendedFund)} - {formatCurrency(maxRecommendedFund)}</CardTitle>
-                        </CardHeader>
+                    <Card className="bg-muted/50 p-4">
+                        <CardDescription>Recommended Range</CardDescription>
+                        <CardTitle className="text-2xl">{formatCurrency(minRecommendedFund)} - {formatCurrency(maxRecommendedFund)}</CardTitle>
                     </Card>
-                    <Card>
-                        <CardHeader className="p-4">
-                            <CardDescription>Status</CardDescription>
-                            <CardTitle className={cn("text-2xl capitalize", 
-                                emergencyFundStatus === 'low' ? 'text-red-600' : 'text-green-600'
-                            )}>
-                                {emergencyFundStatus === 'low' && 'Below Recommended'}
-                                {emergencyFundStatus === 'good' && 'Within Range'}
-                                {emergencyFundStatus === 'high' && 'Above Recommended'}
-                            </CardTitle>
-                        </CardHeader>
+                    <Card className={cn("p-4",
+                         emergencyFundStatus === 'low' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-green-50 dark:bg-green-900/20'
+                    )}>
+                        <CardDescription>Status</CardDescription>
+                        <CardTitle className={cn("text-2xl capitalize", 
+                            emergencyFundStatus === 'low' ? 'text-red-600' : 'text-green-600'
+                        )}>
+                            {emergencyFundStatus === 'low' && 'Below Recommended'}
+                            {emergencyFundStatus === 'good' && 'Within Range'}
+                            {emergencyFundStatus === 'high' && 'Above Recommended'}
+                        </CardTitle>
                     </Card>
                 </CardContent>
             </Card>
