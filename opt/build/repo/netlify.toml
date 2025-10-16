@@ -2,5 +2,27 @@
   command = "npm run build"
   publish = ".next"
 
+[build.processing]
+  skip_processing = false
+[build.processing.css]
+  bundle = false
+  minify = false
+[build.processing.js]
+  bundle = false
+  minify = false
+[build.processing.html]
+  pretty_urls = false
+[build.processing.images]
+  compress = false
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[secrets_scan]
+  # Ignore specific Firebase public keys that are safe to expose
+  omit_keys = ["^NEXT_PUBLIC_"]
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
