@@ -4,7 +4,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calculator, ArrowRight, Receipt } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 
 export default function CalculatorPage() {
     return (
@@ -73,24 +72,6 @@ export default function CalculatorPage() {
                             <CardTitle className="font-headline flex items-center justify-between">
                                  <span className="flex items-center gap-2">
                                     <Receipt className="h-6 w-6" />
-                                    Loan Calculator
-                                </span>
-                                <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground">
-                                Calculate your Equated Monthly Installment for loans.
-                            </p>
-                        </CardContent>
-                    </Card>
-                </Link>
-                <Link href="/dashboard/calculator/emi" className="group">
-                    <Card className="h-full transition-all group-hover:border-primary group-hover:shadow-lg">
-                        <CardHeader>
-                            <CardTitle className="font-headline flex items-center justify-between">
-                                 <span className="flex items-center gap-2">
-                                    <Receipt className="h-6 w-6" />
                                     EMI Calculator
                                 </span>
                                 <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
@@ -98,7 +79,7 @@ export default function CalculatorPage() {
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-muted-foreground">
-                                Calculate your Equated Monthly Installment for loans.
+                                Calculate your Equated Monthly Installment for various loans.
                             </p>
                         </CardContent>
                     </Card>
