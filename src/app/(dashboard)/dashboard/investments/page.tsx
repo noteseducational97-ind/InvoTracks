@@ -405,13 +405,13 @@ export default function InvestmentsPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                             <Card className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800">
+                             <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-sky-800 dark:text-sky-300">Total Amount</CardTitle>
-                                    <Wallet className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                                    <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Total Amount</CardTitle>
+                                    <Wallet className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold text-sky-900 dark:text-sky-200">{formatCurrency(plan.netMonthlyCashflow)}</div>
+                                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.netMonthlyCashflow)}</div>
                                 </CardContent>
                             </Card>
                             {plan.loanRepaymentAmount > 0 && (
@@ -425,22 +425,22 @@ export default function InvestmentsPage() {
                                     </CardContent>
                                 </Card>
                             )}
-                            <Card className="bg-lime-50 dark:bg-lime-900/20 border-lime-200 dark:border-lime-800">
+                            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-lime-800 dark:text-lime-300">Emergency Fund</CardTitle>
-                                    <Shield className="h-4 w-4 text-lime-600 dark:text-lime-400" />
+                                    <CardTitle className="text-sm font-medium text-green-800 dark:text-green-300">Emergency Fund</CardTitle>
+                                    <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold text-lime-900 dark:text-lime-200">{formatCurrency(plan.emergencyFundAmount)}</div>
+                                    <div className="text-2xl font-bold text-green-900 dark:text-green-200">{formatCurrency(plan.emergencyFundAmount)}</div>
                                 </CardContent>
                             </Card>
-                            <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800">
+                            <Card className="bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Mutual Fund SIP</CardTitle>
-                                    <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                    <CardTitle className="text-sm font-medium text-indigo-800 dark:text-indigo-300">Mutual Fund SIP</CardTitle>
+                                    <TrendingUp className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-200">{formatCurrency(plan.mutualFundAmount)}</div>
+                                    <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-200">{formatCurrency(plan.mutualFundAmount)}</div>
                                 </CardContent>
                             </Card>
                         </div>
@@ -545,7 +545,7 @@ export default function InvestmentsPage() {
                                     <Card className="bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                             <CardTitle className="text-sm font-medium text-rose-800 dark:text-rose-300">
-                                                 {isLowRisk ? "Flexi Cap Fund" : "Multi Cap Fund"}
+                                                {isLowRisk ? "Flexi Cap Fund" : "Multi Cap Fund"}
                                             </CardTitle>
                                             <Scale className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                                         </CardHeader>
@@ -565,6 +565,33 @@ export default function InvestmentsPage() {
                                 </div>
                             </div>
                          )}
+                    </CardContent>
+                </Card>
+                
+                <Card className="mt-6">
+                    <CardHeader>
+                        <CardTitle className="font-headline text-lg flex items-center gap-2">
+                            <Shield className="h-5 w-5 text-primary"/>
+                            Emergency Fund Allocation
+                        </CardTitle>
+                        <CardDescription>
+                            Your safety net for unexpected expenses. This amount should be invested in a highly liquid fund.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="border rounded-lg p-4">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Card className="bg-lime-50 dark:bg-lime-900/20 border-lime-200 dark:border-lime-800">
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium text-lime-800 dark:text-lime-300">Liquid Fund</CardTitle>
+                                        <Droplets className="h-4 w-4 text-lime-600 dark:text-lime-400" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-lime-900 dark:text-lime-200">{formatCurrency(plan.emergencyFundAmount)}</div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
                 </>
@@ -590,5 +617,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
