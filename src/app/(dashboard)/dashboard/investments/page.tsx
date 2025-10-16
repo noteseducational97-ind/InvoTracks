@@ -2,11 +2,13 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit, Scale, Anchor, Combine, Gem } from "lucide-react";
+import { Loader2, PlusCircle, Shield, Landmark, TrendingUp, Wallet, PieChart as PieChartIcon, Briefcase, Building, Factory, Sprout, PiggyBank, Droplets, BrainCircuit, Scale, Anchor, Combine, Gem, FileDown } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   ChartContainer,
   ChartTooltip,
@@ -116,6 +118,25 @@ export default function InvestmentsPage() {
       }
       return age;
     };
+    
+    const handleExport = () => {
+        const input = document.getElementById('pdf-content');
+        if (input) {
+          html2canvas(input, { scale: 2 }).then((canvas) => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasWidth / canvasHeight;
+            const width = pdfWidth;
+            const height = width / ratio;
+            pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+            pdf.save('investment-plan.pdf');
+          });
+        }
+      };
 
     const calculateMonthlyInsurancePremium = (insurance: InsuranceCategory | undefined): number => {
         if (!insurance || insurance.invested !== 'yes' || !insurance.amount) {
@@ -398,7 +419,7 @@ export default function InvestmentsPage() {
 
 
             return (
-                <>
+                <div id="pdf-content">
                 <Card className="mt-6">
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">Your Monthly Investment Plan</CardTitle>
@@ -594,7 +615,7 @@ export default function InvestmentsPage() {
                         </div>
                     </CardContent>
                 </Card>
-                </>
+                </div>
             );
         }
 
@@ -608,9 +629,15 @@ export default function InvestmentsPage() {
     
     return (
         <div className="space-y-4">
-            <div>
-                <h1 className="font-headline text-3xl font-bold tracking-tight">Investment Plan</h1>
-                <p className="text-muted-foreground">A personalized plan based on your financial profile and goals.</p>
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="font-headline text-3xl font-bold tracking-tight">Investment Plan</h1>
+                    <p className="text-muted-foreground">A personalized plan based on your financial profile and goals.</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleExport}>
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export to PDF
+                </Button>
             </div>
 
             {renderContent()}

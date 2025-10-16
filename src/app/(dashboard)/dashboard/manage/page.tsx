@@ -2,11 +2,13 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet, Info, Shield, Lightbulb } from "lucide-react";
+import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet, Info, Shield, Lightbulb, FileDown } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -75,6 +77,25 @@ export default function ManagePage() {
     const numValue = Number(value) || 0;
     return numValue.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
+  
+  const handleExport = () => {
+    const input = document.getElementById('pdf-content');
+    if (input) {
+      html2canvas(input, { scale: 2 }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        const width = pdfWidth;
+        const height = width / ratio;
+        pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+        pdf.save('financial-summary.pdf');
+      });
+    }
+  };
 
   const calculateAge = (dobString: string) => {
     if (!dobString) return null;
@@ -249,13 +270,19 @@ export default function ManagePage() {
             <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
             <p className="text-muted-foreground">A centralized view of your financial details and commitments.</p>
         </div>
-        <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/manage/edit"><Pencil className="h-4 w-4 mr-2" />Edit Details</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard/manage/edit"><Pencil className="h-4 w-4 mr-2" />Edit Details</Link>
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport}>
+                <FileDown className="h-4 w-4 mr-2" />
+                Export to PDF
+            </Button>
+        </div>
       </div>
 
 
-      <div className="mt-6 grid gap-6">
+      <div id="pdf-content" className="mt-6 grid gap-6">
 
         {/* Personal & Income Details Card */}
         <Card>
