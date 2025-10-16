@@ -22,8 +22,6 @@ type InvestmentPlan = {
   loanRepaymentAmount: number;
   emergencyFundAmount: number;
   mutualFundAmount: number;
-  equityAmount: number;
-  debtAmount: number;
   age: number;
   largeCapAmount: number;
   midCapAmount: number;
@@ -79,6 +77,7 @@ interface FinancialProfile {
         realEstate: InvestmentCategory;
         commodities: InvestmentCategory;
         other: InvestmentCategory;
+        emergencyFund: InvestmentCategory;
         termInsurance: InsuranceCategory;
         healthInsurance: InsuranceCategory;
     };
@@ -147,11 +146,12 @@ export default function InvestmentsPage() {
             try {
                 const totalMonthlyExpenses = Object.values(financialProfile.expenses).reduce((acc, val) => acc + (Number(val) || 0), 0);
                 const totalMonthlyEmi = financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0);
+                const monthlySIP = (financialProfile.investments.mutualFunds.invested === 'yes' ? Number(financialProfile.investments.mutualFunds.amount) : 0) || 0;
                 const totalMonthlyIncome = Number(financialProfile?.monthlyIncome || 0) + (Number(financialProfile?.annualIncome || 0) / 12);
                 const monthlyHealthInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.healthInsurance);
                 const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.termInsurance);
                 const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
-                const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance;
+                const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance - monthlySIP;
                 const age = calculateAge(financialProfile.dob);
                 const riskPercentage = Number(financialProfile.riskPercentage) || 50;
 
@@ -170,18 +170,19 @@ export default function InvestmentsPage() {
                 let loanRepaymentAmount = 0;
                 let emergencyFundAmount = 0;
                 let mutualFundAmount = 0;
-
+                
                 if (totalMonthlyEmi > 0) {
-                    loanRepaymentAmount = netMonthlyCashflow * 0.10;
-                    const amountAfterLoanRepayment = netMonthlyCashflow - loanRepaymentAmount;
-                    emergencyFundAmount = amountAfterLoanRepayment * 0.30;
-                    mutualFundAmount = amountAfterLoanRepayment - emergencyFundAmount;
+                    loanRepaymentAmount = totalMonthlyEmi * 0.10;
+                    const cashflowForDistribution = netMonthlyCashflow - loanRepaymentAmount;
+                    emergencyFundAmount = cashflowForDistribution * 0.30;
+                    mutualFundAmount = cashflowForDistribution * 0.70;
                 } else {
-                    const redistributionAmount = netMonthlyCashflow * 0.10; // The 10% that would've gone to loans
-                    const remainingCashflow = netMonthlyCashflow * 0.90;
-                    emergencyFundAmount = remainingCashflow * 0.30 + redistributionAmount * 0.30;
-                    mutualFundAmount = remainingCashflow * 0.70 + redistributionAmount * 0.70;
+                    emergencyFundAmount = netMonthlyCashflow * 0.30;
+                    mutualFundAmount = netMonthlyCashflow * 0.70;
                 }
+                
+                const totalInvestable = emergencyFundAmount + mutualFundAmount;
+
 
                 const equityPercentage = (100 - age) / 100;
                 const debtPercentage = age / 100;
@@ -278,7 +279,7 @@ export default function InvestmentsPage() {
                 }
 
                 const generatedPlan: InvestmentPlan = {
-                    netMonthlyCashflow,
+                    netMonthlyCashflow: totalInvestable,
                     loanRepaymentAmount,
                     emergencyFundAmount,
                     mutualFundAmount,
