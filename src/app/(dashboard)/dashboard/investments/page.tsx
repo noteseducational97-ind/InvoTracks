@@ -171,17 +171,15 @@ export default function InvestmentsPage() {
                 }
 
                 let loanRepaymentAmount = 0;
-                let emergencyFundAmount = 0;
-                let mutualFundAmount = 0;
-                
                 let cashflowForDistribution = netMonthlyCashflow;
+                
                 if (totalMonthlyEmi > 0) {
                     loanRepaymentAmount = totalMonthlyEmi * 0.10;
-                    cashflowForDistribution = netMonthlyCashflow - loanRepaymentAmount;
+                    cashflowForDistribution -= loanRepaymentAmount;
                 }
                 
-                emergencyFundAmount = cashflowForDistribution * 0.30;
-                mutualFundAmount = cashflowForDistribution * 0.70;
+                const emergencyFundAmount = cashflowForDistribution * 0.30;
+                const mutualFundAmount = cashflowForDistribution * 0.70;
 
                 const totalInvestable = emergencyFundAmount + mutualFundAmount + loanRepaymentAmount;
 
@@ -354,9 +352,9 @@ export default function InvestmentsPage() {
                 { name: 'debt', value: plan.debtAmount, label: 'Debt' },
             ].filter(item => item.value > 0);
             
-            const lowRiskEquityCards = (
+            const equityCards = (
                 <>
-                    <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                    {plan.largeCapAmount > 0 && <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Nifty 50/100 Index Fund</CardTitle>
                             <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -365,8 +363,8 @@ export default function InvestmentsPage() {
                             <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.largeCapAmount)}</div>
                             <p className="text-xs text-muted-foreground">{((plan.largeCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
                         </CardContent>
-                    </Card>
-                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                    </Card>}
+                    {plan.flexiCapAmount > 0 && <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Flexi Cap Fund</CardTitle>
                             <Combine className="h-4 w-4 text-purple-600 dark:text-purple-400" />
@@ -375,45 +373,8 @@ export default function InvestmentsPage() {
                             <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.flexiCapAmount)}</div>
                             <p className="text-xs text-muted-foreground">{((plan.flexiCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
                         </CardContent>
-                    </Card>
-                    {plan.goldFundAmount > 0 && (
-                        <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Gold Fund</CardTitle>
-                                <Gem className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-200">{formatCurrency(plan.goldFundAmount)}</div>
-                                <p className="text-xs text-muted-foreground">{((plan.goldFundAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
-                            </CardContent>
-                        </Card>
-                    )}
-                </>
-            );
-
-            const highRiskEquityCards = (
-                 <>
-                    <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">Nifty 50/100 Index Fund</CardTitle>
-                            <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{formatCurrency(plan.largeCapAmount)}</div>
-                            <p className="text-xs text-muted-foreground">{((plan.largeCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-300">Flexi Cap Fund</CardTitle>
-                            <Combine className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{formatCurrency(plan.flexiCapAmount)}</div>
-                            <p className="text-xs text-muted-foreground">{((plan.flexiCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                    </Card>}
+                    {plan.smallCapAmount > 0 && <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Small Cap Fund</CardTitle>
                             <Sprout className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
@@ -422,9 +383,22 @@ export default function InvestmentsPage() {
                             <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-200">{formatCurrency(plan.smallCapAmount)}</div>
                             <p className="text-xs text-muted-foreground">{((plan.smallCapAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
                         </CardContent>
-                    </Card>
+                    </Card>}
+                    {plan.goldFundAmount > 0 && (
+                        <Card className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-amber-800 dark:text-amber-300">Gold Fund</CardTitle>
+                                <Gem className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-amber-900 dark:text-amber-200">{formatCurrency(plan.goldFundAmount)}</div>
+                                <p className="text-xs text-muted-foreground">{((plan.goldFundAmount / plan.equityAmount) * 100).toFixed(1)}% of Equity</p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </>
             );
+
 
             return (
                 <>
@@ -539,7 +513,7 @@ export default function InvestmentsPage() {
                         <div className="border rounded-lg p-4">
                             <h4 className="font-semibold mb-4 text-center">Equity Allocation</h4>
                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {isLowRisk ? lowRiskEquityCards : highRiskEquityCards}
+                                {equityCards}
                             </div>
                         </div>
                          <div className="border rounded-lg p-4">
@@ -573,7 +547,9 @@ export default function InvestmentsPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <Card className="bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium text-rose-800 dark:text-rose-300">Multi Cap / Flexi Cap Fund</CardTitle>
+                                            <CardTitle className="text-sm font-medium text-rose-800 dark:text-rose-300">
+                                                {isLowRisk ? "Flexi Cap Fund" : "Multi Cap Fund"}
+                                            </CardTitle>
                                             <Scale className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                                         </CardHeader>
                                         <CardContent>
