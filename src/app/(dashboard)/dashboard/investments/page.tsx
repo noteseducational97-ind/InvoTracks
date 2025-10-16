@@ -1,3 +1,4 @@
+
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -270,7 +271,7 @@ export default function InvestmentsPage() {
                     debtAmount,
                     age,
                     largeCapAmount,
-                    midCapAmount, // Will be zero with new logic but kept for type safety
+                    midCapAmount,
                     smallCapAmount,
                     flexiCapAmount,
                     goldFundAmount,
@@ -555,7 +556,9 @@ export default function InvestmentsPage() {
                                 </Card>
                                 <Card className="bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-cyan-800 dark:text-cyan-300">Liquid/Gold Fund</CardTitle>
+                                        <CardTitle className="text-sm font-medium text-cyan-800 dark:text-cyan-300">
+                                            {plan.goldFundAmount > 0 ? "Liquid Fund" : "Gold Fund"}
+                                        </CardTitle>
                                         <Droplets className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
                                     </CardHeader>
                                     <CardContent>
@@ -614,5 +617,3 @@ export default function InvestmentsPage() {
         </div>
     );
 }
-
-    
