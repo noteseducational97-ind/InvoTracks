@@ -201,10 +201,46 @@ export default function ManagePage() {
     });
 
   const suggestions = [];
-  if (expensePercentage > 50) suggestions.push("Your expenses are higher than the recommended 50%. Consider reviewing your spending on non-essential items.");
-  if (emiPercentage > 30) suggestions.push("Your loan EMIs are taking up a significant portion of your income. Focusing on prepayments could be beneficial.");
-  if (investmentPercentage < 20) suggestions.push("Your savings rate is below the recommended 20%. Try to increase your monthly investments.");
-  if (emergencyFundStatus === 'low') suggestions.push("Your emergency fund is below the recommended 6-month minimum. Prioritize building this safety net.");
+  if (expensePercentage > 50) {
+      suggestions.push({ 
+          title: "Review Your Expenses", 
+          points: [
+              "Your expenses are higher than the recommended 50% of income.",
+              "Categorize your spending to identify non-essential items.",
+              "Consider creating a monthly budget to track and control spending."
+          ]
+      });
+  }
+  if (emiPercentage > 30) {
+      suggestions.push({
+          title: "Manage Your Debt",
+          points: [
+              "Your loan EMIs are taking up a significant portion of your income.",
+              "Focusing on prepaying high-interest loans could save you money in the long run.",
+              "Avoid taking on new debt until your current EMIs are more manageable."
+          ]
+      });
+  }
+  if (investmentPercentage < 20) {
+      suggestions.push({
+          title: "Increase Your Savings Rate",
+          points: [
+              "Your savings rate is below the recommended 20%.",
+              "Try to automate your investments to ensure consistency.",
+              "Even a small increase in your monthly SIP can make a big difference over time."
+          ]
+      });
+  }
+  if (emergencyFundStatus === 'low') {
+      suggestions.push({
+          title: "Build Your Emergency Fund",
+          points: [
+              "Your emergency fund is below the recommended 6-month minimum.",
+              "Prioritize building this safety net to handle unexpected expenses.",
+              "Consider setting up a separate high-yield savings account for your emergency fund."
+          ]
+      });
+  }
 
   return (
     <div>
@@ -463,12 +499,17 @@ export default function ManagePage() {
                         Suggestions
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm text-muted-foreground">
-                    <ul className="list-disc pl-5 space-y-2">
-                        {suggestions.map((suggestion, index) => (
-                            <li key={index}>{suggestion}</li>
-                        ))}
-                    </ul>
+                <CardContent className="space-y-4">
+                    {suggestions.map((suggestion, index) => (
+                        <div key={index} className="p-3 border-l-4 rounded-r-lg bg-muted/50 border-primary">
+                            <h4 className="font-semibold">{suggestion.title}</h4>
+                            <ul className="list-disc pl-5 mt-1 space-y-1 text-sm text-muted-foreground">
+                                {suggestion.points.map((point, i) => (
+                                    <li key={i}>{point}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
                 </CardContent>
             </Card>
         )}
