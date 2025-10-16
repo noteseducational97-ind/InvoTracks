@@ -1,14 +1,13 @@
 
-'use client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, DollarSign, TrendingUp, Landmark, Receipt, Pencil, PlusCircle, Loader2, Wallet, Info, Shield, Lightbulb, FileDown } from "lucide-react";
+import { User, DollarSign, TrendingUp, Landmark, Wallet, Info, Shield, Lightbulb, FileDown, PlusCircle, Pencil } from "lucide-react";
 import Link from "next/link";
-import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { FinancialSummaryClient } from "./financial-summary-client";
+import { getFinancialProfile } from "@/app/actions";
 
 
 type Frequency = 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -62,41 +61,37 @@ interface FinancialProfile {
 }
 
 
-export default function ManagePage() {
-  const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
+export default async function ManagePage() {
+  const financialProfile = await getFinancialProfile();
 
-  const financialProfileRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return doc(firestore, 'users', user.uid, 'financial_profile', 'default');
-  }, [user, firestore]);
-
-  const { data: financialProfile, isLoading: isProfileLoading } = useDoc<FinancialProfile>(financialProfileRef);
+  if (!financialProfile) {
+    return (
+      <div>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
+        <p className="text-muted-foreground">A centralized view of your financial details and commitments.</p>
+        <Card className="mt-6 text-center">
+            <CardHeader>
+                <CardTitle className="font-headline">Welcome to Your Financial Hub</CardTitle>
+                <CardDescription>Get started by adding your financial details.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button asChild>
+                    <Link href="/dashboard/manage/add-details">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Details
+                    </Link>
+                </Button>
+            </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const formatCurrency = (value: number | string) => {
     const numValue = Number(value) || 0;
     return numValue.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
   
-  const handleExport = () => {
-    const input = document.getElementById('pdf-content');
-    if (input) {
-      html2canvas(input, { scale: 2 }).then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / canvasHeight;
-        const width = pdfWidth;
-        const height = width / ratio;
-        pdf.addImage(imgData, 'PNG', 0, 0, width, height);
-        pdf.save('financial-summary.pdf');
-      });
-    }
-  };
-
   const calculateAge = (dobString: string) => {
     if (!dobString) return null;
     const dob = new Date(dobString);
@@ -131,15 +126,15 @@ export default function ManagePage() {
   };
   
 
-  const totalMonthlyExpenses = financialProfile ? Object.values(financialProfile.expenses).reduce((acc, val) => acc + (Number(val) || 0), 0) : 0;
-  const totalOutstandingLoan = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.amount) || 0), 0) : 0;
-  const totalMonthlyEmi = financialProfile ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0) : 0;
+  const totalMonthlyExpenses = financialProfile.expenses ? Object.values(financialProfile.expenses).reduce((acc, val) => acc + (Number(val) || 0), 0) : 0;
+  const totalOutstandingLoan = financialProfile.loans ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.amount) || 0), 0) : 0;
+  const totalMonthlyEmi = financialProfile.loans ? financialProfile.loans.reduce((acc, loan) => acc + (Number(loan.emi) || 0), 0) : 0;
 
-  const monthlySIP = (financialProfile?.investments.mutualFunds.invested === 'yes' ? Number(financialProfile.investments.mutualFunds.amount) : 0) || 0;
+  const monthlySIP = (financialProfile.investments?.mutualFunds.invested === 'yes' ? Number(financialProfile.investments.mutualFunds.amount) : 0) || 0;
   const monthlyIncome = Number(financialProfile?.monthlyIncome || 0);
   const totalMonthlyIncome = monthlyIncome + (Number(financialProfile?.annualIncome || 0) / 12);
-  const monthlyHealthInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.healthInsurance);
-  const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile?.investments.termInsurance);
+  const monthlyHealthInsurance = calculateMonthlyInsurancePremium(financialProfile.investments?.healthInsurance);
+  const monthlyTermInsurance = calculateMonthlyInsurancePremium(financialProfile.investments?.termInsurance);
   
   const totalMonthlyInsurance = monthlyHealthInsurance + monthlyTermInsurance;
   const netMonthlyCashflow = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyEmi - totalMonthlyInsurance - monthlySIP;
@@ -150,7 +145,7 @@ export default function ManagePage() {
   const investmentPercentage = totalMonthlyIncome > 0 ? ((monthlySIP + totalMonthlyInsurance) / totalMonthlyIncome) * 100 : 0;
 
   // Emergency Fund Calculations
-  const currentEmergencyFund = Number(financialProfile?.investments.emergencyFund?.amount || 0);
+  const currentEmergencyFund = Number(financialProfile.investments?.emergencyFund?.amount || 0);
   const minRecommendedFund = monthlyIncome * 6;
   const maxRecommendedFund = monthlyIncome * 18;
   let emergencyFundStatus: 'low' | 'good' | 'high' = 'low';
@@ -159,40 +154,8 @@ export default function ManagePage() {
   } else if (currentEmergencyFund > maxRecommendedFund) {
     emergencyFundStatus = 'high';
   }
-  
 
-  if (isUserLoading || isProfileLoading) {
-    return (
-      <div className="flex min-h-[400px] w-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!financialProfile) {
-    return (
-      <div>
-        <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
-        <p className="text-muted-foreground">A centralized view of your financial details and commitments.</p>
-        <Card className="mt-6 text-center">
-            <CardHeader>
-                <CardTitle className="font-headline">Welcome to Your Financial Hub</CardTitle>
-                <CardDescription>Get started by adding your financial details.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Button asChild>
-                    <Link href="/dashboard/manage/add-details">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add Details
-                    </Link>
-                </Button>
-            </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  const existingInvestments = Object.entries(financialProfile.investments)
+  const existingInvestments = financialProfile.investments ? Object.entries(financialProfile.investments)
     .filter(([, value]) => value.invested === 'yes' && Number(value.amount) > 0)
     .map(([key, value]) => {
          const isInsurance = key === 'termInsurance' || key === 'healthInsurance';
@@ -219,7 +182,7 @@ export default function ManagePage() {
         }
 
         return { name: label, value: displayValue };
-    });
+    }) : [];
 
   const suggestions = [];
   if (expensePercentage > 50) {
@@ -265,297 +228,282 @@ export default function ManagePage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-            <h1 className="font-headline text-3xl font-bold tracking-tight">Manage Your Finances</h1>
-            <p className="text-muted-foreground">A centralized view of your financial details and commitments.</p>
-        </div>
-        <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-                <Link href="/dashboard/manage/edit"><Pencil className="h-4 w-4 mr-2" />Edit Details</Link>
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExport}>
-                <FileDown className="h-4 w-4 mr-2" />
-                Export to PDF
-            </Button>
-        </div>
-      </div>
+      <FinancialSummaryClient>
+        <div id="pdf-content" className="mt-6 grid gap-6">
 
-
-      <div id="pdf-content" className="mt-6 grid gap-6">
-
-        {/* Personal & Income Details Card */}
-        <Card>
-          <CardHeader>
-              <CardTitle className="font-headline flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
-                Personal & Income Details
-              </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 text-sm">
-            <div><span className="text-muted-foreground block">Name</span> <span className="font-medium">{financialProfile.name}</span></div>
-            <div>
-              <span className="text-muted-foreground block">Date of Birth</span> 
-              <span className="font-medium">{financialProfile.dob} {financialProfile.dob && `(Age: ${calculateAge(financialProfile.dob)})`}</span>
-            </div>
-            <div><span className="text-muted-foreground block">Risk Profile</span> <span className="font-medium">{financialProfile.riskPercentage}%</span></div>
-            <div><span className="text-muted-foreground block">Monthly Income</span> <span className="font-medium">{formatCurrency(financialProfile.monthlyIncome)}</span></div>
-            <div><span className="text-muted-foreground block">Annual Income</span> <span className="font-medium">{formatCurrency(financialProfile.annualIncome)}</span></div>
-            <div><span className="text-muted-foreground block">Overall Monthly Income</span> <span className="font-medium">{formatCurrency(totalMonthlyIncome)}</span></div>
-          </CardContent>
-        </Card>
-        
-        <div className="grid gap-6 lg:grid-cols-2">
-            {/* Expenses Card */}
+            {/* Personal & Income Details Card */}
             <Card>
               <CardHeader>
+                  <CardTitle className="font-headline flex items-center gap-2">
+                    <User className="h-5 w-5 text-primary" />
+                    Personal & Income Details
+                  </CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 text-sm">
+                <div><span className="text-muted-foreground block">Name</span> <span className="font-medium">{financialProfile.name}</span></div>
+                <div>
+                  <span className="text-muted-foreground block">Date of Birth</span> 
+                  <span className="font-medium">{financialProfile.dob} {financialProfile.dob && `(Age: ${calculateAge(financialProfile.dob)})`}</span>
+                </div>
+                <div><span className="text-muted-foreground block">Risk Profile</span> <span className="font-medium">{financialProfile.riskPercentage}%</span></div>
+                <div><span className="text-muted-foreground block">Monthly Income</span> <span className="font-medium">{formatCurrency(financialProfile.monthlyIncome)}</span></div>
+                <div><span className="text-muted-foreground block">Annual Income</span> <span className="font-medium">{formatCurrency(financialProfile.annualIncome)}</span></div>
+                <div><span className="text-muted-foreground block">Overall Monthly Income</span> <span className="font-medium">{formatCurrency(totalMonthlyIncome)}</span></div>
+              </CardContent>
+            </Card>
+            
+            <div className="grid gap-6 lg:grid-cols-2">
+                {/* Expenses Card */}
+                <Card>
+                  <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2">
+                            <DollarSign className="h-5 w-5 text-primary" />
+                            Monthly Expenses
+                        </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    {financialProfile.expenses && Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).length > 0 ?
+                        Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).map(([key, value]) => (
+                            <div key={key} className="flex justify-between">
+                            <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> 
+                            <span className="font-medium">{formatCurrency(value)}</span>
+                            </div>
+                        ))
+                        : <p className="text-muted-foreground text-sm">No expenses provided.</p>
+                    }
+                    <div className="flex justify-between font-semibold pt-2 border-t"><span className="text-foreground">Total Monthly Expenses:</span> <span>{formatCurrency(totalMonthlyExpenses)}</span></div>
+                  </CardContent>
+                </Card>
+
+                {/* Current Investments Card */}
+                <Card>
+                  <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-primary" />
-                        Monthly Expenses
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      Investments & Insurance
                     </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                {Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).length > 0 ?
-                    Object.entries(financialProfile.expenses).filter(([, value]) => Number(value) > 0).map(([key, value]) => (
-                        <div key={key} className="flex justify-between">
-                        <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> 
-                        <span className="font-medium">{formatCurrency(value)}</span>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                     {existingInvestments.length > 0 ? existingInvestments.map(investment => (
+                        <div key={investment.name} className="flex justify-between">
+                            <p className="text-muted-foreground">{investment.name}</p>
+                            <p className="font-medium">{investment.value}</p>
                         </div>
-                    ))
-                    : <p className="text-muted-foreground text-sm">No expenses provided.</p>
-                }
-                <div className="flex justify-between font-semibold pt-2 border-t"><span className="text-foreground">Total Monthly Expenses:</span> <span>{formatCurrency(totalMonthlyExpenses)}</span></div>
-              </CardContent>
-            </Card>
+                     )) : <p className="text-muted-foreground">No investments or insurance details provided.</p>}
+                  </CardContent>
+                </Card>
+            </div>
 
-            {/* Current Investments Card */}
+
+            {/* Loan Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  Investments & Insurance
+                  <Landmark className="h-5 w-5 text-primary" />
+                  Active Loans & EMIs
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                 {existingInvestments.length > 0 ? existingInvestments.map(investment => (
-                    <div key={investment.name} className="flex justify-between">
-                        <p className="text-muted-foreground">{investment.name}</p>
-                        <p className="font-medium">{investment.value}</p>
+              <CardContent className="space-y-6 text-sm">
+                {financialProfile.loans && financialProfile.loans.filter(loan => Number(loan.amount) > 0).length > 0 ? (
+                    <>
+                    {financialProfile.loans.filter(loan => Number(loan.amount) > 0).map(loan => (
+                         <div key={loan.id} className="p-4 rounded-lg border">
+                            <h4 className="font-semibold capitalize mb-2">{loan.type} Loan</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div><span className="text-muted-foreground block">Loan Amount</span> <span className="font-medium">{formatCurrency(loan.amount)}</span></div>
+                                <div><span className="text-muted-foreground block">Monthly EMI</span> <span className="font-medium">{formatCurrency(loan.emi)}</span></div>
+                                <div><span className="text-muted-foreground block">Interest Rate</span> <span className="font-medium">{loan.rate}%</span></div>
+                                <div><span className="text-muted-foreground block">Tenure</span> <span className="font-medium">{loan.tenure} Years</span></div>
+                            </div>
+                         </div>
+                    ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-semibold pt-4 border-t">
+                        <div className="flex justify-between"><span className="text-foreground">Total Outstanding Loan:</span> <span>{formatCurrency(totalOutstandingLoan)}</span></div>
+                        <div className="flex justify-between"><span className="text-foreground">Total Monthly EMI:</span> <span>{formatCurrency(totalMonthlyEmi)}</span></div>
                     </div>
-                 )) : <p className="text-muted-foreground">No investments or insurance details provided.</p>}
+                    </>
+                ): (
+                     <p className="text-muted-foreground">No active loan details provided.</p>
+                )}
               </CardContent>
             </Card>
-        </div>
 
-
-        {/* Loan Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2">
-              <Landmark className="h-5 w-5 text-primary" />
-              Active Loans & EMIs
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 text-sm">
-            {financialProfile.loans.filter(loan => Number(loan.amount) > 0).length > 0 ? (
-                <>
-                {financialProfile.loans.filter(loan => Number(loan.amount) > 0).map(loan => (
-                     <div key={loan.id} className="p-4 rounded-lg border">
-                        <h4 className="font-semibold capitalize mb-2">{loan.type} Loan</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div><span className="text-muted-foreground block">Loan Amount</span> <span className="font-medium">{formatCurrency(loan.amount)}</span></div>
-                            <div><span className="text-muted-foreground block">Monthly EMI</span> <span className="font-medium">{formatCurrency(loan.emi)}</span></div>
-                            <div><span className="text-muted-foreground block">Interest Rate</span> <span className="font-medium">{loan.rate}%</span></div>
-                            <div><span className="text-muted-foreground block">Tenure</span> <span className="font-medium">{loan.tenure} Years</span></div>
-                        </div>
-                     </div>
-                ))}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-semibold pt-4 border-t">
-                    <div className="flex justify-between"><span className="text-foreground">Total Outstanding Loan:</span> <span>{formatCurrency(totalOutstandingLoan)}</span></div>
-                    <div className="flex justify-between"><span className="text-foreground">Total Monthly EMI:</span> <span>{formatCurrency(totalMonthlyEmi)}</span></div>
-                </div>
-                </>
-            ): (
-                 <p className="text-muted-foreground">No active loan details provided.</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Financial Summary Card */}
-        <Card>
-            <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                    <Wallet className="h-5 w-5 text-primary" />
-                    Financial Summary
-                </CardTitle>
-                 <CardDescription>A breakdown of your monthly cashflow.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-                <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Monthly Income</span>
-                    <span className="font-medium text-green-600">{formatCurrency(totalMonthlyIncome)}</span>
-                </div>
-                <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Monthly Expenses</span>
-                    <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyExpenses)}</span>
-                </div>
-                 {totalMonthlyInsurance > 0 && (
-                   <div className="flex justify-between">
-                        <span className="text-muted-foreground">Monthly Insurance Premiums</span>
-                        <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyInsurance)}</span>
-                    </div>
-                )}
-                 {monthlySIP > 0 && (
-                   <div className="flex justify-between">
-                        <span className="text-muted-foreground">Monthly SIP Investment</span>
-                        <span className="font-medium text-red-600">-{formatCurrency(monthlySIP)}</span>
-                    </div>
-                )}
-                <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Monthly Loan EMI</span>
-                    <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyEmi)}</span>
-                </div>
-                <div className="flex justify-between font-bold pt-4 border-t text-base">
-                    <span className="text-foreground">Net Monthly Cashflow</span>
-                    <span className={netMonthlyCashflow >= 0 ? 'text-green-700' : 'text-red-700'}>
-                        {formatCurrency(netMonthlyCashflow)}
-                    </span>
-                </div>
-            </CardContent>
-        </Card>
-
-        {/* Emergency Fund Plan Card */}
-        {monthlyIncome > 0 && (
+            {/* Financial Summary Card */}
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2">
-                        <Shield className="h-5 w-5 text-primary" />
-                        Emergency Fund Plan
+                        <Wallet className="h-5 w-5 text-primary" />
+                        Financial Summary
                     </CardTitle>
+                     <CardDescription>A breakdown of your monthly cashflow.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                     <Card className="bg-muted/50 p-4">
-                        <CardDescription>Current Fund</CardDescription>
-                        <CardTitle className="text-2xl">{formatCurrency(currentEmergencyFund)}</CardTitle>
-                    </Card>
-                    <Card className="bg-muted/50 p-4">
-                        <CardDescription>Recommended Range</CardDescription>
-                        <CardTitle className="text-2xl">{formatCurrency(minRecommendedFund)} - {formatCurrency(maxRecommendedFund)}</CardTitle>
-                    </Card>
-                    <Card className={cn("p-4",
-                         emergencyFundStatus === 'low' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-green-50 dark:bg-green-900/20'
-                    )}>
-                        <CardDescription>Status</CardDescription>
-                        <CardTitle className={cn("text-2xl capitalize", 
-                            emergencyFundStatus === 'low' ? 'text-red-600' : 'text-green-600'
-                        )}>
-                            {emergencyFundStatus === 'low' && 'Below Recommended'}
-                            {emergencyFundStatus === 'good' && 'Within Range'}
-                            {emergencyFundStatus === 'high' && 'Above Recommended'}
-                        </CardTitle>
-                    </Card>
+                <CardContent className="space-y-4 text-sm">
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Total Monthly Income</span>
+                        <span className="font-medium text-green-600">{formatCurrency(totalMonthlyIncome)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Total Monthly Expenses</span>
+                        <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyExpenses)}</span>
+                    </div>
+                     {totalMonthlyInsurance > 0 && (
+                       <div className="flex justify-between">
+                            <span className="text-muted-foreground">Monthly Insurance Premiums</span>
+                            <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyInsurance)}</span>
+                        </div>
+                    )}
+                     {monthlySIP > 0 && (
+                       <div className="flex justify-between">
+                            <span className="text-muted-foreground">Monthly SIP Investment</span>
+                            <span className="font-medium text-red-600">-{formatCurrency(monthlySIP)}</span>
+                        </div>
+                    )}
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Total Monthly Loan EMI</span>
+                        <span className="font-medium text-red-600">-{formatCurrency(totalMonthlyEmi)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold pt-4 border-t text-base">
+                        <span className="text-foreground">Net Monthly Cashflow</span>
+                        <span className={netMonthlyCashflow >= 0 ? 'text-green-700' : 'text-red-700'}>
+                            {formatCurrency(netMonthlyCashflow)}
+                        </span>
+                    </div>
                 </CardContent>
             </Card>
-        )}
-        
-        {/* 50-30-20 Rule Analysis Card */}
-        {totalMonthlyIncome > 0 && (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2">
-                        <Info className="h-5 w-5 text-primary" />
-                        50-30-20 Rule Analysis
-                    </CardTitle>
-                    <CardDescription>
-                        A popular guideline for budgeting: allocate 50% of your income to needs, 30% to wants/loans, and 20% to savings.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <Card className={cn(
-                        expensePercentage <= 50
-                        ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
-                        : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
-                    )}>
-                        <CardHeader className="p-4">
-                            <CardDescription>Needs (Expenses)</CardDescription>
-                            <CardTitle className="text-2xl">{expensePercentage.toFixed(1)}%</CardTitle>
-                            <p className={cn("font-semibold", expensePercentage <= 50 ? 'text-green-600' : 'text-red-600')}>
-                                {expensePercentage <= 50 ? 'On Track (<= 50%)' : 'High (> 50%)'}
-                            </p>
-                        </CardHeader>
-                    </Card>
-                     <Card className={cn(
-                        emiPercentage <= 30
-                        ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
-                        : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
-                    )}>
-                        <CardHeader className="p-4">
-                            <CardDescription>Wants (EMIs/Debts)</CardDescription>
-                            <CardTitle className="text-2xl">{emiPercentage.toFixed(1)}%</CardTitle>
-                            <p className={cn("font-semibold", emiPercentage <= 30 ? 'text-green-600' : 'text-red-600')}>
-                                {emiPercentage <= 30 ? 'On Track (<= 30%)' : 'High (> 30%)'}
-                            </p>
-                        </CardHeader>
-                    </Card>
-                    <Link href="/dashboard/manage/edit" className="group">
+
+            {/* Emergency Fund Plan Card */}
+            {monthlyIncome > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2">
+                            <Shield className="h-5 w-5 text-primary" />
+                            Emergency Fund Plan
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                         <Card className="bg-muted/50 p-4">
+                            <CardDescription>Current Fund</CardDescription>
+                            <CardTitle className="text-2xl">{formatCurrency(currentEmergencyFund)}</CardTitle>
+                        </Card>
+                        <Card className="bg-muted/50 p-4">
+                            <CardDescription>Recommended Range</CardDescription>
+                            <CardTitle className="text-2xl">{formatCurrency(minRecommendedFund)} - {formatCurrency(maxRecommendedFund)}</CardTitle>
+                        </Card>
+                        <Card className={cn("p-4",
+                             emergencyFundStatus === 'low' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-green-50 dark:bg-green-900/20'
+                        )}>
+                            <CardDescription>Status</CardDescription>
+                            <CardTitle className={cn("text-2xl capitalize", 
+                                emergencyFundStatus === 'low' ? 'text-red-600' : 'text-green-600'
+                            )}>
+                                {emergencyFundStatus === 'low' && 'Below Recommended'}
+                                {emergencyFundStatus === 'good' && 'Within Range'}
+                                {emergencyFundStatus === 'high' && 'Above Recommended'}
+                            </CardTitle>
+                        </Card>
+                    </CardContent>
+                </Card>
+            )}
+            
+            {/* 50-30-20 Rule Analysis Card */}
+            {totalMonthlyIncome > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2">
+                            <Info className="h-5 w-5 text-primary" />
+                            50-30-20 Rule Analysis
+                        </CardTitle>
+                        <CardDescription>
+                            A popular guideline for budgeting: allocate 50% of your income to needs, 30% to wants/loans, and 20% to savings.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <Card className={cn(
-                            "transition-all group-hover:ring-2 group-hover:ring-primary h-full",
-                            investmentPercentage >= 20
+                            expensePercentage <= 50
                             ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
                             : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
                         )}>
                             <CardHeader className="p-4">
-                                <CardDescription>Savings (Investments)</CardDescription>
-                                <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
-                                <p className={cn("font-semibold", investmentPercentage >= 20 ? 'text-green-600' : 'text-red-600')}>
-                                    {investmentPercentage >= 20 ? 'On Track (>= 20%)' : 'Low (< 20%)'}
+                                <CardDescription>Needs (Expenses)</CardDescription>
+                                <CardTitle className="text-2xl">{expensePercentage.toFixed(1)}%</CardTitle>
+                                <p className={cn("font-semibold", expensePercentage <= 50 ? 'text-green-600' : 'text-red-600')}>
+                                    {expensePercentage <= 50 ? 'On Track (<= 50%)' : 'High (> 50%)'}
                                 </p>
                             </CardHeader>
                         </Card>
-                    </Link>
-                </CardContent>
-            </Card>
-        )}
+                         <Card className={cn(
+                            emiPercentage <= 30
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+                            : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                        )}>
+                            <CardHeader className="p-4">
+                                <CardDescription>Wants (EMIs/Debts)</CardDescription>
+                                <CardTitle className="text-2xl">{emiPercentage.toFixed(1)}%</CardTitle>
+                                <p className={cn("font-semibold", emiPercentage <= 30 ? 'text-green-600' : 'text-red-600')}>
+                                    {emiPercentage <= 30 ? 'On Track (<= 30%)' : 'High (> 30%)'}
+                                </p>
+                            </CardHeader>
+                        </Card>
+                        <Link href="/dashboard/manage/edit" className="group">
+                            <Card className={cn(
+                                "transition-all group-hover:ring-2 group-hover:ring-primary h-full",
+                                investmentPercentage >= 20
+                                ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"
+                                : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                            )}>
+                                <CardHeader className="p-4">
+                                    <CardDescription>Savings (Investments)</CardDescription>
+                                    <CardTitle className="text-2xl">{investmentPercentage.toFixed(1)}%</CardTitle>
+                                    <p className={cn("font-semibold", investmentPercentage >= 20 ? 'text-green-600' : 'text-red-600')}>
+                                        {investmentPercentage >= 20 ? 'On Track (>= 20%)' : 'Low (< 20%)'}
+                                    </p>
+                                </CardHeader>
+                            </Card>
+                        </Link>
+                    </CardContent>
+                </Card>
+            )}
 
-        {/* Suggestions Card */}
-        {totalMonthlyIncome > 0 && suggestions.length > 0 && (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2">
-                        <Lightbulb className="h-5 w-5 text-primary" />
-                        Suggestions
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {suggestions.map((suggestion, index) => (
-                        <div key={index} className="p-3 border-l-4 rounded-r-lg bg-muted/50 border-primary">
-                            <h4 className="font-semibold">{suggestion.title}</h4>
-                            <ul className="list-disc pl-5 mt-1 space-y-1 text-sm text-muted-foreground">
-                                {suggestion.points.map((point, i) => (
-                                    <li key={i}>{point}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
-        )}
-         {totalMonthlyIncome > 0 && suggestions.length === 0 && (
-            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
-                <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2">
-                        <Lightbulb className="h-5 w-5 text-green-600" />
-                        All Clear!
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                     <p className="text-sm text-green-800 dark:text-green-200">
-                        Great job! Your finances are well-balanced according to our guidelines. Keep up the good work.
-                    </p>
-                </CardContent>
-            </Card>
-        )}
-      </div>
+            {/* Suggestions Card */}
+            {totalMonthlyIncome > 0 && suggestions.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2">
+                            <Lightbulb className="h-5 w-5 text-primary" />
+                            Suggestions
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {suggestions.map((suggestion, index) => (
+                            <div key={index} className="p-3 border-l-4 rounded-r-lg bg-muted/50 border-primary">
+                                <h4 className="font-semibold">{suggestion.title}</h4>
+                                <ul className="list-disc pl-5 mt-1 space-y-1 text-sm text-muted-foreground">
+                                    {suggestion.points.map((point, i) => (
+                                        <li key={i}>{point}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            )}
+             {totalMonthlyIncome > 0 && suggestions.length === 0 && (
+                <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
+                    <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2">
+                            <Lightbulb className="h-5 w-5 text-green-600" />
+                            All Clear!
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <p className="text-sm text-green-800 dark:text-green-200">
+                            Great job! Your finances are well-balanced according to our guidelines. Keep up the good work.
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
+          </div>
+      </FinancialSummaryClient>
     </div>
   );
 }

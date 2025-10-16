@@ -3,6 +3,25 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ADMIN_EMAIL } from '@/lib/constants';
+import { initializeApp, getApps, App } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+
+// --- START: Server-Side Firebase Initialization ---
+// This pattern ensures we initialize Firebase Admin only once.
+const apps = getApps();
+const app: App = apps.length
+  ? apps[0]!
+  : initializeApp({
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      // The GOOGLE_APPLICATION_CREDENTIALS env var is used automatically
+      // when running in a Google Cloud environment.
+    });
+
+const auth = getAuth(app);
+const firestore = getFirestore(app);
+// --- END: Server-Side Firebase Initialization ---
+
 
 export type User = {
     id: string;
@@ -11,36 +30,38 @@ export type User = {
     role: "user" | "admin";
 };
 
-// This is a simplified, mock implementation.
-// In a real app, you would have a proper database and password hashing.
-const MOCK_USERS_DB: User[] = [
-  { id: '1', name: 'Prasanna Warade', email: ADMIN_EMAIL, role: 'admin' as const },
-  { id: '2', name: 'Jane Doe', email: 'jane@example.com', role: 'user' as const },
-];
-
-// This is now a simplified representation, actual user data will be in Firebase
-const findUserById = (id: string) => {
-    if (id === 'gHZ9n7s2b9X8fJ2kP3s5t8YxVOE2') { // Mocking a specific firebase user for now
-        return {
-             id: 'gHZ9n7s2b9X8fJ2kP3s5t8YxVOE2',
-             name: 'Firebase User',
-             email: 'user@firebase.com',
-             role: 'user' as const
-        }
+async function getUserIdFromSession(): Promise<string | null> {
+    try {
+        const sessionCookie = cookies().get('__session')?.value;
+        if (!sessionCookie) return null;
+        const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
+        return decodedToken.uid;
+    } catch (error) {
+        // Session cookie is invalid or expired.
+        return null;
     }
-    return MOCK_USERS_DB.find(u => u.id === id);
 }
 
-export async function getUserFromCookie(): Promise<User | null> {
-  const userId = cookies().get('session')?.value;
-  if (!userId) return null;
+export async function getFinancialProfile() {
+    const userId = await getUserIdFromSession();
+    if (!userId) {
+        return null;
+    }
 
-  // In a real app, you'd fetch this from a database.
-  // We'll simulate it for now.
-  const user = findUserById(userId);
-  return user || null;
+    try {
+        const docRef = firestore.collection('users').doc(userId).collection('financial_profile').doc('default');
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists) {
+            return docSnap.data();
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching financial profile:", error);
+        return null;
+    }
 }
-
 
 export async function login(prevState: any, formData: FormData) {
   // This server action is now primarily for non-JS form submissions or specific server-side logic.
@@ -59,28 +80,4 @@ export async function logout() {
   // Client-side will call Firebase signOut. This is a fallback/server-side cleanup.
   cookies().delete('session');
   redirect('/login');
-}
-
-export async function getUser(): Promise<{
-  displayName: string | null;
-  email: string | null;
-  uid: string;
-  role: 'admin' | 'user';
-} | null> {
-  const userId = cookies().get('session')?.value;
-  if (!userId) return null;
-
-  // This is a placeholder. In a real app, you might verify the session
-  // with Firebase Admin SDK and get user roles from a database.
-  const isHardcodedAdmin = userId === '1' && MOCK_USERS_DB[0].email === ADMIN_EMAIL;
-  
-  // This is a simplified mock. The client-side `useUser` hook will provide the real user object.
-  const mockUser = findUserById(userId);
-
-  return {
-      uid: userId,
-      displayName: mockUser?.name || 'Anonymous',
-      email: mockUser?.email || '',
-      role: isHardcodedAdmin ? 'admin' : 'user',
-  }
 }
